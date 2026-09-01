@@ -234,6 +234,119 @@ class CameraContract(unittest.TestCase):
         self.assertIn("ov5647_1080p30_10bpp", driver)
         self.assertIn("RKMODULE_GET_MODULE_INFO", driver)
 
+    def test_ov5647_mode_and_control_contract(self):
+        driver = re.sub(
+            r"/\*.*?\*/|//[^\n]*", "", read_text(DRIVER), flags=re.DOTALL
+        )
+        for token in (
+            "ov5647_2592x1944_10bpp",
+            "ov5647_1080p30_10bpp",
+            "ov5647_2x2binned_10bpp",
+            "ov5647_640x480_10bpp",
+            "MEDIA_BUS_FMT_SBGGR10_1X10",
+            "V4L2_CID_EXPOSURE",
+            "V4L2_CID_ANALOGUE_GAIN",
+            "V4L2_CID_VBLANK",
+            "V4L2_CID_LINK_FREQ",
+            "V4L2_CID_PIXEL_RATE",
+            "V4L2_CID_TEST_PATTERN",
+            "enum_frame_interval",
+            "get_mbus_config",
+            "pm_runtime_resume_and_get",
+            "SET_RUNTIME_PM_OPS",
+            "RKMODULE_GET_MODULE_INFO",
+            "RKMODULE_GET_HDR_CFG",
+            "RKMODULE_GET_CHANNEL_INFO",
+            "devm_regulator_get_optional",
+            "regulator_enable",
+            "v4l2_async_register_subdev_sensor_common",
+        ):
+            self.assertIn(token, driver)
+        self.assertIn("struct v4l2_subdev_pad_config", driver)
+        self.assertNotIn("struct v4l2_subdev_state", driver)
+        self.assertNotIn("MEDIA_BUS_FMT_SBGGR8_1X8", driver)
+
+        modes = (
+            ("ov5647_2592x1944_10bpp", 2592, 1944, 87500000, 2844,
+             "0x7b0", 218750000, 1, 15),
+            ("ov5647_1080p30_10bpp", 1920, 1080, 81666700, 2416,
+             "0x450", 204166750, 1, 30),
+            ("ov5647_2x2binned_10bpp", 1296, 972, 81666700, 1896,
+             "0x59b", 204166750, 1, 30),
+            ("ov5647_640x480_10bpp", 640, 480, 55000000, 1852,
+             "0x1f8", 137500000, 1, 60),
+        )
+        for name, width, height, pixel_rate, hts, vts, link_freq, num, den in modes:
+            pattern = rf"""
+                \.format\s*=\s*\{{
+                (?:(?!\.reg_list).)*?\.code\s*=\s*MEDIA_BUS_FMT_SBGGR10_1X10
+                (?:(?!\.reg_list).)*?\.width\s*=\s*{width}
+                (?:(?!\.reg_list).)*?\.height\s*=\s*{height}
+                (?:(?!\.reg_list).)*?\.pixel_rate\s*=\s*{pixel_rate}
+                (?:(?!\.reg_list).)*?\.hts\s*=\s*{hts}
+                (?:(?!\.reg_list).)*?\.vts\s*=\s*{vts}
+                (?:(?!\.reg_list).)*?\.link_freq\s*=\s*{link_freq}
+                (?:(?!\.reg_list).)*?\.frame_interval\s*=\s*\{{
+                \s*\.numerator\s*=\s*{num}\s*,
+                \s*\.denominator\s*=\s*{den}\s*,?\s*\}}
+                (?:(?!\.reg_list).)*?\.reg_list\s*=\s*{name}\b
+                (?:(?!\}}).)*?\.num_regs\s*=\s*ARRAY_SIZE\({name}\)
+            """
+            self.assertRegex(driver, re.compile(pattern, re.DOTALL | re.VERBOSE))
+
+    def test_ov5647_register_tables_have_verified_geometry(self):
+        driver = re.sub(
+            r"/\*.*?\*/|//[^\n]*", "", read_text(DRIVER), flags=re.DOTALL
+        )
+        expected_geometry = {
+            "ov5647_2592x1944_10bpp": {
+                (0x3808, 0x0A), (0x3809, 0x20), (0x380A, 0x07),
+                (0x380B, 0x98), (0x380C, 0x0B), (0x380D, 0x1C),
+            },
+            "ov5647_1080p30_10bpp": {
+                (0x3808, 0x07), (0x3809, 0x80), (0x380A, 0x04),
+                (0x380B, 0x38), (0x380C, 0x09), (0x380D, 0x70),
+            },
+            "ov5647_2x2binned_10bpp": {
+                (0x3808, 0x05), (0x3809, 0x10), (0x380A, 0x03),
+                (0x380B, 0xCC), (0x380C, 0x07), (0x380D, 0x68),
+            },
+            "ov5647_640x480_10bpp": {
+                (0x3808, 0x02), (0x3809, 0x80), (0x380A, 0x01),
+                (0x380B, 0xE0), (0x380C, 0x07), (0x380D, 0x3C),
+            },
+        }
+        for name, geometry in expected_geometry.items():
+            match = re.search(
+                rf"static(?:\s+const)?\s+struct\s+regval_list\s+{name}"
+                rf"\s*\[\s*\]\s*=\s*\{{(?P<body>.*?)\n\}};",
+                driver,
+                re.DOTALL,
+            )
+            self.assertIsNotNone(match, name)
+            pairs = {
+                (int(reg, 16), int(value, 16))
+                for reg, value in re.findall(
+                    r"\{\s*(0x[0-9a-fA-F]+)\s*,\s*(0x[0-9a-fA-F]+)\s*\}",
+                    match.group("body"),
+                )
+            }
+            self.assertGreaterEqual(len(pairs), 40, name)
+            self.assertTrue({(0x0100, 0x00), (0x0103, 0x01)}.issubset(pairs), name)
+            self.assertTrue(geometry.issubset(pairs), name)
+
+    def test_ov5647_binding_matches_formal_module(self):
+        binding = read_text(BINDING)
+        for token in (
+            "vdd-supply:",
+            "rockchip,camera-module-index:",
+            "rockchip,camera-module-facing:",
+            "rockchip,camera-module-name:",
+            "rockchip,camera-module-lens-name:",
+            "data-lanes:",
+        ):
+            self.assertIn(token, binding)
+
 
 if __name__ == "__main__":
     unittest.main()
