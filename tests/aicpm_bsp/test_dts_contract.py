@@ -103,10 +103,12 @@ class DtsContract(unittest.TestCase):
         self.assertIn('status = "disabled"', pwm5)
         # Catches PWM6 being enabled while another disabled node masks it.
         self.assertIn('status = "disabled"', pwm6)
-        # Catches an L9110S motor-driver consumer being added to this release.
-        self.assertNotRegex(self.dts, r'(?i)compatible\s*=\s*"l9110s"')
-        # Catches a consumer that reuses either safety-disabled PWM output.
-        self.assertNotRegex(self.dts, r"pwms\s*=\s*<&pwm[56]\b")
+        # Catches bare or vendor-prefixed L9110S motor-driver compatible values.
+        self.assertNotRegex(
+            self.dts, r'(?is)\bcompatible\s*=\s*[^;]*"[^"]*l9110s[^"]*"'
+        )
+        # Catches a consumer that uses PWM5/PWM6 at any phandle position.
+        self.assertNotRegex(self.dts, r"(?s)\bpwms\s*=\s*[^;]*&pwm[56]\b[^;]*;")
         # Catches an unreviewed CAM GPIO/LED function mapping in the base DTS.
         self.assertNotRegex(self.dts, r"(?i)cam[01]_(gpio|led_on)\b")
         self.assertIn("j9_feed_detect_gpio: j9-feed-detect-gpio", self.dts)
