@@ -103,12 +103,25 @@ class DtsContract(unittest.TestCase):
         self.assertIn('status = "disabled"', pwm5)
         # Catches PWM6 being enabled while another disabled node masks it.
         self.assertIn('status = "disabled"', pwm6)
-        # Catches bare or vendor-prefixed L9110S motor-driver compatible values.
-        self.assertNotRegex(
-            self.dts, r'(?is)\bcompatible\s*=\s*[^;]*"[^"]*l9110s[^"]*"'
+        # Task 6 supersedes the earlier global L9110S ban with one inert,
+        # reviewable instance.  The exact-list check catches aliases and a
+        # second instance rather than accepting any substring match.
+        l9110s_compatibles = re.findall(
+            r'(?is)\bcompatible\s*=\s*[^;]*"[^"]*l9110s[^"]*"[^;]*;',
+            self.dts,
         )
-        # Catches a consumer that uses PWM5/PWM6 at any phandle position.
-        self.assertNotRegex(self.dts, r"(?s)\bpwms\s*=\s*[^;]*&pwm[56]\b[^;]*;")
+        self.assertEqual(l9110s_compatibles, ['compatible = "aicpm,l9110s";'])
+        motor = self.node_body("l9110s0: motor-controller")
+        self.assertIn('status = "disabled"', motor)
+        self.assertEqual(
+            re.findall(r"(?s)\bpwms\s*=\s*[^;]*;", motor),
+            ["pwms = <&pwm5 0 1000000 0>, <&pwm6 0 1000000 0>;"],
+        )
+        # The frozen motor is the sole reviewed PWM5/PWM6 consumer.
+        dts_without_motor = self.dts.replace(motor, "", 1)
+        self.assertNotRegex(
+            dts_without_motor, r"(?s)\bpwms\s*=\s*[^;]*&pwm[56]\b[^;]*;"
+        )
         # Catches an unreviewed CAM GPIO/LED function mapping in the base DTS.
         self.assertNotRegex(self.dts, r"(?i)cam[01]_(gpio|led_on)\b")
         self.assertIn("j9_feed_detect_gpio: j9-feed-detect-gpio", self.dts)

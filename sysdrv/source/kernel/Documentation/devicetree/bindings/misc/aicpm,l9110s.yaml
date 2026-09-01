@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/misc/aicpm,l9110s.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: AICPM L9110S dual-input feeder motor controller
+
+maintainers:
+  - AICPM BSP Integration <aicpm-bsp@localhost>
+
+properties:
+  compatible:
+    const: aicpm,l9110s
+
+  pwms:
+    minItems: 2
+    maxItems: 2
+
+  pwm-names:
+    items:
+      - const: in-a
+      - const: in-b
+
+  aicpm,dead-time-us:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: Break-before-make delay before either direction is driven.
+    minimum: 1
+    maximum: 100000
+
+  aicpm,max-run-time-ms:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: Hard upper bound accepted for a single RUN command.
+    minimum: 1
+    maximum: 30000
+
+required:
+  - compatible
+  - pwms
+  - pwm-names
+  - aicpm,dead-time-us
+  - aicpm,max-run-time-ms
+
+additionalProperties: false
+...

@@ -65,6 +65,15 @@
 		simple-audio-card,cpu { sound-dai = <&i2s0_8ch>; };
 		simple-audio-card,codec { sound-dai = <&acodec>; };
 	};
+
+	l9110s0: motor-controller {
+		compatible = "aicpm,l9110s";
+		pwms = <&pwm5 0 1000000 0>, <&pwm6 0 1000000 0>;
+		pwm-names = "in-a", "in-b";
+		aicpm,dead-time-us = <2000>;
+		aicpm,max-run-time-ms = <3000>;
+		status = "disabled";
+	};
 };
 
 &acodec { #sound-dai-cells = <0>; pa-ctl-gpios = <&gpio4 RK_PA7 GPIO_ACTIVE_HIGH>; status = "okay"; };

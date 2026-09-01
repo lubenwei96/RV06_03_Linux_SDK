@@ -469,6 +469,21 @@ config UID_SYS_STATS_DEBUG
 	help
 	  Per TASK based io statistics exported to /proc/uid_io
 
+config AICPM_L9110S
+	bool "AICPM fail-safe L9110S motor controller"
+	depends on OF && PWM
+	help
+	  Built-in timed dual-PWM controller for the AICPM feeder motor.
+	  Keep the device-tree node disabled until first-board waveform checks.
+
+config AICPM_L9110S_KUNIT_TEST
+	bool "KUnit tests for the AICPM L9110S controller" if !KUNIT_ALL_TESTS
+	depends on KUNIT && AICPM_L9110S
+	default KUNIT_ALL_TESTS
+	help
+	  Exercise validation, timeout ordering, remove lifetime and fail-safe
+	  PWM transitions without enabling physical motor hardware.
+
 config PVPANIC
 	tristate "pvpanic device support"
 	depends on HAS_IOMEM && (ACPI || OF)
