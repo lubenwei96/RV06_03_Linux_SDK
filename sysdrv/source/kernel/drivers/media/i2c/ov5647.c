@@ -769,7 +769,7 @@ static int ov5647_stream_on(struct v4l2_subdev *sd)
 	}
 
 	/* Apply customized values from user when stream starts. */
-	ret = v4l2_ctrl_handler_setup(sd->ctrl_handler);
+	ret = __v4l2_ctrl_handler_setup(sd->ctrl_handler);
 	if (ret)
 		return ret;
 
@@ -808,7 +808,7 @@ static int ov5647_stream_off(struct v4l2_subdev *sd)
 static int ov5647_power_on(struct device *dev)
 {
 	struct ov5647 *sensor = dev_get_drvdata(dev);
-	int ret;
+	int regulator_ret, ret;
 
 	dev_dbg(dev, "OV5647 power on\n");
 
@@ -851,8 +851,13 @@ error_clk_disable:
 		gpiod_set_value_cansleep(sensor->pwdn, 1);
 	clk_disable_unprepare(sensor->xclk);
 error_regulator_disable:
-	if (sensor->vdd)
-		regulator_disable(sensor->vdd);
+	if (sensor->vdd) {
+		regulator_ret = regulator_disable(sensor->vdd);
+		if (regulator_ret)
+			dev_err(dev,
+				"failed to disable vdd during rollback: %d\n",
+				regulator_ret);
+	}
 
 	return ret;
 }
@@ -889,6 +894,18 @@ static int ov5647_power_off(struct device *dev)
 		regulator_ret = regulator_disable(sensor->vdd);
 		if (regulator_ret) {
 			dev_err(dev, "failed to disable vdd: %d\n", regulator_ret);
+			ret = clk_prepare_enable(sensor->xclk);
+			if (ret)
+				dev_err(dev,
+					"failed to restore xclk after vdd error: %d\n",
+					ret);
+
+			if (sensor->pwdn)
+				gpiod_set_value_cansleep(sensor->pwdn, 0);
+			msleep(PWDN_ACTIVE_DELAY_MS);
+
+			if (ret)
+				return ret;
 			return regulator_ret;
 		}
 	}
@@ -938,9 +955,11 @@ static int ov5647_get_channel_info(struct ov5647 *sensor,
 		return -EINVAL;
 
 	ch_info->vc = 0;
+	mutex_lock(&sensor->lock);
 	ch_info->width = sensor->mode->format.width;
 	ch_info->height = sensor->mode->format.height;
 	ch_info->bus_fmt = sensor->mode->format.code;
+	mutex_unlock(&sensor->lock);
 
 	return 0;
 }
@@ -1044,6 +1063,7 @@ static int ov5647_s_stream(struct v4l2_subdev *sd, int enable)
 	struct ov5647 *sensor = to_sensor(sd);
 	int ret;
 
+	enable = !!enable;
 	mutex_lock(&sensor->lock);
 	if (sensor->streaming == enable) {
 		mutex_unlock(&sensor->lock);
@@ -1070,7 +1090,7 @@ static int ov5647_s_stream(struct v4l2_subdev *sd, int enable)
 	}
 	mutex_unlock(&sensor->lock);
 
-	return 0;
+	return ret;
 
 error_pm:
 	pm_runtime_put(&client->dev);
@@ -1120,19 +1140,25 @@ static int ov5647_enum_frame_interval(
 		struct v4l2_subdev_pad_config *cfg,
 		struct v4l2_subdev_frame_interval_enum *fie)
 {
-	const struct ov5647_mode *mode;
+	const struct ov5647_mode *mode = NULL;
+	unsigned int i;
 
 	if (fie->code != MEDIA_BUS_FMT_SBGGR10_1X10 ||
-	    fie->index >= ARRAY_SIZE(ov5647_modes))
+	    fie->index != 0)
 		return -EINVAL;
 
-	mode = &ov5647_modes[fie->index];
-	fie->code = mode->format.code;
-	fie->width = mode->format.width;
-	fie->height = mode->format.height;
-	fie->interval = mode->frame_interval;
+	for (i = 0; i < ARRAY_SIZE(ov5647_modes); i++) {
+		mode = &ov5647_modes[i];
+		if (fie->width != mode->format.width ||
+		    fie->height != mode->format.height)
+			continue;
 
-	return 0;
+		fie->interval = mode->frame_interval;
+
+		return 0;
+	}
+
+	return -EINVAL;
 }
 
 static int ov5647_get_pad_fmt(struct v4l2_subdev *sd,
@@ -1187,6 +1213,9 @@ static int ov5647_set_pad_fmt(struct v4l2_subdev *sd,
 	mutex_lock(&sensor->lock);
 	if (format->which == V4L2_SUBDEV_FORMAT_TRY) {
 		*v4l2_subdev_get_try_format(sd, cfg, format->pad) = mode->format;
+	} else if (sensor->streaming) {
+		mutex_unlock(&sensor->lock);
+		return -EBUSY;
 	} else {
 		int exposure_max, exposure_def;
 		int hblank, link_freq_index, vblank;
@@ -1468,9 +1497,10 @@ static const struct v4l2_ctrl_ops ov5647_ctrl_ops = {
 static int ov5647_init_controls(struct ov5647 *sensor)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(&sensor->sd);
-	int hblank, exposure_max, exposure_def, link_freq_index;
+	int hblank, exposure_max, exposure_def, link_freq_index, ret;
 
 	v4l2_ctrl_handler_init(&sensor->ctrls, 8);
+	sensor->ctrls.lock = &sensor->lock;
 
 	v4l2_ctrl_new_std_menu(&sensor->ctrls, &ov5647_ctrl_ops,
 			       V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL,
@@ -1532,11 +1562,12 @@ static int ov5647_init_controls(struct ov5647 *sensor)
 	return 0;
 
 handler_free:
+	ret = sensor->ctrls.error;
 	dev_err(&client->dev, "%s Controls initialization failed (%d)\n",
-		__func__, sensor->ctrls.error);
+		__func__, ret);
 	v4l2_ctrl_handler_free(&sensor->ctrls);
 
-	return sensor->ctrls.error;
+	return ret;
 }
 
 static int ov5647_parse_dt(struct ov5647 *sensor, struct device_node *np)

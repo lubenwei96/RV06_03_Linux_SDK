@@ -1,3 +1,4 @@
+import hashlib
 import re
 import unittest
 
@@ -39,6 +40,30 @@ def direct_properties(block):
                 properties.append(stripped)
         depth += line.count("{") - line.count("}")
     return properties
+
+
+def c_function_body(text, name):
+    match = re.search(
+        rf"\b{re.escape(name)}\s*\([^;]*?\)\s*\{{",
+        text,
+        re.DOTALL,
+    )
+    if match is None:
+        raise AssertionError(f"missing C function: {name}")
+
+    depth = 1
+    for index in range(match.end(), len(text)):
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[match.end() : index]
+    raise AssertionError(f"unterminated C function: {name}")
+
+
+def strip_c_comments(text):
+    return re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)
 
 
 class CameraContract(unittest.TestCase):
@@ -235,18 +260,18 @@ class CameraContract(unittest.TestCase):
         self.assertIn("RKMODULE_GET_MODULE_INFO", driver)
 
     def test_ov5647_mode_and_control_contract(self):
-        driver = re.sub(
-            r"/\*.*?\*/|//[^\n]*", "", read_text(DRIVER), flags=re.DOTALL
-        )
+        driver = strip_c_comments(read_text(DRIVER))
         for token in (
             "ov5647_2592x1944_10bpp",
             "ov5647_1080p30_10bpp",
             "ov5647_2x2binned_10bpp",
             "ov5647_640x480_10bpp",
             "MEDIA_BUS_FMT_SBGGR10_1X10",
+            "V4L2_CID_EXPOSURE_AUTO",
             "V4L2_CID_EXPOSURE",
             "V4L2_CID_ANALOGUE_GAIN",
             "V4L2_CID_VBLANK",
+            "V4L2_CID_HBLANK",
             "V4L2_CID_LINK_FREQ",
             "V4L2_CID_PIXEL_RATE",
             "V4L2_CID_TEST_PATTERN",
@@ -265,6 +290,80 @@ class CameraContract(unittest.TestCase):
         self.assertIn("struct v4l2_subdev_pad_config", driver)
         self.assertNotIn("struct v4l2_subdev_state", driver)
         self.assertNotIn("MEDIA_BUS_FMT_SBGGR8_1X8", driver)
+
+        def assert_short_transfer(body, call, count):
+            transfer = body.find(call)
+            short_check = body.find(f"if (ret != {count})", transfer)
+            short_eio = body.find(
+                "return ret < 0 ? ret : -EIO", short_check
+            )
+            self.assertGreaterEqual(transfer, 0, call)
+            self.assertGreater(short_check, transfer, call)
+            self.assertGreater(short_eio, short_check, call)
+
+        write16 = c_function_body(driver, "ov5647_write16")
+        assert_short_transfer(
+            write16, "ret = i2c_master_send(client, data, 4)", 4
+        )
+        write8 = c_function_body(driver, "ov5647_write")
+        assert_short_transfer(
+            write8, "ret = i2c_master_send(client, data, 3)", 3
+        )
+        read8 = c_function_body(driver, "ov5647_read")
+        assert_short_transfer(
+            read8, "ret = i2c_master_send(client, data_w, 2)", 2
+        )
+        assert_short_transfer(
+            read8, "ret = i2c_master_recv(client, val, 1)", 1
+        )
+
+        probe = c_function_body(driver, "ov5647_probe")
+        get_vdd = probe.find('devm_regulator_get_optional(dev, "vdd")')
+        vdd_error = probe.find("if (IS_ERR(sensor->vdd))", get_vdd)
+        enodev_only = probe.find("if (ret == -ENODEV)", vdd_error)
+        vdd_absent = probe.find("sensor->vdd = NULL", enodev_only)
+        vdd_other_error = probe.find("return ret", vdd_absent)
+        self.assertGreaterEqual(get_vdd, 0)
+        self.assertGreater(vdd_error, get_vdd)
+        self.assertGreater(enodev_only, vdd_error)
+        self.assertGreater(vdd_absent, enodev_only)
+        self.assertGreater(vdd_other_error, vdd_absent)
+
+        compat_ioctl = c_function_body(driver, "ov5647_compat_ioctl32")
+        compat_ptr_call = compat_ioctl.find("compat_ptr(arg)")
+        channel_copy_in = compat_ioctl.find("copy_from_user(karg, up, size)")
+        native_ioctl = compat_ioctl.find("ov5647_ioctl(sd, cmd, karg)")
+        result_copy_out = compat_ioctl.find("copy_to_user(up, karg, size)")
+        self.assertGreaterEqual(compat_ptr_call, 0)
+        self.assertGreater(channel_copy_in, compat_ptr_call)
+        self.assertGreater(native_ioctl, channel_copy_in)
+        self.assertGreater(result_copy_out, native_ioctl)
+
+        test_menu = re.search(
+            r"ov5647_test_pattern_menu\s*\[\s*\]\s*=\s*\{(.*?)\};",
+            driver,
+            re.DOTALL,
+        )
+        test_values = re.search(
+            r"ov5647_test_pattern_val\s*\[\s*\]\s*=\s*\{(.*?)\};",
+            driver,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(test_menu)
+        self.assertIsNotNone(test_values)
+        self.assertEqual(
+            re.findall(r'"([^"]+)"', test_menu.group(1)),
+            ["Disabled", "Color Bars", "Color Squares", "Random Data"],
+        )
+        self.assertEqual(
+            [
+                int(value, 16)
+                for value in re.findall(
+                    r"0x[0-9a-fA-F]+", test_values.group(1)
+                )
+            ],
+            [0x00, 0x80, 0x82, 0x81],
+        )
 
         modes = (
             ("ov5647_2592x1944_10bpp", 2592, 1944, 87500000, 2844,
@@ -294,29 +393,183 @@ class CameraContract(unittest.TestCase):
             """
             self.assertRegex(driver, re.compile(pattern, re.DOTALL | re.VERBOSE))
 
-    def test_ov5647_register_tables_have_verified_geometry(self):
-        driver = re.sub(
-            r"/\*.*?\*/|//[^\n]*", "", read_text(DRIVER), flags=re.DOTALL
+        init_controls = c_function_body(driver, "ov5647_init_controls")
+        save_error = re.search(
+            r"\bret\s*=\s*sensor->ctrls\.error\s*;", init_controls
         )
-        expected_geometry = {
-            "ov5647_2592x1944_10bpp": {
-                (0x3808, 0x0A), (0x3809, 0x20), (0x380A, 0x07),
-                (0x380B, 0x98), (0x380C, 0x0B), (0x380D, 0x1C),
-            },
-            "ov5647_1080p30_10bpp": {
-                (0x3808, 0x07), (0x3809, 0x80), (0x380A, 0x04),
-                (0x380B, 0x38), (0x380C, 0x09), (0x380D, 0x70),
-            },
-            "ov5647_2x2binned_10bpp": {
-                (0x3808, 0x05), (0x3809, 0x10), (0x380A, 0x03),
-                (0x380B, 0xCC), (0x380C, 0x07), (0x380D, 0x68),
-            },
-            "ov5647_640x480_10bpp": {
-                (0x3808, 0x02), (0x3809, 0x80), (0x380A, 0x01),
-                (0x380B, 0xE0), (0x380C, 0x07), (0x380D, 0x3C),
-            },
+        free_error = init_controls.find("v4l2_ctrl_handler_free(&sensor->ctrls)")
+        return_error = init_controls.find("return ret", free_error)
+        self.assertIsNotNone(
+            save_error,
+            "control setup errno must be saved before handler_free clears it",
+        )
+        self.assertGreater(free_error, save_error.start())
+        self.assertGreater(return_error, free_error)
+        self.assertNotIn("return sensor->ctrls.error", init_controls[free_error:])
+
+        self.assertIn(
+            "sensor->ctrls.lock = &sensor->lock;",
+            init_controls,
+            "the control handler and sensor state must share one lock domain",
+        )
+        stream_on = c_function_body(driver, "ov5647_stream_on")
+        self.assertIn(
+            "__v4l2_ctrl_handler_setup(sd->ctrl_handler)", stream_on
+        )
+        self.assertNotRegex(
+            stream_on, r"(?<!_)v4l2_ctrl_handler_setup\s*\("
+        )
+        set_pad_fmt = c_function_body(driver, "ov5647_set_pad_fmt")
+        for helper in ("s_ctrl", "modify_range"):
+            self.assertNotRegex(
+                set_pad_fmt, rf"(?<!_)v4l2_ctrl_{helper}\s*\("
+            )
+        self.assertIn("__v4l2_ctrl_s_ctrl", set_pad_fmt)
+        self.assertIn("__v4l2_ctrl_modify_range", set_pad_fmt)
+
+        try_format = set_pad_fmt.find(
+            "format->which == V4L2_SUBDEV_FORMAT_TRY"
+        )
+        busy_guard = set_pad_fmt.find("sensor->streaming")
+        active_mode_update = set_pad_fmt.find("sensor->mode = mode")
+        self.assertGreaterEqual(try_format, 0)
+        self.assertGreater(busy_guard, try_format)
+        self.assertGreater(active_mode_update, busy_guard)
+        self.assertIn("return -EBUSY", set_pad_fmt[busy_guard:active_mode_update])
+
+        channel_info = c_function_body(driver, "ov5647_get_channel_info")
+        channel_lock = channel_info.find("mutex_lock(&sensor->lock)")
+        channel_mode = channel_info.find("sensor->mode")
+        channel_unlock = channel_info.find("mutex_unlock(&sensor->lock)")
+        self.assertGreaterEqual(channel_lock, 0)
+        self.assertGreater(channel_mode, channel_lock)
+        self.assertGreater(channel_unlock, channel_mode)
+
+        s_stream = c_function_body(driver, "ov5647_s_stream")
+        normalize = s_stream.find("enable = !!enable;")
+        stream_lock = s_stream.find("mutex_lock(&sensor->lock)")
+        same_state = s_stream.find("sensor->streaming == enable")
+        self.assertGreaterEqual(normalize, 0)
+        self.assertGreater(stream_lock, normalize)
+        self.assertGreater(same_state, stream_lock)
+
+        runtime_get = s_stream.find("pm_runtime_resume_and_get(&client->dev)")
+        stream_on_call = s_stream.find("ret = ov5647_stream_on(sd)", runtime_get)
+        stream_state_set = s_stream.find("sensor->streaming = true", stream_on_call)
+        start_rollback = s_stream.find("error_pm:")
+        start_pm_put = s_stream.find(
+            "pm_runtime_put(&client->dev)", start_rollback
+        )
+        self.assertGreater(runtime_get, same_state)
+        self.assertGreater(stream_on_call, runtime_get)
+        self.assertGreater(stream_state_set, stream_on_call)
+        self.assertGreater(start_rollback, stream_state_set)
+        self.assertGreater(start_pm_put, start_rollback)
+        self.assertIn("goto error_pm", s_stream[stream_on_call:stream_state_set])
+
+        stream_off = s_stream.find("ret = ov5647_stream_off(sd)")
+        stop_pm_put = s_stream.find("pm_runtime_put(&client->dev)", stream_off)
+        stop_state_clear = s_stream.find("sensor->streaming = false", stream_off)
+        self.assertGreaterEqual(stream_off, 0)
+        self.assertGreater(stop_pm_put, stream_off)
+        self.assertGreater(stop_state_clear, stop_pm_put)
+        self.assertNotIn("goto ", s_stream[stream_off:stop_pm_put])
+        normal_path = s_stream[:s_stream.find("error_pm:")]
+        final_unlock = normal_path.rfind("mutex_unlock(&sensor->lock)")
+        final_return = normal_path.find("return ret", final_unlock)
+        self.assertGreater(final_unlock, stop_state_clear)
+        self.assertGreater(final_return, final_unlock)
+        self.assertNotIn("return 0", normal_path[final_unlock:])
+
+        power_on = c_function_body(driver, "ov5647_power_on")
+        power_on_cleanup = power_on[power_on.find("error_regulator_disable:"):]
+        cleanup_disable = power_on_cleanup.find(
+            "regulator_ret = regulator_disable(sensor->vdd)"
+        )
+        cleanup_check = power_on_cleanup.find("if (regulator_ret)", cleanup_disable)
+        cleanup_log = power_on_cleanup.find("dev_err(", cleanup_check)
+        cleanup_return = power_on_cleanup.find("return ret", cleanup_log)
+        self.assertGreaterEqual(cleanup_disable, 0)
+        self.assertGreater(cleanup_check, cleanup_disable)
+        self.assertGreater(cleanup_log, cleanup_check)
+        self.assertGreater(cleanup_return, cleanup_log)
+        self.assertNotIn("return regulator_ret", power_on_cleanup)
+
+        power_off = c_function_body(driver, "ov5647_power_off")
+        regulator_disable = power_off.find(
+            "regulator_ret = regulator_disable(sensor->vdd)"
+        )
+        disable_failure = power_off.find("if (regulator_ret)", regulator_disable)
+        restore_clock = power_off.find(
+            "ret = clk_prepare_enable(sensor->xclk)", disable_failure
+        )
+        restore_log = power_off.find("dev_err(", restore_clock)
+        restore_pwdn = power_off.find(
+            "gpiod_set_value_cansleep(sensor->pwdn, 0)", restore_clock
+        )
+        restore_delay = power_off.find("msleep(PWDN_ACTIVE_DELAY_MS)", restore_pwdn)
+        rollback_error = power_off.find("return ret", restore_delay)
+        original_error = power_off.find("return regulator_ret", rollback_error)
+        self.assertGreaterEqual(regulator_disable, 0)
+        self.assertGreater(disable_failure, regulator_disable)
+        self.assertGreater(restore_clock, disable_failure)
+        self.assertGreater(restore_log, restore_clock)
+        self.assertGreater(restore_pwdn, restore_clock)
+        self.assertGreater(restore_delay, restore_pwdn)
+        self.assertGreater(rollback_error, restore_delay)
+        self.assertGreater(original_error, rollback_error)
+        rollback_path = power_off[restore_clock:]
+        self.assertRegex(
+            rollback_path,
+            re.compile(r"if\s*\(ret\).*?dev_err\(", re.DOTALL),
+        )
+        self.assertRegex(
+            rollback_path,
+            re.compile(
+                r"if\s*\(ret\)\s*return\s+ret\s*;\s*return\s+regulator_ret",
+                re.DOTALL,
+            ),
+        )
+
+        enum_interval = c_function_body(driver, "ov5647_enum_frame_interval")
+        self.assertRegex(
+            enum_interval,
+            re.compile(
+                r"fie->code\s*!=\s*MEDIA_BUS_FMT_SBGGR10_1X10"
+                r".*?fie->index\s*!=\s*0",
+                re.DOTALL,
+            ),
+        )
+        self.assertRegex(
+            enum_interval,
+            r"for\s*\(\s*i\s*=\s*0\s*;\s*i\s*<\s*ARRAY_SIZE\(ov5647_modes\)",
+        )
+        self.assertIn("mode = &ov5647_modes[i]", enum_interval)
+        self.assertIn("fie->width != mode->format.width", enum_interval)
+        self.assertIn("fie->height != mode->format.height", enum_interval)
+        interval_copy = enum_interval.find("fie->interval = mode->frame_interval")
+        invalid_size = enum_interval.rfind("return -EINVAL")
+        self.assertGreaterEqual(interval_copy, 0)
+        self.assertGreater(invalid_size, interval_copy)
+        self.assertNotIn("&ov5647_modes[fie->index]", enum_interval)
+        self.assertNotRegex(
+            enum_interval,
+            r"fie->(?:code|width|height)\s*=(?!=)",
+        )
+
+    def test_ov5647_register_tables_match_ordered_upstream_fingerprints(self):
+        driver = strip_c_comments(read_text(DRIVER))
+        expected_fingerprints = {
+            "ov5647_2592x1944_10bpp":
+                (86, "f19251e277fc1f3c8bf312c502c2f2420ca823007cfcf5151ee13043c9a6533e"),
+            "ov5647_1080p30_10bpp":
+                (86, "ae5dd78b7e71c7beaf0b38e5f9ce202d5ea3b73b800db991cd11d2f3ff7fae5c"),
+            "ov5647_2x2binned_10bpp":
+                (90, "963300a50cb3b67a42623f222ef4cd64aa607f4740002918d2251ffbe2f42507"),
+            "ov5647_640x480_10bpp":
+                (87, "3b472e1567de196350f3661fdaca5853b504ed7668a6c8207b0f41a4112c0efc"),
         }
-        for name, geometry in expected_geometry.items():
+        for name, (expected_count, expected_digest) in expected_fingerprints.items():
             match = re.search(
                 rf"static(?:\s+const)?\s+struct\s+regval_list\s+{name}"
                 rf"\s*\[\s*\]\s*=\s*\{{(?P<body>.*?)\n\}};",
@@ -324,16 +577,22 @@ class CameraContract(unittest.TestCase):
                 re.DOTALL,
             )
             self.assertIsNotNone(match, name)
-            pairs = {
+            pairs = [
                 (int(reg, 16), int(value, 16))
                 for reg, value in re.findall(
                     r"\{\s*(0x[0-9a-fA-F]+)\s*,\s*(0x[0-9a-fA-F]+)\s*\}",
                     match.group("body"),
                 )
-            }
-            self.assertGreaterEqual(len(pairs), 40, name)
-            self.assertTrue({(0x0100, 0x00), (0x0103, 0x01)}.issubset(pairs), name)
-            self.assertTrue(geometry.issubset(pairs), name)
+            ]
+            canonical = ";".join(
+                f"{reg:04x}:{value:02x}" for reg, value in pairs
+            )
+            self.assertEqual(len(pairs), expected_count, name)
+            self.assertEqual(
+                hashlib.sha256(canonical.encode()).hexdigest(),
+                expected_digest,
+                name,
+            )
 
     def test_ov5647_binding_matches_formal_module(self):
         binding = read_text(BINDING)
@@ -346,6 +605,37 @@ class CameraContract(unittest.TestCase):
             "data-lanes:",
         ):
             self.assertIn(token, binding)
+
+        required_match = re.search(
+            r"^required:\s*\n(?P<body>(?:\s+-\s+\S+\s*\n)+)",
+            binding,
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(required_match)
+        required = re.findall(
+            r"^\s+-\s+(\S+)\s*$",
+            required_match.group("body"),
+            re.MULTILINE,
+        )
+        self.assertEqual(required, ["compatible", "reg", "clocks", "port"])
+        for optional in (
+            "vdd-supply",
+            "rockchip,camera-module-index",
+            "rockchip,camera-module-facing",
+            "rockchip,camera-module-name",
+            "rockchip,camera-module-lens-name",
+        ):
+            self.assertNotIn(optional, required)
+
+        lanes = re.search(
+            r"(?ms)^[ ]{10}data-lanes:\s*\n(?P<body>.*?)(?=^[ ]{10}\S)",
+            binding,
+        )
+        self.assertIsNotNone(lanes)
+        lane_values = [
+            int(value) for value in re.findall(r"- const:\s*(\d+)", lanes.group("body"))
+        ]
+        self.assertEqual(lane_values, [1, 2])
 
 
 if __name__ == "__main__":
