@@ -3,6 +3,7 @@
 
 #include <linux/completion.h>
 #include <linux/errno.h>
+#include <linux/jiffies.h>
 #include <linux/kthread.h>
 #include <linux/string.h>
 
@@ -106,6 +107,12 @@ static const struct aicpm_l9110s_core_ops fake_ops = {
 	.schedule_timeout = fake_schedule_timeout,
 	.now_ms = fake_now_ms,
 };
+
+static bool fake_wait_completion(struct completion *completion)
+{
+	return wait_for_completion_timeout(completion,
+					   msecs_to_jiffies(5000)) != 0;
+}
 
 static void fake_init(struct kunit *test, struct fake_context *fake,
 		      struct aicpm_l9110s_core *core)
@@ -302,11 +309,53 @@ static int status_thread(void *data)
 	return 0;
 }
 
+static int run_thread(void *data)
+{
+	struct thread_call *call = data;
+
+	complete(&call->started);
+	call->result = aicpm_l9110s_run_transaction(call->core, &call->run);
+	complete(&call->done);
+	return 0;
+}
+
+static int stop_thread(void *data)
+{
+	struct thread_call *call = data;
+
+	complete(&call->started);
+	call->result = aicpm_l9110s_stop_transaction(call->core, 0);
+	complete(&call->done);
+	return 0;
+}
+
 static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 {
+	struct aicpm_l9110s_core race_core;
+	struct fake_context race_fake;
+	struct aicpm_l9110s_run first_run =
+		fake_run(AICPM_L9110S_FORWARD, 1000);
+	struct thread_call concurrent_run = {
+		.core = &race_core,
+		.run = {
+			.abi_version = AICPM_L9110S_ABI_VERSION,
+			.direction = AICPM_L9110S_REVERSE,
+			.duty_permille = 600,
+			.duration_ms = 500,
+		},
+	};
+	struct thread_call concurrent_stop = { .core = &race_core };
+	struct aicpm_l9110s_status race_status;
+	struct task_struct *run_task;
+	struct task_struct *stop_task;
+	int expected[] = { FAKE_CANCEL, FAKE_STOP, FAKE_DEAD_TIME,
+			   FAKE_DRIVE, FAKE_SCHEDULE, FAKE_CANCEL, FAKE_STOP };
+	int event_base;
+	int index;
 	struct aicpm_l9110s_core core;
 	struct fake_context fake;
-	struct aicpm_l9110s_run run = fake_run(AICPM_L9110S_FORWARD, 1000);
+	struct aicpm_l9110s_run remove_run =
+		fake_run(AICPM_L9110S_FORWARD, 1000);
 	struct thread_call begin_remove = { .core = &core };
 	struct thread_call existing_fd_ioctl = { .core = &core };
 	struct task_struct *remove_task;
@@ -314,24 +363,101 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 	int stop_count;
 	int cancel_count;
 
+	/* A blocked RUN owns op_lock, so STOP must serialize after it. */
+	fake_init(test, &race_fake, &race_core);
+	init_completion(&concurrent_run.started);
+	init_completion(&concurrent_run.done);
+	init_completion(&concurrent_stop.started);
+	init_completion(&concurrent_stop.done);
+	KUNIT_ASSERT_EQ(test,
+			aicpm_l9110s_run_transaction(&race_core, &first_run), 0);
+	event_base = race_fake.event_count;
+	race_fake.block_cancel = true;
+	run_task = kthread_run(run_thread, &concurrent_run, "aicpm-run-race-test");
+	KUNIT_ASSERT_FALSE(test, IS_ERR(run_task));
+	if (!fake_wait_completion(&race_fake.cancel_entered)) {
+		race_fake.block_cancel = false;
+		complete_all(&race_fake.cancel_release);
+		kthread_stop(run_task);
+		KUNIT_FAIL(test, "RUN did not enter cancel before timeout");
+		return;
+	}
+	stop_task = kthread_run(stop_thread, &concurrent_stop,
+				"aicpm-stop-race-test");
+	KUNIT_ASSERT_FALSE(test, IS_ERR(stop_task));
+	if (!fake_wait_completion(&concurrent_stop.started)) {
+		race_fake.block_cancel = false;
+		complete_all(&race_fake.cancel_release);
+		kthread_stop(stop_task);
+		kthread_stop(run_task);
+		KUNIT_FAIL(test, "STOP thread did not start before timeout");
+		return;
+	}
+	KUNIT_EXPECT_FALSE(test, completion_done(&concurrent_stop.done));
+	race_fake.block_cancel = false;
+	complete_all(&race_fake.cancel_release);
+	if (!fake_wait_completion(&concurrent_run.done) ||
+	    !fake_wait_completion(&concurrent_stop.done)) {
+		kthread_stop(stop_task);
+		kthread_stop(run_task);
+		KUNIT_FAIL(test, "RUN/STOP threads did not serialize before timeout");
+		return;
+	}
+	KUNIT_EXPECT_EQ(test, concurrent_run.result, 0);
+	KUNIT_EXPECT_EQ(test, concurrent_stop.result, 0);
+	for (index = 0; index < ARRAY_SIZE(expected); index++)
+		KUNIT_EXPECT_EQ(test, race_fake.events[event_base + index],
+				expected[index]);
+	KUNIT_EXPECT_EQ(test, race_fake.stop_count, 3);
+	KUNIT_ASSERT_EQ(test,
+			aicpm_l9110s_get_status_transaction(&race_core,
+						       &race_status), 0);
+	KUNIT_EXPECT_EQ(test, race_status.direction,
+			(u32)AICPM_L9110S_STOPPED);
+	KUNIT_EXPECT_EQ(test, race_status.remaining_ms, 0U);
+	KUNIT_EXPECT_EQ(test, race_status.last_error, 0);
+	KUNIT_EXPECT_EQ(test, kthread_stop(stop_task), 0);
+	KUNIT_EXPECT_EQ(test, kthread_stop(run_task), 0);
+
+	/* Retain the remove/existing-fd lifetime subscenario in this case. */
 	fake_init(test, &fake, &core);
 	init_completion(&begin_remove.started);
 	init_completion(&begin_remove.done);
 	init_completion(&existing_fd_ioctl.started);
 	init_completion(&existing_fd_ioctl.done);
 	KUNIT_ASSERT_EQ(test, aicpm_l9110s_open_transaction(&core), 0);
-	KUNIT_ASSERT_EQ(test, aicpm_l9110s_run_transaction(&core, &run), 0);
+	KUNIT_ASSERT_EQ(test,
+			aicpm_l9110s_run_transaction(&core, &remove_run), 0);
 	fake.block_cancel = true;
 	remove_task = kthread_run(remove_thread, &begin_remove, "aicpm-remove-test");
 	KUNIT_ASSERT_FALSE(test, IS_ERR(remove_task));
-	wait_for_completion(&fake.cancel_entered);
+	if (!fake_wait_completion(&fake.cancel_entered)) {
+		fake.block_cancel = false;
+		complete_all(&fake.cancel_release);
+		kthread_stop(remove_task);
+		KUNIT_FAIL(test, "remove did not enter cancel before timeout");
+		return;
+	}
 	ioctl_task = kthread_run(status_thread, &existing_fd_ioctl, "aicpm-ioctl-test");
 	KUNIT_ASSERT_FALSE(test, IS_ERR(ioctl_task));
-	wait_for_completion(&existing_fd_ioctl.started);
+	if (!fake_wait_completion(&existing_fd_ioctl.started)) {
+		fake.block_cancel = false;
+		complete_all(&fake.cancel_release);
+		kthread_stop(ioctl_task);
+		kthread_stop(remove_task);
+		KUNIT_FAIL(test, "existing-fd ioctl did not start before timeout");
+		return;
+	}
 	KUNIT_EXPECT_FALSE(test, completion_done(&existing_fd_ioctl.done));
-	complete(&fake.cancel_release);
-	wait_for_completion(&begin_remove.done);
-	wait_for_completion(&existing_fd_ioctl.done);
+	fake.block_cancel = false;
+	complete_all(&fake.cancel_release);
+	if (!fake_wait_completion(&begin_remove.done) ||
+	    !fake_wait_completion(&existing_fd_ioctl.done)) {
+		kthread_stop(ioctl_task);
+		kthread_stop(remove_task);
+		KUNIT_FAIL(test, "remove/ioctl threads did not finish before timeout");
+		return;
+	}
 	KUNIT_EXPECT_EQ(test, begin_remove.result, 0);
 	KUNIT_EXPECT_EQ(test, existing_fd_ioctl.result, -ENODEV);
 	stop_count = fake.stop_count;
@@ -341,16 +467,6 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 	KUNIT_EXPECT_EQ(test, fake.cancel_count, cancel_count);
 	KUNIT_EXPECT_EQ(test, kthread_stop(ioctl_task), 0);
 	KUNIT_EXPECT_EQ(test, kthread_stop(remove_task), 0);
-}
-
-static int run_thread(void *data)
-{
-	struct thread_call *call = data;
-
-	complete(&call->started);
-	call->result = aicpm_l9110s_run_transaction(call->core, &call->run);
-	complete(&call->done);
-	return 0;
 }
 
 static int timeout_thread(void *data)
@@ -476,14 +592,46 @@ static void aicpm_l9110s_hardware_error_forces_stop(struct kunit *test)
 	pair.active_output = AICPM_L9110S_OUTPUT_B;
 	pair_fake.fail_apply_call = 1;
 	pair_fake.fail_errno = -EIO;
-	pair_fake.fail_apply_call2 = 2;
-	pair_fake.fail_errno2 = -ENOSPC;
+	pair_fake.fail_apply_call2 = 3;
+	pair_fake.fail_errno2 = -EAGAIN;
+	pair_fake.fail_apply_call3 = 4;
+	pair_fake.fail_errno3 = -ENOSPC;
 	first_error = aicpm_l9110s_pair_stop(&pair);
 	KUNIT_EXPECT_EQ(test, first_error, -EIO);
 	KUNIT_EXPECT_EQ(test, pair_fake.call_count, 2);
 	KUNIT_EXPECT_EQ(test, pair_fake.outputs[0],
 			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
 	KUNIT_EXPECT_EQ(test, pair_fake.outputs[1],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_A);
+	KUNIT_EXPECT_EQ(test, pair.active_output,
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	first_error = aicpm_l9110s_pair_stop(&pair);
+	KUNIT_EXPECT_EQ(test, first_error, -EAGAIN);
+	KUNIT_EXPECT_EQ(test, pair_fake.call_count, 4);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[2],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[3],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_A);
+	KUNIT_EXPECT_EQ(test, pair.active_output,
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	KUNIT_EXPECT_EQ(test, aicpm_l9110s_pair_stop(&pair), 0);
+	KUNIT_EXPECT_EQ(test, pair_fake.call_count, 6);
+	KUNIT_EXPECT_EQ(test, pair.active_output,
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_NONE);
+
+	memset(&pair_fake, 0, sizeof(pair_fake));
+	aicpm_l9110s_pair_init(&pair, &fake_pair_ops, &pair_fake);
+	pair_fake.fail_apply_call = 1;
+	pair_fake.fail_errno = -EREMOTEIO;
+	first_error = aicpm_l9110s_pair_drive(&pair,
+					 AICPM_L9110S_FORWARD, 500);
+	KUNIT_EXPECT_EQ(test, first_error, -EREMOTEIO);
+	KUNIT_EXPECT_EQ(test, pair_fake.call_count, 3);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[0],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[1],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[2],
 			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_A);
 
 	memset(&pair_fake, 0, sizeof(pair_fake));
@@ -509,6 +657,16 @@ static void aicpm_l9110s_hardware_error_forces_stop(struct kunit *test)
 	KUNIT_EXPECT_EQ(test, pair_fake.outputs[3],
 			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
 	KUNIT_EXPECT_EQ(test, pair_fake.duties[3], 0U);
+	KUNIT_EXPECT_EQ(test, pair.active_output,
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_A);
+	KUNIT_EXPECT_EQ(test, aicpm_l9110s_pair_stop(&pair), 0);
+	KUNIT_EXPECT_EQ(test, pair_fake.call_count, 6);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[4],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_A);
+	KUNIT_EXPECT_EQ(test, pair_fake.outputs[5],
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_B);
+	KUNIT_EXPECT_EQ(test, pair.active_output,
+			(enum aicpm_l9110s_output)AICPM_L9110S_OUTPUT_NONE);
 
 	fake_init(test, &fake, &core);
 	fake.drive_error = -EIO;

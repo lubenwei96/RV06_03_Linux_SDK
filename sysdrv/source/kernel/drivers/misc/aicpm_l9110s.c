@@ -91,9 +91,14 @@ int aicpm_l9110s_pair_stop(struct aicpm_l9110s_pair *pair)
 		 AICPM_L9110S_OUTPUT_B : AICPM_L9110S_OUTPUT_A;
 	first_error = pair->ops->apply(pair->context, first, 0);
 	result = pair->ops->apply(pair->context, second, 0);
+	if (!first_error && !result)
+		pair->active_output = AICPM_L9110S_OUTPUT_NONE;
+	else if (first_error)
+		pair->active_output = first;
+	else
+		pair->active_output = second;
 	if (!first_error)
 		first_error = result;
-	pair->active_output = AICPM_L9110S_OUTPUT_NONE;
 	return first_error;
 }
 
@@ -110,8 +115,10 @@ int aicpm_l9110s_pair_drive(struct aicpm_l9110s_pair *pair,
 	inactive = active == AICPM_L9110S_OUTPUT_A ?
 		   AICPM_L9110S_OUTPUT_B : AICPM_L9110S_OUTPUT_A;
 	first_error = pair->ops->apply(pair->context, inactive, 0);
-	if (first_error)
+	if (first_error) {
+		pair->active_output = inactive;
 		goto cleanup;
+	}
 	pair->active_output = active;
 	first_error = pair->ops->apply(pair->context, active, duty_permille);
 	if (!first_error)
