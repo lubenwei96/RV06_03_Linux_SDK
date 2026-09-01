@@ -66,6 +66,34 @@ def strip_c_comments(text):
     return re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)
 
 
+def c_calls(text, name_pattern):
+    calls = []
+    for match in re.finditer(rf"\b({name_pattern})\s*\(", text):
+        depth = 1
+        for index in range(match.end(), len(text)):
+            if text[index] == "(":
+                depth += 1
+            elif text[index] == ")":
+                depth -= 1
+                if depth == 0:
+                    calls.append((match.group(1), text[match.end() : index]))
+                    break
+        else:
+            raise AssertionError(f"unterminated C call: {match.group(1)}")
+    return calls
+
+
+def c_case_body(text, control_id):
+    match = re.search(
+        rf"\bcase\s+{re.escape(control_id)}\s*:(?P<body>.*?\bbreak\s*;)",
+        text,
+        re.DOTALL,
+    )
+    if match is None:
+        raise AssertionError(f"missing control case: {control_id}")
+    return match.group("body")
+
+
 class CameraContract(unittest.TestCase):
     @property
     def camera(self):
@@ -407,6 +435,83 @@ class CameraContract(unittest.TestCase):
         self.assertGreater(return_error, free_error)
         self.assertNotIn("return sensor->ctrls.error", init_controls[free_error:])
 
+        expected_controls = (
+            "V4L2_CID_EXPOSURE_AUTO",
+            "V4L2_CID_EXPOSURE",
+            "V4L2_CID_ANALOGUE_GAIN",
+            "V4L2_CID_VBLANK",
+            "V4L2_CID_HBLANK",
+            "V4L2_CID_LINK_FREQ",
+            "V4L2_CID_PIXEL_RATE",
+            "V4L2_CID_TEST_PATTERN",
+        )
+        creation_calls = c_calls(
+            init_controls,
+            r"v4l2_ctrl_new_(?:std_menu_items|std_menu|std|int_menu)",
+        )
+        created_controls = []
+        for call_name, arguments in creation_calls:
+            control_ids = re.findall(r"\bV4L2_CID_[A-Z_]+\b", arguments)
+            self.assertEqual(
+                len(control_ids),
+                1,
+                f"{call_name} must create exactly one named control",
+            )
+            created_controls.append(control_ids[0])
+        self.assertCountEqual(created_controls, expected_controls)
+        self.assertEqual(len(created_controls), len(expected_controls))
+
+        s_ctrl = c_function_body(driver, "ov5647_s_ctrl")
+        dispatched_controls = re.findall(
+            r"\bcase\s+(V4L2_CID_[A-Z_]+)\s*:", s_ctrl
+        )
+        self.assertCountEqual(dispatched_controls, expected_controls)
+        self.assertEqual(len(dispatched_controls), len(expected_controls))
+        writable_dispatch = {
+            "V4L2_CID_EXPOSURE_AUTO":
+                "ov5647_s_exposure_auto(sd, ctrl->val)",
+            "V4L2_CID_EXPOSURE":
+                "ov5647_s_exposure(sd, ctrl->val)",
+            "V4L2_CID_ANALOGUE_GAIN":
+                "ov5647_s_analogue_gain(sd, ctrl->val)",
+            "V4L2_CID_VBLANK":
+                "ov5647_write16(sd, OV5647_REG_VTS_HI",
+        }
+        for control_id, handler_call in writable_dispatch.items():
+            self.assertIn(handler_call, c_case_body(s_ctrl, control_id))
+        self.assertRegex(
+            s_ctrl,
+            re.compile(
+                r"case\s+V4L2_CID_LINK_FREQ\s*:\s*"
+                r"case\s+V4L2_CID_PIXEL_RATE\s*:\s*"
+                r"case\s+V4L2_CID_HBLANK\s*:\s*break\s*;",
+                re.DOTALL,
+            ),
+        )
+        test_pattern_case = c_case_body(s_ctrl, "V4L2_CID_TEST_PATTERN")
+        test_pattern_write = re.search(
+            r"\bret\s*=\s*ov5647_write\s*\(\s*sd\s*,\s*"
+            r"(?P<reg>OV5647_REG_[A-Z0-9_]*ISP[A-Z0-9_]*3D)\s*,\s*"
+            r"ov5647_test_pattern_val\s*\[\s*ctrl->val\s*\]\s*\)",
+            test_pattern_case,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(
+            test_pattern_write,
+            "TEST_PATTERN must write its selected hardware pattern value",
+        )
+        test_pattern_register = re.search(
+            rf"^\s*#define\s+{test_pattern_write.group('reg')}"
+            r"\s+(0x[0-9a-fA-F]+)\b",
+            driver,
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(test_pattern_register)
+        self.assertEqual(
+            int(test_pattern_register.group(1), 16),
+            0x503D,
+        )
+
         self.assertIn(
             "sensor->ctrls.lock = &sensor->lock;",
             init_controls,
@@ -419,6 +524,38 @@ class CameraContract(unittest.TestCase):
         self.assertNotRegex(
             stream_on, r"(?<!_)v4l2_ctrl_handler_setup\s*\("
         )
+        set_mode_call = stream_on.find("ret = ov5647_set_mode(sd)")
+        setup_call = stream_on.find(
+            "ret = __v4l2_ctrl_handler_setup(sd->ctrl_handler)"
+        )
+        mipi_stream_write = re.search(
+            r"ov5647_write\s*\(\s*sd\s*,\s*"
+            r"(?P<reg>OV5647_REG_MIPI_CTRL00)\s*,\s*val\s*\)",
+            stream_on,
+        )
+        frame_stream_write = re.search(
+            r"ov5647_write\s*\(\s*sd\s*,\s*"
+            r"(?P<reg>OV5647_REG_FRAME_OFF_NUMBER)\s*,\s*0x00\s*\)",
+            stream_on,
+        )
+        self.assertGreaterEqual(set_mode_call, 0)
+        self.assertGreater(setup_call, set_mode_call)
+        self.assertIsNotNone(mipi_stream_write)
+        self.assertIsNotNone(frame_stream_write)
+        self.assertGreater(mipi_stream_write.start(), setup_call)
+        self.assertGreater(frame_stream_write.start(), mipi_stream_write.start())
+        for register_name, expected_address in (
+            (mipi_stream_write.group("reg"), 0x4800),
+            (frame_stream_write.group("reg"), 0x4202),
+        ):
+            define = re.search(
+                rf"^\s*#define\s+{register_name}\s+(0x[0-9a-fA-F]+)\b",
+                driver,
+                re.MULTILINE,
+            )
+            self.assertIsNotNone(define, register_name)
+            self.assertEqual(int(define.group(1), 16), expected_address)
+
         set_pad_fmt = c_function_body(driver, "ov5647_set_pad_fmt")
         for helper in ("s_ctrl", "modify_range"):
             self.assertNotRegex(
@@ -427,6 +564,22 @@ class CameraContract(unittest.TestCase):
         self.assertIn("__v4l2_ctrl_s_ctrl", set_pad_fmt)
         self.assertIn("__v4l2_ctrl_modify_range", set_pad_fmt)
 
+        try_then_active_guard = re.search(
+            r"if\s*\(\s*format->which\s*==\s*"
+            r"V4L2_SUBDEV_FORMAT_TRY\s*\)\s*\{"
+            r"(?P<try_body>.*?)\}\s*else\s+if\s*"
+            r"\(\s*sensor->streaming\s*\)",
+            set_pad_fmt,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(
+            try_then_active_guard,
+            "streaming guard must be mutually exclusive with TRY format",
+        )
+        self.assertIn(
+            "v4l2_subdev_get_try_format",
+            try_then_active_guard.group("try_body"),
+        )
         try_format = set_pad_fmt.find(
             "format->which == V4L2_SUBDEV_FORMAT_TRY"
         )
