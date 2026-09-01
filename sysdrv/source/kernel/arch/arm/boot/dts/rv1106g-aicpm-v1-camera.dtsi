@@ -1,0 +1,224 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+
+/ {
+	ov5647_xclk_25m: ov5647-xclk-25m {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <25000000>;
+		clock-output-names = "ov5647_xclk_25m";
+	};
+};
+
+&i2c4 {
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4m2_xfer>;
+	status = "okay";
+
+	ov5647_cam0: camera@36 {
+		compatible = "ovti,ov5647";
+		reg = <0x36>;
+		clocks = <&ov5647_xclk_25m>;
+		vdd-supply = <&vdd_cam0_3v3>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "HBV-RPI-AUTO-IRCUT-3.6-S1.0";
+		rockchip,camera-module-lens-name = "3.6mm";
+		status = "okay";
+
+		port {
+			ov5647_cam0_out: endpoint {
+				remote-endpoint = <&csi_dphy1_input>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&i2c3 {
+	clock-frequency = <400000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c3m2_xfer>;
+	status = "disabled";
+
+	ov5647_cam1: camera@36 {
+		compatible = "ovti,ov5647";
+		reg = <0x36>;
+		clocks = <&ov5647_xclk_25m>;
+		vdd-supply = <&vdd_cam1_3v3>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "HBV-RPI-AUTO-IRCUT-3.6-S1.0";
+		rockchip,camera-module-lens-name = "3.6mm";
+		status = "disabled";
+
+		port {
+			ov5647_cam1_out: endpoint {
+				remote-endpoint = <&csi_dphy2_input>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&csi2_dphy_hw {
+	status = "okay";
+};
+
+&csi2_dphy1 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			csi_dphy1_input: endpoint {
+				remote-endpoint = <&ov5647_cam0_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			csi_dphy1_output: endpoint {
+				remote-endpoint = <&mipi0_csi2_input>;
+			};
+		};
+	};
+};
+
+&csi2_dphy2 {
+	status = "disabled";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			csi_dphy2_input: endpoint {
+				remote-endpoint = <&ov5647_cam1_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			csi_dphy2_output: endpoint {
+				remote-endpoint = <&mipi1_csi2_input>;
+			};
+		};
+	};
+};
+
+&mipi0_csi2 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			mipi0_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csi_dphy1_output>;
+			};
+		};
+		port@1 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <1>;
+			mipi0_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in0>;
+			};
+		};
+	};
+};
+
+&mipi1_csi2 {
+	status = "disabled";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+			mipi1_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csi_dphy2_output>;
+			};
+		};
+		port@1 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <1>;
+			mipi1_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in1>;
+			};
+		};
+	};
+};
+
+&rkcif {
+	pinctrl-names = "default";
+	pinctrl-0 = <&mipi_pins>;
+	status = "okay";
+};
+
+&rkcif_mipi_lvds {
+	status = "okay";
+	port {
+		cif_mipi_in0: endpoint {
+			remote-endpoint = <&mipi0_csi2_output>;
+		};
+	};
+};
+
+&rkcif_mipi_lvds_sditf {
+	status = "okay";
+	port {
+		mipi_lvds0_sditf: endpoint {
+			remote-endpoint = <&isp_in0>;
+		};
+	};
+};
+
+&rkcif_mipi_lvds1 {
+	status = "disabled";
+	port {
+		cif_mipi_in1: endpoint {
+			remote-endpoint = <&mipi1_csi2_output>;
+		};
+	};
+};
+
+&rkcif_mipi_lvds1_sditf {
+	status = "disabled";
+	port {
+		mipi_lvds1_sditf: endpoint {
+			remote-endpoint = <&isp_in1>;
+		};
+	};
+};
+
+&rkisp {
+	status = "okay";
+};
+
+&rkisp_vir0 {
+	status = "okay";
+	port@0 {
+		isp_in0: endpoint {
+			remote-endpoint = <&mipi_lvds0_sditf>;
+		};
+	};
+};
+
+&rkisp_vir1 {
+	status = "disabled";
+	port@0 {
+		isp_in1: endpoint {
+			remote-endpoint = <&mipi_lvds1_sditf>;
+		};
+	};
+};
