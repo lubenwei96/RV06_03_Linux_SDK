@@ -350,7 +350,7 @@ class CameraContract(unittest.TestCase):
         )
         self.assertNotRegex(
             dts_structural_view(block),
-            r"(?<![A-Za-z0-9_.@-])(?:port(?:@[A-Za-z0-9_.-]+)?|ports)(?![A-Za-z0-9_.@-])\s*\{",
+            r"(?<![A-Za-z0-9_.@-])(?:port(?:@[^\s{]+)?|ports)(?![A-Za-z0-9_.@-])\s*\{",
             f"disabled CAM1 block must not contain graph ports: {header}",
         )
 
@@ -436,12 +436,28 @@ class CameraContract(unittest.TestCase):
         ):
             self.assert_cam1_has_no_media_graph(compact_stage)
 
-        compact_ports_only = self.camera + "&csi2_dphy2 { ports { }; };\n"
-        with self.assertRaisesRegex(
-            AssertionError,
-            "disabled CAM1 block must not contain graph ports: &csi2_dphy2",
-        ):
-            self.assert_cam1_has_no_media_graph(compact_ports_only)
+        graph_mutations = (
+            ("compact port", "&csi2_dphy2 { port { }; };\n"),
+            ("compact ports", "&csi2_dphy2 { ports { }; };\n"),
+            ("comma unit address", "&csi2_dphy2 { port@0,1 { }; };\n"),
+            ("plus unit address", "&csi2_dphy2 { port@a+b { }; };\n"),
+        )
+        for name, fragment in graph_mutations:
+            with self.subTest(graph_mutation=name):
+                with self.assertRaisesRegex(
+                    AssertionError,
+                    "disabled CAM1 block must not contain graph ports: &csi2_dphy2",
+                ):
+                    self.assert_cam1_has_no_media_graph(self.camera + fragment)
+
+        graph_decoys = (
+            ("comment", "&csi2_dphy2 { /* port@0,1 { }; */ };\n"),
+            ("string", '&csi2_dphy2 { note = "port@0,1 { };"; };\n'),
+            ("identifier", "&csi2_dphy2 { viewport { }; };\n"),
+        )
+        for name, fragment in graph_decoys:
+            with self.subTest(graph_decoy=name):
+                self.assert_cam1_has_no_media_graph(self.camera + fragment)
 
         quoted_brace_stage = self.camera + """
 &csi2_dphy2 {
