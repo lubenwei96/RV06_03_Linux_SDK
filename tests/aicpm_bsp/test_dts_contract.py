@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from tests.aicpm_bsp.common import read_text
@@ -13,6 +14,14 @@ class DtsContract(unittest.TestCase):
     def setUp(self):
         self.dts = read_text(DTS_PATH)
         self.dts_makefile = read_text(DTS_MAKEFILE)
+
+    def node_body(self, node):
+        match = re.search(
+            rf"{re.escape(node)}\s*\{{(?P<body>[^{{}}]*)\}};",
+            self.dts,
+        )
+        self.assertIsNotNone(match, f"missing DTS node {node}")
+        return match.group("body")
 
     def test_independent_board(self):
         self.assertIn('#include "rv1106.dtsi"', self.dts)
@@ -42,7 +51,16 @@ class DtsContract(unittest.TestCase):
     def test_power_and_boot_media(self):
         self.assertIn('regulator-name = "vcc5v0_sys"', self.dts)
         self.assertGreaterEqual(self.dts.count("<5000000>"), 2)
-        self.assertIn("gpio = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>", self.dts)
+        vcc_wlan = self.node_body("vcc_wlan: vcc-wlan")
+        # Catches a descriptor-polarity mutation to active high or another GPIO.
+        self.assertIn("gpio = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>", vcc_wlan)
+        # Catches removal of the USB-enumeration supply's always-on policy.
+        self.assertIn("regulator-always-on", vcc_wlan)
+        # Catches removal of the USB-enumeration supply's boot-on policy.
+        self.assertIn("regulator-boot-on", vcc_wlan)
+        # Catches the fixed-regulator property that inverts descriptor polarity.
+        self.assertNotIn("enable-active-high", vcc_wlan)
+        # Retained guard for the non-binding property rejected by the contract.
         self.assertNotIn("enable-active-low", self.dts)
         self.assertIn('compatible = "spi-nand"', self.dts)
         self.assertIn("spi-max-frequency = <24000000>", self.dts)
@@ -77,11 +95,20 @@ class DtsContract(unittest.TestCase):
         self.assertEqual(self.dts.count("linux,code ="), 2)
         self.assertNotIn('compatible = "adc-keys"', self.dts)
 
-    def test_usb_host_and_unsafe_resources(self):
+    def test_usb_host_and_frozen_unsafe_resources(self):
         self.assertIn('dr_mode = "host"', self.dts)
-        self.assertIn("&pwm5", self.dts)
-        self.assertIn("&pwm6", self.dts)
-        self.assertGreaterEqual(self.dts.count('status = "disabled"'), 2)
+        pwm5 = self.node_body("&pwm5")
+        pwm6 = self.node_body("&pwm6")
+        # Catches PWM5 being enabled while another disabled node masks it.
+        self.assertIn('status = "disabled"', pwm5)
+        # Catches PWM6 being enabled while another disabled node masks it.
+        self.assertIn('status = "disabled"', pwm6)
+        # Catches an L9110S motor-driver consumer being added to this release.
+        self.assertNotRegex(self.dts, r'(?i)compatible\s*=\s*"l9110s"')
+        # Catches a consumer that reuses either safety-disabled PWM output.
+        self.assertNotRegex(self.dts, r"pwms\s*=\s*<&pwm[56]\b")
+        # Catches an unreviewed CAM GPIO/LED function mapping in the base DTS.
+        self.assertNotRegex(self.dts, r"(?i)cam[01]_(gpio|led_on)\b")
         self.assertIn("j9_feed_detect_gpio: j9-feed-detect-gpio", self.dts)
         self.assertIn("<0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>", self.dts)
         self.assertIn("j11_bin_present_gpio: j11-bin-present-gpio", self.dts)
