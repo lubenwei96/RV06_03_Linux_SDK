@@ -384,7 +384,14 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 	}
 	stop_task = kthread_run(stop_thread, &concurrent_stop,
 				"aicpm-stop-race-test");
-	KUNIT_ASSERT_FALSE(test, IS_ERR(stop_task));
+	if (IS_ERR(stop_task)) {
+		race_fake.block_cancel = false;
+		complete_all(&race_fake.cancel_release);
+		kthread_stop(run_task);
+		KUNIT_FAIL(test, "failed to create STOP thread: %ld",
+			   PTR_ERR(stop_task));
+		return;
+	}
 	if (!fake_wait_completion(&concurrent_stop.started)) {
 		race_fake.block_cancel = false;
 		complete_all(&race_fake.cancel_release);
@@ -403,6 +410,8 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 		KUNIT_FAIL(test, "RUN/STOP threads did not serialize before timeout");
 		return;
 	}
+	KUNIT_EXPECT_EQ(test, kthread_stop(stop_task), 0);
+	KUNIT_EXPECT_EQ(test, kthread_stop(run_task), 0);
 	KUNIT_EXPECT_EQ(test, concurrent_run.result, 0);
 	KUNIT_EXPECT_EQ(test, concurrent_stop.result, 0);
 	for (index = 0; index < ARRAY_SIZE(expected); index++)
@@ -416,8 +425,6 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 			(u32)AICPM_L9110S_STOPPED);
 	KUNIT_EXPECT_EQ(test, race_status.remaining_ms, 0U);
 	KUNIT_EXPECT_EQ(test, race_status.last_error, 0);
-	KUNIT_EXPECT_EQ(test, kthread_stop(stop_task), 0);
-	KUNIT_EXPECT_EQ(test, kthread_stop(run_task), 0);
 
 	/* Retain the remove/existing-fd lifetime subscenario in this case. */
 	fake_init(test, &fake, &core);
@@ -439,7 +446,14 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 		return;
 	}
 	ioctl_task = kthread_run(status_thread, &existing_fd_ioctl, "aicpm-ioctl-test");
-	KUNIT_ASSERT_FALSE(test, IS_ERR(ioctl_task));
+	if (IS_ERR(ioctl_task)) {
+		fake.block_cancel = false;
+		complete_all(&fake.cancel_release);
+		kthread_stop(remove_task);
+		KUNIT_FAIL(test, "failed to create existing-fd ioctl thread: %ld",
+			   PTR_ERR(ioctl_task));
+		return;
+	}
 	if (!fake_wait_completion(&existing_fd_ioctl.started)) {
 		fake.block_cancel = false;
 		complete_all(&fake.cancel_release);
@@ -458,6 +472,8 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 		KUNIT_FAIL(test, "remove/ioctl threads did not finish before timeout");
 		return;
 	}
+	KUNIT_EXPECT_EQ(test, kthread_stop(ioctl_task), 0);
+	KUNIT_EXPECT_EQ(test, kthread_stop(remove_task), 0);
 	KUNIT_EXPECT_EQ(test, begin_remove.result, 0);
 	KUNIT_EXPECT_EQ(test, existing_fd_ioctl.result, -ENODEV);
 	stop_count = fake.stop_count;
@@ -465,8 +481,6 @@ static void aicpm_l9110s_run_stop_race_leaves_outputs_low(struct kunit *test)
 	aicpm_l9110s_close_transaction(&core);
 	KUNIT_EXPECT_EQ(test, fake.stop_count, stop_count);
 	KUNIT_EXPECT_EQ(test, fake.cancel_count, cancel_count);
-	KUNIT_EXPECT_EQ(test, kthread_stop(ioctl_task), 0);
-	KUNIT_EXPECT_EQ(test, kthread_stop(remove_task), 0);
 }
 
 static int timeout_thread(void *data)
@@ -512,10 +526,20 @@ static void aicpm_l9110s_concurrent_runs_keep_newest_timeout(struct kunit *test)
 	KUNIT_ASSERT_FALSE(test, IS_ERR(run_task));
 	wait_for_completion(&fake.cancel_entered);
 	worker_task = kthread_run(timeout_thread, &old_worker, "aicpm-old-timeout-test");
-	KUNIT_ASSERT_FALSE(test, IS_ERR(worker_task));
+	if (IS_ERR(worker_task)) {
+		fake.block_cancel = false;
+		complete_all(&fake.cancel_release);
+		kthread_stop(run_task);
+		KUNIT_FAIL(test, "failed to create old-worker thread: %ld",
+			   PTR_ERR(worker_task));
+		return;
+	}
 	wait_for_completion(&old_worker.done);
-	complete(&fake.cancel_release);
+	fake.block_cancel = false;
+	complete_all(&fake.cancel_release);
 	wait_for_completion(&new_run.done);
+	KUNIT_EXPECT_EQ(test, kthread_stop(worker_task), 0);
+	KUNIT_EXPECT_EQ(test, kthread_stop(run_task), 0);
 	KUNIT_ASSERT_EQ(test, new_run.result, 0);
 	KUNIT_ASSERT_EQ(test, old_worker.result, 0);
 	KUNIT_EXPECT_GT(test, fake.scheduled_generation, old_generation);
@@ -524,8 +548,6 @@ static void aicpm_l9110s_concurrent_runs_keep_newest_timeout(struct kunit *test)
 	KUNIT_ASSERT_EQ(test, aicpm_l9110s_get_status_transaction(&core, &status), 0);
 	KUNIT_EXPECT_EQ(test, status.direction, (u32)AICPM_L9110S_REVERSE);
 	KUNIT_EXPECT_EQ(test, status.remaining_ms, 100U);
-	KUNIT_EXPECT_EQ(test, kthread_stop(worker_task), 0);
-	KUNIT_EXPECT_EQ(test, kthread_stop(run_task), 0);
 }
 
 static void aicpm_l9110s_suspend_forces_stop(struct kunit *test)

@@ -53,6 +53,37 @@ def c_function_body(text, name):
     raise AssertionError(f"unterminated C function: {name}")
 
 
+def c_if_body(text, condition_pattern):
+    source = strip_c_comments(text)
+    match = re.search(
+        rf"\bif\s*\(\s*{condition_pattern}\s*\)\s*\{{", source, re.DOTALL
+    )
+    if not match:
+        raise AssertionError(f"missing braced if: {condition_pattern}")
+    depth = 1
+    in_string = False
+    escaped = False
+    for index in range(match.end(), len(source)):
+        char = source[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return source[match.end() : index]
+    raise AssertionError(f"unterminated if: {condition_pattern}")
+
+
 def ordered(body, *needles):
     cursor = -1
     for needle in needles:
@@ -264,6 +295,58 @@ def assert_disabled_dts_contract(dts):
             raise AssertionError(f"{pwm} must remain disabled")
 
 
+def assert_kthread_failure_cleanup(test_source):
+    race = c_function_body(
+        test_source, "aicpm_l9110s_run_stop_race_leaves_outputs_low"
+    )
+    for task, blocked_task, fake_name, release_name in (
+        ("stop_task", "run_task", "race_fake", "race_fake.cancel_release"),
+        ("ioctl_task", "remove_task", "fake", "fake.cancel_release"),
+    ):
+        if f"KUNIT_ASSERT_FALSE(test, IS_ERR({task}))" in race:
+            raise AssertionError(f"fatal {task} spawn assertion leaks blocked thread")
+        failure = c_if_body(race, rf"IS_ERR\s*\(\s*{task}\s*\)")
+        ordered(
+            failure,
+            f"{fake_name}.block_cancel = false",
+            f"complete_all(&{release_name})",
+            f"kthread_stop({blocked_task})",
+            "KUNIT_FAIL",
+            "return",
+        )
+    ordered(
+        race,
+        "fake_wait_completion(&concurrent_run.done)",
+        "fake_wait_completion(&concurrent_stop.done)",
+        "kthread_stop(stop_task)",
+        "kthread_stop(run_task)",
+        "aicpm_l9110s_get_status_transaction(&race_core",
+    )
+
+    concurrent = c_function_body(
+        test_source, "aicpm_l9110s_concurrent_runs_keep_newest_timeout"
+    )
+    if "KUNIT_ASSERT_FALSE(test, IS_ERR(worker_task))" in concurrent:
+        raise AssertionError("fatal worker spawn assertion leaks blocked RUN")
+    failure = c_if_body(concurrent, r"IS_ERR\s*\(\s*worker_task\s*\)")
+    ordered(
+        failure,
+        "fake.block_cancel = false",
+        "complete_all(&fake.cancel_release)",
+        "kthread_stop(run_task)",
+        "KUNIT_FAIL",
+        "return",
+    )
+    ordered(
+        concurrent,
+        "wait_for_completion(&old_worker.done)",
+        "wait_for_completion(&new_run.done)",
+        "kthread_stop(worker_task)",
+        "kthread_stop(run_task)",
+        "KUNIT_ASSERT_EQ(test, new_run.result",
+    )
+
+
 class MotorContract(unittest.TestCase):
     def test_abi_is_fixed_16_bytes_and_compat_safe(self):
         uapi = read_text(UAPI)
@@ -428,6 +511,16 @@ int main(void)
         lifecycle = c_function_body(test, "aicpm_l9110s_run_stop_race_leaves_outputs_low")
         for token in ("begin_remove", "-ENODEV", "close_transaction"):
             self.assertIn(token, lifecycle)
+        assert_kthread_failure_cleanup(test)
+        for task in ("stop_task", "ioctl_task", "worker_task"):
+            mutant = test.replace(
+                f"if (IS_ERR({task})) {{",
+                f"KUNIT_ASSERT_FALSE(test, IS_ERR({task}));\n\tif (false) {{",
+                1,
+            )
+            self.assertNotEqual(mutant, test, task)
+            with self.assertRaises(AssertionError):
+                assert_kthread_failure_cleanup(mutant)
         invalid = c_function_body(test, "aicpm_l9110s_rejects_wrong_abi")
         for token in ("cancel_count", "generation", "direction", "AICPM_L9110S_FORWARD"):
             self.assertIn(token, invalid)
