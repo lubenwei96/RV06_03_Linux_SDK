@@ -226,17 +226,13 @@ class CameraContract(unittest.TestCase):
         ):
             self.assert_node_properties(self.camera, header, (), status="disabled")
 
-    # Catches a one-way/wrong remote endpoint, a missing lane list, or MIPI local-reg drift.
-    def test_mipi_endpoint_reg_has_local_address_cells(self):
+    # Catches a one-way/wrong CAM0 remote endpoint, a missing CAM0 lane list, or MIPI0 local-reg drift.
+    def test_cam0_mipi_endpoint_reg_has_local_address_cells(self):
         reciprocal_pairs = (
             ("ov5647_cam0_out: endpoint", "csi_dphy1_input", "csi_dphy1_input: endpoint", "ov5647_cam0_out"),
             ("csi_dphy1_output: endpoint", "mipi0_csi2_input", "mipi0_csi2_input: endpoint@1", "csi_dphy1_output"),
             ("mipi0_csi2_output: endpoint@0", "cif_mipi_in0", "cif_mipi_in0: endpoint", "mipi0_csi2_output"),
             ("mipi_lvds0_sditf: endpoint", "isp_in0", "isp_in0: endpoint", "mipi_lvds0_sditf"),
-            ("ov5647_cam1_out: endpoint", "csi_dphy2_input", "csi_dphy2_input: endpoint", "ov5647_cam1_out"),
-            ("csi_dphy2_output: endpoint", "mipi1_csi2_input", "mipi1_csi2_input: endpoint@1", "csi_dphy2_output"),
-            ("mipi1_csi2_output: endpoint@0", "cif_mipi_in1", "cif_mipi_in1: endpoint", "mipi1_csi2_output"),
-            ("mipi_lvds1_sditf: endpoint", "isp_in1", "isp_in1: endpoint", "mipi_lvds1_sditf"),
         )
         for left, left_remote, right, right_remote in reciprocal_pairs:
             self.assert_endpoint_remote(left, left_remote)
@@ -245,12 +241,10 @@ class CameraContract(unittest.TestCase):
         for endpoint in (
             "ov5647_cam0_out: endpoint",
             "csi_dphy1_input: endpoint",
-            "ov5647_cam1_out: endpoint",
-            "csi_dphy2_input: endpoint",
         ):
             self.assert_endpoint_lanes(endpoint)
 
-        for mipi, input_reg, output_reg in (("mipi0_csi2", 1, 0), ("mipi1_csi2", 1, 0)):
+        for mipi, input_reg, output_reg in (("mipi0_csi2", 1, 0),):
             mipi_block = node_block(self.camera, f"&{mipi}")
             ports = node_block(mipi_block, "ports")
             for port_reg, endpoint_reg in ((0, input_reg), (1, output_reg)):
@@ -267,6 +261,58 @@ class CameraContract(unittest.TestCase):
                     [prop for prop in direct_properties(endpoint) if prop.startswith("reg = ")],
                     [f"reg = <{endpoint_reg}>;"],
                 )
+
+    def assert_cam1_has_no_media_graph(self, camera):
+        labels = (
+            "ov5647_cam1_out",
+            "csi_dphy2_input",
+            "csi_dphy2_output",
+            "mipi1_csi2_input",
+            "mipi1_csi2_output",
+            "cif_mipi_in1",
+            "mipi_lvds1_sditf",
+            "isp_in1",
+        )
+        for label in labels:
+            self.assertNotRegex(
+                camera,
+                rf"\b{label}\s*:",
+                f"disabled CAM1 graph label must be absent: {label}",
+            )
+        for header in (
+            "&i2c3",
+            "&csi2_dphy2",
+            "&mipi1_csi2",
+            "&rkcif_mipi_lvds1",
+            "&rkcif_mipi_lvds1_sditf",
+            "&rkisp_vir1",
+        ):
+            self.assertNotIn(
+                "remote-endpoint",
+                node_block(camera, header),
+                f"disabled CAM1 block must not contain remote-endpoint: {header}",
+            )
+
+    # Catches a disabled CAM1 graph being retained and later becoming a dangling DTB phandle.
+    def test_cam1_disabled_path_has_no_media_graph(self):
+        self.assert_cam1_has_no_media_graph(self.camera)
+
+    # Proves the no-graph contract rejects an accidental CAM1 endpoint reintroduction.
+    def test_cam1_no_graph_contract_rejects_endpoint_mutation(self):
+        mutated = self.camera + """
+&i2c3 {
+	port {
+		ov5647_cam1_out: endpoint {
+			remote-endpoint = <&csi_dphy2_input>;
+		};
+	};
+};
+"""
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 graph label must be absent: ov5647_cam1_out",
+        ):
+            self.assert_cam1_has_no_media_graph(mutated)
 
     # Catches reserved CAM pins reintroduced directly or through camera control aliases/properties.
     def test_unverified_control_gpio_not_bound(self):
