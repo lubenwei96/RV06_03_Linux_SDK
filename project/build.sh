@@ -221,10 +221,12 @@ function build_select_board()
 
 function unset_board_config_all()
 {
-	local tmp_file=`mktemp`
-	grep -oh "^export.*RK_.*=" `find cfg -name "BoardConfig*.mk"` > $tmp_file
-	source $tmp_file
-	rm -f $tmp_file
+	local board_var
+	for board_var in $(grep -oh "^export[[:space:]]*RK_[A-Za-z0-9_]*=" \
+		$(find cfg -name "BoardConfig*.mk") | \
+		sed -E 's/^export[[:space:]]*([^=]+)=.*/\1/' | sort -u); do
+		unset "$board_var"
+	done
 }
 
 function usagemedia()
@@ -666,7 +668,7 @@ function build_kernel(){
 		$kernel_build_options \
 		KERNEL_DTS=${RK_KERNEL_DTS} \
 		KERNEL_CFG=${RK_KERNEL_DEFCONFIG} \
-		KERNEL_CFG_FRAGMENT=${RK_KERNEL_DEFCONFIG_FRAGMENT}
+		KERNEL_CFG_FRAGMENT="${RK_KERNEL_DEFCONFIG_FRAGMENT}"
 
 	finish_build
 }
@@ -1216,28 +1218,32 @@ function __PACKAGE_RESOURCES()
 		fi
 	fi
 
-	mkdir -p  $_iqfiles_dir
-	if [ -n "$RK_CAMERA_SENSOR_IQFILES" ];then
-		IFS=" ";for item in `echo $RK_CAMERA_SENSOR_IQFILES`
-		do
-			if [ -f "$RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item" ];then
-				cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item $_iqfiles_dir
-			fi
-		done; IFS=
+	if [ "${RK_AICPM_PACKAGE_IQFILES:-y}" = "n" ];then
+		msg_warn "IQ/CAC packaging explicitly disabled by BoardConfig"
 	else
-		msg_warn "Not found RK_CAMERA_SENSOR_IQFILES on the `realpath $BOARD_CONFIG`, copy all default for emmc or nand"
-		if [ "$RK_BOOT_MEDIUM" != "spi_nor" ];then
-			cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/* $_iqfiles_dir
-		fi
-	fi
-
-	if [ -n "$RK_CAMERA_SENSOR_CAC_BIN" ];then
-		IFS=" "; for item in `echo $RK_CAMERA_SENSOR_CAC_BIN`
-		do
-			if [ -d "$RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item" ]; then
-				cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item $_iqfiles_dir
+		mkdir -p $_iqfiles_dir
+		if [ -n "$RK_CAMERA_SENSOR_IQFILES" ];then
+			IFS=" ";for item in `echo $RK_CAMERA_SENSOR_IQFILES`
+			do
+				if [ -f "$RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item" ];then
+					cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item $_iqfiles_dir
+				fi
+			done; IFS=
+		else
+			msg_warn "Not found RK_CAMERA_SENSOR_IQFILES on the `realpath $BOARD_CONFIG`, copy all default for emmc or nand"
+			if [ "$RK_BOOT_MEDIUM" != "spi_nor" ];then
+				cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/* $_iqfiles_dir
 			fi
-		done; IFS=
+		fi
+
+		if [ -n "$RK_CAMERA_SENSOR_CAC_BIN" ];then
+			IFS=" "; for item in `echo $RK_CAMERA_SENSOR_CAC_BIN`
+			do
+				if [ -d "$RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item" ]; then
+					cp -rfa $RK_PROJECT_PATH_MEDIA/isp_iqfiles/$item $_iqfiles_dir
+				fi
+			done; IFS=
+		fi
 	fi
 }
 
