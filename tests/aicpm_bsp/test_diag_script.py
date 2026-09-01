@@ -28,26 +28,39 @@ class DiagnosticScriptContract(unittest.TestCase):
 
     @staticmethod
     def _safety_gate(script):
-        forbidden = re.compile(r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install|iw|rfkill)(?=$|[;|&()\s])|(?:busybox|(?<![A-Za-z0-9_])command|env|exec|sh\s+-c)\s+['\"]?(?:modprobe|tee|dd|cp|install|iw|rfkill)|/dev/aicpm-l9110s|/etc/shadow|/proc/self/environ|>\s*/(?:sys|proc|dev)/")
+        if not script.startswith("#!/bin/sh\n") or "\r" in script:
+            raise AssertionError("production script must use the fixed POSIX shebang and LF")
+        body = script.split("\n", 1)[1]
+        absolute_external = re.compile(
+            r"(?<![A-Za-z0-9_])/(?:bin|sbin|usr/(?:bin|sbin|local/(?:bin|sbin)))/"
+            r"[A-Za-z0-9_.+-]+(?=$|[\s;|&()])"
+        )
+        forbidden = re.compile(
+            r"(?im)(?:^|[;|&()\s])(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|"
+            r"pwm|tee|dd|cp|install|iw|rfkill|wpa_supplicant|hostapd|udhcpc|dhclient|"
+            r"ifconfig|reboot|shutdown|poweroff)(?=$|[;|&()\s])|"
+            r"(?:^|[;|&()\s])(?:busybox|command|env|exec|sh\s+-c)(?=$|[;|&()\s])|"
+            r"ip\s+(?:addr|route|link\s+set)|"
+            r"(?:^|[;|&()\s])(?:printenv|export\s+-p|set)(?=$|[;|&()\s])|"
+            r"(?:^|[;\n])\s*[A-Za-z_][A-Za-z0-9_]*=(?:insmod|modprobe|rmmod|"
+            r"gpioset|gpioget|gpioinfo|pwm|tee|dd|cp|install|iw|rfkill)(?=$|[;\s])|"
+            r"(?:^|[;\n])\s*\"\$[A-Za-z_][A-Za-z0-9_]*\"|"
+            r"/dev/aicpm-l9110s|(?:cat\s+)?/etc/shadow|/proc/self/environ|"
+            r"/etc/wpa_supplicant|/(?:data|oem)/[^\n]*(?:mqtt|cloud|device|private)|"
+            r"(?:^|[;\n])\s*target=/(?:sys|proc|dev)/|>\s*['\"]?\$\{?target|"
+            r"(?:tee|dd|cp|install|mv)\b[^\n]*(?:/(?:sys|proc|dev)/|\$\{?target)|"
+            r">\s*/(?:sys|proc|dev)/|sed\s+-i"
+        )
+        if absolute_external.search(body):
+            raise AssertionError("absolute external command bypasses the fake PATH")
         if forbidden.search(script):
             raise AssertionError("unsafe production command")
 
     @classmethod
     def setUpClass(cls):
         script = read_text(SCRIPT)
-        cls.assertIn(cls, "#!/bin/sh", script)
-        cls.assertIn(cls, "REPORT=/run/aicpm-firstboard-report.txt", script)
-        cls.assertNotIn(cls, "/dev/aicpm-l9110s", script)
-        if re.search(r"(?m)^\s*(?:insmod|modprobe|rmmod|wpa_supplicant|hostapd|udhcpc|ifconfig|reboot|shutdown)\b", script):
-            raise AssertionError("unsafe production command")
-        gate = re.compile(
-            r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin)|sbin|bin)/)?(?:modprobe|insmod|rmmod|gpioset|gpioget|gpioinfo|pwm|iw|rfkill|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)(?=$|[;|&()\s])|"
-            r"(?:busybox|(?<![A-Za-z0-9_])command|env|exec|sh\s+-c)\s+['\"]?(?:modprobe|insmod|rmmod|iw|rfkill)|ip\s+(?:addr|route|link\s+set)|"
-            r"/dev/aicpm-l9110s|>\s*/(?:sys|proc|dev)/|/etc/(?:wpa_supplicant|.*mqtt|.*cloud)|/proc/self/environ"
-        )
-        if gate.search(script):
-            raise AssertionError("dynamic harness refuses unsafe production script")
         cls._safety_gate(script)
+        cls.assertIn(cls, "REPORT=/run/aicpm-firstboard-report.txt", script)
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -136,6 +149,11 @@ class DiagnosticScriptContract(unittest.TestCase):
         self.assertIn("src=$2", mkimg)
         self.assertIn("__RELEASE_FILESYSTEM_FILES $src", mkimg)
         self.assertIn("$RK_PROJECT_TOOLS_MKFS_EXT4 $src $dst", mkimg)
+        self.assertEqual(
+            exported(read_text(BOARD), "RK_PARTITION_FS_TYPE_CFG"),
+            "rootfs@IGNORE@ubifs",
+        )
+        self.assertIn("$RK_PROJECT_TOOLS_MKFS_UBIFS $src $(dirname $dst) $part_size $part_name $fs_type $RK_UBIFS_COMP", mkimg)
 
     def test_start_collects_redacts_and_publishes_atomically(self):
         result = self._run()
@@ -323,19 +341,7 @@ class DiagnosticScriptContract(unittest.TestCase):
 
     def test_static_safety_rejects_direct_and_wrapper_bypass_mutants(self):
         script = read_text(SCRIPT)
-        forbidden = re.compile(
-            r"(?im)(?:^|[;|&()\s])(?:"
-            r"(?:/(?:sbin|bin|usr/bin)/)?(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)|"
-            r"(?:busybox|command|env)\s+(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)|"
-            r"ip\s+link\s+set)(?=$|[\s;|&()])|/dev/aicpm-l9110s|>\s*/(?:sys|proc|dev)/|"
-            r"/etc/(?:wpa_supplicant|.*mqtt|.*cloud)"
-        )
-        indirect = re.compile(
-            r"(?im)(?:^|[;\n])\s*[A-Za-z_][A-Za-z0-9_]*=(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)(?=$|[;\s])|"
-            r"\"\$[A-Za-z_][A-Za-z0-9_]*\"\s+(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)"
-        )
-        self.assertIsNone(forbidden.search(script))
-        self.assertIsNone(indirect.search(script))
+        self._safety_gate(script)
         for mutant in (
             "/sbin/modprobe rtl8822cu", "busybox modprobe rtl8822cu", "command modprobe rtl8822cu",
             "env modprobe rtl8822cu", "gpioset gpiochip0 1=1", "echo 1 > /sys/class/pwm/pwmchip0/export",
@@ -343,7 +349,8 @@ class DiagnosticScriptContract(unittest.TestCase):
             "runner=modprobe; \"$runner\" rtl8822cu",
         ):
             with self.subTest(mutant=mutant):
-                self.assertTrue(forbidden.search(mutant) or indirect.search(mutant))
+                with self.assertRaises(AssertionError):
+                    self._safety_gate(f"#!/bin/sh\n{mutant}\n")
         self.assertIn("REPORT=/run/aicpm-firstboard-report.txt", script)
         self.assertNotRegex(script, r"(?:AICPM_|REPORT=)\\$\\{|/run/\\$")
 
@@ -392,11 +399,7 @@ class DiagnosticScriptContract(unittest.TestCase):
 
     def test_deny_scanner_rejects_review_mutants(self):
         script = read_text(SCRIPT)
-        deny = re.compile(r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install|iw|rfkill)(?=$|[;|&()\s])|"
-                          r"(?:busybox|(?<![A-Za-z0-9_])command|env(?:\s+-\S+)*|exec|sh\s+-c)\s+['\"]?(?:modprobe|tee|dd|cp|install|iw|rfkill)|ip\s+(?:addr|route|link\s+set)|"
-                          r"(?:printenv|env|(?:export)\s+-p|set)(?=$|\s)|(?:^|[;\n])\s*[A-Za-z_][A-Za-z0-9_]*=(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install)(?=$|[;\s])|(?:cat\s+)?/etc/shadow|/proc/self/environ|/etc/wpa_supplicant|"
-                          r"/(?:data|oem)/[^\n]*(?:mqtt|cloud|device|private)|(?:^|[;\n])\s*target=/(?:sys|proc|dev)/|>\s*['\"]?\$\{?target|(?:tee|dd|cp|install|mv)\b[^\n]*(?:/(?:sys|proc|dev)/|\$\{?target)|sed\s+-i")
-        self.assertIsNone(deny.search(script))
+        self._safety_gate(script)
         for mutant in (
             "/usr/sbin/modprobe x", "/usr/bin/tee /sys/x", "/usr/local/sbin/modprobe x",
             "busybox modprobe x", "command modprobe x", "env -i modprobe x", "exec modprobe x",
@@ -407,7 +410,8 @@ class DiagnosticScriptContract(unittest.TestCase):
             "cat /proc/self/environ", "cat /etc/wpa_supplicant.conf", "cat /data/mqtt.conf", "cat /oem/cloud.json",
             "sed -i x /sys/x",
         ):
-            self.assertIsNotNone(deny.search(mutant), mutant)
+            with self.assertRaises(AssertionError, msg=mutant):
+                self._safety_gate(f"#!/bin/sh\n{mutant}\n")
 
     def test_redacts_mixed_secret_formats_and_keeps_normal_diagnostics(self):
         self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' 'authToken=auth token value' 'refreshToken: refresh token value' 'sessionToken=session token value' 'preSharedKey=shared key value' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
