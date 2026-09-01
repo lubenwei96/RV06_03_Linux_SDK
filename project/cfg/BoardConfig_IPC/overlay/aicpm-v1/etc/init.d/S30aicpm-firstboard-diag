@@ -1,0 +1,156 @@
+#!/bin/sh
+
+umask 077
+REPORT=/run/aicpm-firstboard-report.txt
+TMP=
+SCRATCH=
+
+cleanup()
+{
+	if [ -n "$TMP" ]; then
+		rm -f "$TMP"
+	fi
+	if [ -n "$SCRATCH" ]; then
+		rm -f "${SCRATCH}.collect" "${SCRATCH}.dmesg"
+	fi
+}
+
+record_failure()
+{
+	printf 'AICPM_DIAG_ERROR %s rc=%s\n' "$1" "$2" >>"$TMP"
+	logger -t aicpm-firstboard-diag "collection failure: $1 rc=$2" >&2
+}
+
+redact_append()
+{
+	sed \
+		-e 's/\([Pp][Ss][Kk]\|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]\|[Pp][Aa][Ss][Ss][Ww][Dd]\|[Ss][Ss][Ii][Dd]\|[Tt][Oo][Kk][Ee][Nn]\|[Ss][Ee][Cc][Rr][Ee][Tt]\|[Kk][Ee][Yy]\)[[:space:]]*[=:][[:space:]]*[^[:space:]]*/\1=[REDACTED]/g' \
+		"$1" >>"$TMP"
+	return $?
+}
+
+collect_command()
+{
+	name=$1
+	shift
+	"$@" >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect"
+	redact_rc=$?
+	if [ "$redact_rc" -ne 0 ]; then
+		record_failure redact "$redact_rc"
+	fi
+	if [ "$rc" -ne 0 ]; then
+		record_failure "$name" "$rc"
+	fi
+	return 0
+}
+
+collect_file()
+{
+	name=$1
+	path=$2
+	printf '== %s ==\n' "$path" >>"$TMP"
+	collect_command "$name" cat "$path"
+}
+
+collect_directory()
+{
+	name=$1
+	path=$2
+	printf '== %s ==\n' "$path" >>"$TMP"
+	collect_command "$name" find "$path" -maxdepth 2 \( -type l -o -type f \)
+}
+
+collect_dmesg()
+{
+	printf '%s\n' '== dmesg tail ==' >>"$TMP"
+	dmesg >"${SCRATCH}.dmesg" 2>&1
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		redact_append "${SCRATCH}.dmesg" || record_failure redact "$?"
+		record_failure dmesg "$rc"
+		return 0
+	fi
+	tail -n 400 "${SCRATCH}.dmesg" >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || record_failure redact "$?"
+	if [ "$rc" -ne 0 ]; then
+		record_failure dmesg_tail "$rc"
+	fi
+	return 0
+}
+
+collect_network()
+{
+	printf '%s\n' '== network ==' >>"$TMP"
+	ip -br link >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || record_failure redact "$?"
+	if [ "$rc" -eq 0 ]; then
+		return 0
+	fi
+	record_failure ip_br_link "$rc"
+	ip link >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || record_failure redact "$?"
+	if [ "$rc" -ne 0 ]; then
+		record_failure ip_link "$rc"
+	fi
+	return 0
+}
+
+collect_report()
+{
+	TMP=$(mktemp "${REPORT}.tmp.XXXXXX") || return 1
+	SCRATCH=$TMP
+	chmod 0600 "$TMP" || return 1
+	printf '%s\n' 'AICPM_FIRSTBOARD_REPORT_V1' >"$TMP"
+	collect_command date date -Iseconds
+	collect_command uname uname -a
+	collect_file read_proc_cmdline /proc/cmdline
+	collect_file read_proc_mtd /proc/mtd
+	collect_file read_proc_partitions /proc/partitions
+	collect_file read_proc_meminfo /proc/meminfo
+	collect_directory scan_sys_class_mtd /sys/class/mtd
+	collect_directory scan_sys_class_mmc_host /sys/class/mmc_host
+	collect_directory scan_sys_class_net /sys/class/net
+	collect_directory scan_sys_class_pwm /sys/class/pwm
+	printf '%s\n' '== USB ==' >>"$TMP"
+	for device in /sys/bus/usb/devices/*; do
+		[ -f "$device/idVendor" ] || continue
+		collect_command usb_name basename "$device"
+		collect_command usb_vendor cat "$device/idVendor"
+		collect_command usb_product_id cat "$device/idProduct"
+		collect_command usb_product cat "$device/product"
+	done
+	collect_network
+	collect_dmesg
+	chmod 0600 "$TMP" || return 1
+	mv "$TMP" "$REPORT" || return 1
+	TMP=
+	return 0
+}
+
+start()
+{
+	if ! collect_report; then
+		logger -t aicpm-firstboard-diag 'report collection setup failed' >&2
+		printf '%s\n' 'aicpm-firstboard-diag: report collection setup failed' >&2
+	fi
+	return 0
+}
+
+case "${1:-}" in
+	start)
+		trap cleanup 0 1 2 15
+		start
+		;;
+	stop)
+		exit 0
+		;;
+	*)
+		printf 'Usage: %s {start|stop}\n' "$0" >&2
+		exit 2
+		;;
+esac
