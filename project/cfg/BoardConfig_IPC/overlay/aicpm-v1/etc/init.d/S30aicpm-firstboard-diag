@@ -42,7 +42,7 @@ redact_append()
 	awk 'BEGIN { private_key = 0 }
 {
  lower = tolower($0)
- if (lower ~ /presharedkey/) {
+ if (lower ~ /presharedkey/ || lower ~ /(^|[^a-z0-9])[a-z][a-z0-9_]*(token|secret|password|passwd|passphrase|credential|psk)([^a-z0-9]|$)/) {
   print "AICPM_DIAG_REDACTED_LINE"
   next
  }

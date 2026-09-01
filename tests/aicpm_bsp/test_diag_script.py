@@ -31,9 +31,18 @@ class DiagnosticScriptContract(unittest.TestCase):
         if not script.startswith("#!/bin/sh\n") or "\r" in script:
             raise AssertionError("production script must use the fixed POSIX shebang and LF")
         body = script.split("\n", 1)[1]
-        absolute_external = re.compile(
-            r"(?<![A-Za-z0-9_])/(?:bin|sbin|usr/(?:bin|sbin|local/(?:bin|sbin)))/"
-            r"[A-Za-z0-9_.+-]+(?=$|[\s;|&()])"
+        absolute_command = re.compile(
+            r"(?m)(?:^|[;|&()])[ \t]*"
+            r"(?:(?:if|elif|while|until|then|do|exec|command|env)[ \t]+)?"
+            r"(?:[A-Za-z_][A-Za-z0-9_]*=[^ \t;|&()]+[ \t]+)*"
+            r"/[^ \t\r\n;|&()]+"
+        )
+        absolute_assignment = re.compile(
+            r"(?m)(?:^|[;\n])[ \t]*([A-Za-z_][A-Za-z0-9_]*)="
+            r"(/[^ \t\r\n;|&()]+)"
+        )
+        absolute_dispatch = re.compile(
+            r"(?m)^[ \t]*collect_command[ \t]+[^ \t]+[ \t]+/"
         )
         forbidden = re.compile(
             r"(?im)(?:^|[;|&()\s])(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|"
@@ -51,7 +60,12 @@ class DiagnosticScriptContract(unittest.TestCase):
             r"(?:tee|dd|cp|install|mv)\b[^\n]*(?:/(?:sys|proc|dev)/|\$\{?target)|"
             r">\s*/(?:sys|proc|dev)/|sed\s+-i"
         )
-        if absolute_external.search(body):
+        allowed_assignments = {
+            ("REPORT", "/run/aicpm-firstboard-report.txt"),
+            ("USB_ROOT", "/sys/bus/usb/devices"),
+        }
+        assignments = set(absolute_assignment.findall(body))
+        if absolute_command.search(body) or absolute_dispatch.search(body) or assignments - allowed_assignments:
             raise AssertionError("absolute external command bypasses the fake PATH")
         if forbidden.search(script):
             raise AssertionError("unsafe production command")
