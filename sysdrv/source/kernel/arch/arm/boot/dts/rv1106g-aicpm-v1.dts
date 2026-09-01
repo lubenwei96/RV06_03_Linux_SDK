@@ -1,0 +1,109 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/dts-v1/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include "rv1106.dtsi"
+#include "rv1106g-aicpm-v1-camera.dtsi"
+
+/ {
+	model = "AICPM RV1106G V1.0";
+	compatible = "aicpm,rv1106g-v1", "rockchip,rv1106";
+
+	chosen {
+		bootargs = "earlycon=uart8250,mmio32,0xff4c0000,115200n8 console=ttyFIQ0 snd_soc_core.prealloc_buffer_size_kbytes=16 coherent_pool=0 net.ifnames=0 biosdevname=0";
+	};
+
+	restart-poweroff { compatible = "restart-poweroff"; };
+
+	vcc5v0_sys: vcc5v0-sys {
+		compatible = "regulator-fixed"; regulator-name = "vcc5v0_sys"; regulator-always-on; regulator-boot-on;
+		regulator-min-microvolt = <5000000>; regulator-max-microvolt = <5000000>;
+	};
+	vcc_1v8: vcc-1v8 {
+		compatible = "regulator-fixed"; regulator-name = "vcc_1v8"; regulator-always-on; regulator-boot-on;
+		regulator-min-microvolt = <1800000>; regulator-max-microvolt = <1800000>; vin-supply = <&vcc5v0_sys>;
+	};
+	vcc_3v3: vcc-3v3 {
+		compatible = "regulator-fixed"; regulator-name = "vcc_3v3"; regulator-always-on; regulator-boot-on;
+		regulator-min-microvolt = <3300000>; regulator-max-microvolt = <3300000>; vin-supply = <&vcc5v0_sys>;
+	};
+	vcc3v3_sd: vcc3v3-sd {
+		compatible = "regulator-fixed"; regulator-name = "vcc3v3_sd"; regulator-always-on; regulator-boot-on;
+		regulator-min-microvolt = <3300000>; regulator-max-microvolt = <3300000>; vin-supply = <&vcc_3v3>;
+	};
+	vcc_wlan: vcc-wlan {
+		compatible = "regulator-fixed"; regulator-name = "vcc_wlan"; regulator-always-on; regulator-boot-on;
+		regulator-min-microvolt = <3300000>; regulator-max-microvolt = <3300000>;
+		gpio = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>; vin-supply = <&vcc_3v3>;
+	};
+	vdd_cam0_3v3: vdd-cam0-3v3 {
+		compatible = "regulator-fixed"; regulator-name = "vdd_cam0_3v3";
+		regulator-min-microvolt = <3300000>; regulator-max-microvolt = <3300000>; enable-active-high;
+		gpio = <&gpio2 RK_PA3 GPIO_ACTIVE_HIGH>; vin-supply = <&vcc_3v3>;
+	};
+	vdd_cam1_3v3: vdd-cam1-3v3 {
+		compatible = "regulator-fixed"; regulator-name = "vdd_cam1_3v3";
+		regulator-min-microvolt = <3300000>; regulator-max-microvolt = <3300000>; enable-active-high;
+		gpio = <&gpio2 RK_PA6 GPIO_ACTIVE_HIGH>; vin-supply = <&vcc_3v3>;
+	};
+
+	gpio_keys: gpio-keys {
+		compatible = "gpio-keys";
+		manual-feed { label = "manual-feed"; linux,code = <KEY_F13>; gpios = <&gpio3 RK_PC6 GPIO_ACTIVE_LOW>; debounce-interval = <30>; };
+		provision-reset { label = "provision-reset"; linux,code = <KEY_SETUP>; gpios = <&gpio3 RK_PC4 GPIO_ACTIVE_LOW>; debounce-interval = <30>; };
+	};
+	leds {
+		compatible = "gpio-leds";
+		system-green { label = "aicpm:green:system"; gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>; default-state = "off"; };
+		status-red { label = "aicpm:red:status"; gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>; default-state = "off"; };
+		status-green { label = "aicpm:green:status"; gpios = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>; default-state = "off"; };
+	};
+	acodec_sound: acodec-sound {
+		compatible = "simple-audio-card"; simple-audio-card,name = "rv1106-aicpm-acodec";
+		simple-audio-card,format = "i2s"; simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,cpu { sound-dai = <&i2s0_8ch>; };
+		simple-audio-card,codec { sound-dai = <&acodec>; };
+	};
+};
+
+&acodec { #sound-dai-cells = <0>; pa-ctl-gpios = <&gpio4 RK_PA7 GPIO_ACTIVE_HIGH>; status = "okay"; };
+&i2s0_8ch { #sound-dai-cells = <0>; status = "okay"; };
+&gmac { status = "okay"; };
+&rmii_phy { status = "okay"; };
+&rtc { status = "okay"; };
+&saradc { vref-supply = <&vcc_1v8>; status = "okay"; };
+&sdmmc {
+	max-frequency = <50000000>; no-1-8-v; no-sdio; no-mmc; bus-width = <4>; cap-sd-highspeed; disable-wp;
+	pinctrl-names = "normal", "idle";
+	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_det &sdmmc0_bus4>;
+	pinctrl-1 = <&sdmmc0_idle_pins &sdmmc0_det>;
+	vmmc-supply = <&vcc3v3_sd>; status = "okay";
+};
+&sfc {
+	status = "okay";
+	flash@0 { compatible = "spi-nand"; reg = <0>; spi-max-frequency = <24000000>; spi-rx-bus-width = <4>; spi-tx-bus-width = <1>; };
+};
+&fiq_debugger { rockchip,baudrate = <115200>; rockchip,irq-mode-enable = <1>; status = "okay"; };
+&u2phy { status = "okay"; };
+&u2phy_otg { status = "okay"; };
+&usbdrd { status = "okay"; };
+&usbdrd_dwc3 { dr_mode = "host"; status = "okay"; };
+&mpp_srv { status = "okay"; };
+&mpp_vcodec { status = "okay"; };
+&npu { status = "okay"; };
+&rga2 { status = "okay"; };
+&rkdvbm { status = "okay"; };
+&rkvenc { status = "okay"; };
+&rkvenc_pp { status = "okay"; };
+&rng { status = "okay"; };
+&rve { status = "okay"; };
+&tsadc { status = "okay"; };
+&pinctrl {
+	aicpm_gated_inputs {
+		j9_feed_detect_gpio: j9-feed-detect-gpio { rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>; };
+		j11_bin_present_gpio: j11-bin-present-gpio { rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>; };
+	};
+};
+&pwm5 { status = "disabled"; };
+&pwm6 { status = "disabled"; };
