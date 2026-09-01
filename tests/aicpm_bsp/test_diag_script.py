@@ -413,6 +413,16 @@ class DiagnosticScriptContract(unittest.TestCase):
         for normal in ("devices online", "capability=usb-host", "api version=1"):
             self.assertIn(normal, report)
 
+    def test_global_safety_gate_and_ubifs_release_sink_contract(self):
+        self.assertTrue(hasattr(self, "_safety_gate"))
+        board = read_text(BOARD)
+        self.assertIn("RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs", board)
+        build = read_text(BUILD)
+        mkimg = build[build.index("function build_mkimg()"):build.index("\n}\n", build.index("function build_mkimg()"))]
+        self.assertIn("$RK_PROJECT_TOOLS_MKFS_UBIFS $src", mkimg)
+        self.assertNotIn("$RK_PROJECT_TOOLS_MKFS_UBIFS $dst", mkimg)
+        self.assertNotRegex(read_text(SCRIPT), r"(?m)^\s*/(?:usr|bin)/")
+
 
 if __name__ == "__main__":
     unittest.main()
