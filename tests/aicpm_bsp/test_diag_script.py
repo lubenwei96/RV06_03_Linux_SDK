@@ -420,15 +420,36 @@ class DiagnosticScriptContract(unittest.TestCase):
         for normal in ("devices online", "capability=usb-host", "api version=1"):
             self.assertIn(normal, report)
 
-    def test_global_safety_gate_and_ubifs_release_sink_contract(self):
-        self.assertTrue(hasattr(self, "_safety_gate"))
+    def test_global_safety_gate_rejects_absolute_external_commands(self):
+        self._safety_gate("#!/bin/sh\nprintf ok\n")
+        for mutant in (
+            "/usr/bin/tee /sys/x",
+            "/bin/cat /proc/cmdline",
+            "/bin/busybox dmesg",
+            "/usr/bin/env",
+            'runner=/bin/cat; "$runner" /proc/cmdline',
+        ):
+            with self.subTest(mutant=mutant):
+                with self.assertRaises(AssertionError):
+                    self._safety_gate(f"#!/bin/sh\n{mutant}\n")
+
+    def test_ubifs_release_sink_mutation_is_rejected(self):
         board = read_text(BOARD)
-        self.assertIn("RK_PARTITION_FS_TYPE_CFG=rootfs@IGNORE@ubifs", board)
+        self.assertEqual(
+            exported(board, "RK_PARTITION_FS_TYPE_CFG"),
+            "rootfs@IGNORE@ubifs",
+        )
         build = read_text(BUILD)
-        mkimg = build[build.index("function build_mkimg()"):build.index("\n}\n", build.index("function build_mkimg()"))]
-        self.assertIn("$RK_PROJECT_TOOLS_MKFS_UBIFS $src", mkimg)
-        self.assertNotIn("$RK_PROJECT_TOOLS_MKFS_UBIFS $dst", mkimg)
-        self.assertNotRegex(read_text(SCRIPT), r"(?m)^\s*/(?:usr|bin)/")
+        self._assert_overlay_pipeline(build)
+        sink = "$RK_PROJECT_TOOLS_MKFS_UBIFS $src $(dirname $dst) $part_size $part_name $fs_type $RK_UBIFS_COMP"
+        self.assertIn(sink, build)
+        mutated = build.replace(
+            sink,
+            sink.replace("$src", "$RK_PROJECT_PACKAGE_OEM_DIR", 1),
+            1,
+        )
+        with self.assertRaises((AssertionError, ValueError)):
+            self._assert_overlay_pipeline(mutated)
 
 
 if __name__ == "__main__":
