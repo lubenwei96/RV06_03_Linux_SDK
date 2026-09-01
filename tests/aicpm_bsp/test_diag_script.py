@@ -414,11 +414,11 @@ class DiagnosticScriptContract(unittest.TestCase):
                 self._safety_gate(f"#!/bin/sh\n{mutant}\n")
 
     def test_redacts_mixed_secret_formats_and_keeps_normal_diagnostics(self):
-        self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' 'authToken=auth token value' 'refreshToken: refresh token value' 'sessionToken=session token value' 'preSharedKey=shared key value' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
+        self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' 'authToken=opaque-A7' 'refreshToken: opaque-R8' 'sessionToken=opaque-S9' 'preSharedKey=opaque-P0' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
         result = self._run()
         self.assertEqual(result.returncode, 0, result.stderr)
         report = self.report.read_text(encoding="utf-8")
-        for secret in ("two words", "alpha beta", "json secret", "camel secret", "private key value", "wireless secret", "quoted password", "phrase with spaces", "broker secret", "short secret", "auth token value", "refresh token value", "session token value", "shared key value", "high-entropy-private-body"):
+        for secret in ("two words", "alpha beta", "json secret", "camel secret", "private key value", "wireless secret", "quoted password", "phrase with spaces", "broker secret", "short secret", "opaque-A7", "opaque-R8", "opaque-S9", "opaque-P0", "high-entropy-private-body"):
             self.assertNotIn(secret, report)
         self.assertGreaterEqual(report.count("AICPM_DIAG_REDACTED_LINE"), 13)
         for normal in ("devices online", "capability=usb-host", "api version=1"):
@@ -432,6 +432,10 @@ class DiagnosticScriptContract(unittest.TestCase):
             "/bin/busybox dmesg",
             "/usr/bin/env",
             'runner=/bin/cat; "$runner" /proc/cmdline',
+            "/opt/vendor/bin/modprobe rtl8822cu",
+            "/tmp/tee /sys/x",
+            "/busybox-helper /proc/cmdline",
+            'runner=/opt/vendor/bin/helper; "$runner" /proc/cmdline',
         ):
             with self.subTest(mutant=mutant):
                 with self.assertRaises(AssertionError):
