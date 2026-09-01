@@ -26,6 +26,22 @@ def exported(board, name):
 class DiagnosticScriptContract(unittest.TestCase):
     """Exercise the actual init script using disposable read-only command fakes."""
 
+    @classmethod
+    def setUpClass(cls):
+        script = read_text(SCRIPT)
+        cls.assertIn(cls, "#!/bin/sh", script)
+        cls.assertIn(cls, "REPORT=/run/aicpm-firstboard-report.txt", script)
+        cls.assertNotIn(cls, "/dev/aicpm-l9110s", script)
+        if re.search(r"(?m)^\s*(?:insmod|modprobe|rmmod|wpa_supplicant|hostapd|udhcpc|ifconfig|reboot|shutdown)\b", script):
+            raise AssertionError("unsafe production command")
+        gate = re.compile(
+            r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin)|sbin|bin)/)?(?:modprobe|insmod|rmmod|gpioset|gpioget|gpioinfo|pwm|iw|rfkill|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)(?=$|[;|&()\s])|"
+            r"(?:busybox|(?<![A-Za-z0-9_])command|env|exec|sh\s+-c)\s+['\"]?(?:modprobe|insmod|rmmod|iw|rfkill)|ip\s+(?:addr|route|link\s+set)|"
+            r"/dev/aicpm-l9110s|>\s*/(?:sys|proc|dev)/|/etc/(?:wpa_supplicant|.*mqtt|.*cloud)|/proc/self/environ"
+        )
+        if gate.search(script):
+            raise AssertionError("dynamic harness refuses unsafe production script")
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
@@ -33,7 +49,10 @@ class DiagnosticScriptContract(unittest.TestCase):
         self.fake.mkdir()
         self.report = self.root / "run" / "aicpm-firstboard-report.txt"
         self.report.parent.mkdir()
+        self.usb = self.root / "usb"
+        self.usb.mkdir()
         self.calls = self.root / "calls.log"
+        self.chmod_state = self.root / "chmod.state"
         self._defaults()
 
     def tearDown(self):
@@ -54,6 +73,7 @@ class DiagnosticScriptContract(unittest.TestCase):
         self._cmd("tail", 'exec /usr/bin/tail "$@"')
         self._cmd("ip", 'if [ "$1" = "-br" ]; then printf "lo UNKNOWN\\n"; else printf "1: lo: <LOOPBACK>\\n"; fi')
         self._cmd("sed", 'exec /bin/sed "$@"')
+        self._cmd("awk", 'exec /usr/bin/awk "$@"')
         self._cmd("mktemp", 'exec /usr/bin/mktemp "$@"')
         self._cmd("mv", 'printf "mv\\n" >> "$FAKE_LOG"; exec /bin/mv "$@"')
         self._cmd("chmod", 'exec /bin/chmod "$@"')
@@ -64,19 +84,51 @@ class DiagnosticScriptContract(unittest.TestCase):
         source = (ROOT / SCRIPT).read_text(encoding="utf-8")
         fixed = "REPORT=/run/aicpm-firstboard-report.txt"
         self.assertIn(fixed, source)
+        self.assertEqual(source.count("USB_ROOT=/sys/bus/usb/devices"), 1)
+        source = source.replace("USB_ROOT=/sys/bus/usb/devices", f"USB_ROOT={self.usb}")
         copy = self.root / "S30aicpm-firstboard-diag"
         copy.write_text(source.replace(fixed, f"REPORT={self.report}"), encoding="utf-8")
         copy.chmod(0o755)
         return copy
 
-    def _run(self, action="start"):
+    def _run_copy(self, copy, action="start"):
         return subprocess.run(
-            [str(self._copy()), action], text=True, capture_output=True, check=False,
-            env={"PATH": f"{self.fake}:/usr/bin:/bin", "FAKE_LOG": str(self.calls), "LC_ALL": "C"},
+            [str(copy), action], text=True, capture_output=True, check=False,
+            env={"PATH": str(self.fake), "FAKE_LOG": str(self.calls), "CHMOD_STATE": str(self.chmod_state), "LC_ALL": "C"},
         )
+
+    def _run(self, action="start"):
+        return self._run_copy(self._copy(), action)
 
     def _temps(self):
         return list(self.report.parent.glob("aicpm-firstboard-report.txt.tmp.*"))
+
+    def _assert_fatal_preserves_complete_report(self, command, body):
+        self.report.write_text("old-complete\n", encoding="utf-8")
+        self.report.chmod(0o600)
+        self.chmod_state.unlink(missing_ok=True)
+        self._cmd(command, body)
+        result = self._run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.report.read_text(encoding="utf-8"), "old-complete\n")
+        self.assertEqual(self._temps(), [])
+        self.assertIn("report collection internal failure", result.stderr)
+        self.assertIn("logger:", result.stderr)
+
+    def _assert_overlay_pipeline(self, build):
+        post = build[build.index("function post_overlay()"):build.index("\n}\n", build.index("function post_overlay()"))]
+        firmware = build[build.index("function build_firmware()"):build.index("\n}\n", build.index("function build_firmware()"))]
+        rootfs = build[build.index("function build_rootfs()"):build.index("\n}\n", build.index("function build_rootfs()"))]
+        mkimg = build[build.index("function build_mkimg()"):build.index("\n}\n", build.index("function build_mkimg()"))]
+        self.assertIn("overlay/$RK_POST_OVERLAY/*", post)
+        self.assertIn("$RK_PROJECT_PACKAGE_ROOTFS_DIR/", post)
+        self.assertIn("--chmod=u=rwX,go=rX", post)
+        self.assertNotIn("post_overlay", rootfs)
+        self.assertLess(firmware.index("__PACKAGE_ROOTFS"), firmware.index("post_overlay"))
+        self.assertLess(firmware.index("post_overlay"), firmware.index("build_mkimg $GLOBAL_ROOT_FILESYSTEM_NAME $RK_PROJECT_PACKAGE_ROOTFS_DIR"))
+        self.assertIn("src=$2", mkimg)
+        self.assertIn("__RELEASE_FILESYSTEM_FILES $src", mkimg)
+        self.assertIn("$RK_PROJECT_TOOLS_MKFS_EXT4 $src $dst", mkimg)
 
     def test_start_collects_redacts_and_publishes_atomically(self):
         result = self._run()
@@ -89,7 +141,8 @@ class DiagnosticScriptContract(unittest.TestCase):
             "== USB ==", "== network ==", "== dmesg tail ==",
         ):
             self.assertIn(heading, report)
-        self.assertIn("psk=[REDACTED]", report)
+        self.assertIn("AICPM_DIAG_REDACTED_LINE", report)
+        self.assertIn("AICPM_DIAG_USB_EMPTY", report)
         self.assertNotIn("very-secret-value", report)
         self.assertEqual(stat.S_IMODE(self.report.stat().st_mode), 0o600)
         self.assertEqual(self.calls.read_text(encoding="utf-8").splitlines(), ["mv"])
@@ -110,6 +163,39 @@ class DiagnosticScriptContract(unittest.TestCase):
                 self.assertIn(marker, self.report.read_text(encoding="utf-8"))
                 self.report.unlink()
 
+    def test_each_readonly_collector_emits_its_own_fixed_failure_marker(self):
+        device = self.usb / "1-1"
+        device.mkdir()
+        for name in ("idVendor", "idProduct", "product"):
+            (device / name).write_text("fixture\n", encoding="utf-8")
+        cases = (
+            ("cat", "/proc/cmdline", "read_proc_cmdline"),
+            ("cat", "/proc/mtd", "read_proc_mtd"),
+            ("cat", "/proc/partitions", "read_proc_partitions"),
+            ("cat", "/proc/meminfo", "read_proc_meminfo"),
+            ("date", "-Iseconds", "date"),
+            ("uname", "-a", "uname"),
+            ("find", "/sys/class/mtd", "scan_sys_class_mtd"),
+            ("find", "/sys/class/mmc_host", "scan_sys_class_mmc_host"),
+            ("find", "/sys/class/net", "scan_sys_class_net"),
+            ("find", "/sys/class/pwm", "scan_sys_class_pwm"),
+            ("basename", str(device), "usb_name"),
+            ("cat", str(device / "idVendor"), "usb_vendor"),
+            ("cat", str(device / "idProduct"), "usb_product_id"),
+            ("cat", str(device / "product"), "usb_product"),
+        )
+        for command, path, marker in cases:
+            with self.subTest(marker=marker):
+                self._defaults()
+                self._cmd(command, f'if [ "$1" = "{path}" ]; then exit 29; fi; printf "ok\\n"')
+                result = self._run()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(
+                    f"AICPM_DIAG_ERROR {marker} rc=29",
+                    self.report.read_text(encoding="utf-8"),
+                )
+                self.report.unlink()
+
     def test_ip_fallback_and_both_failure_markers(self):
         self._cmd("ip", 'if [ "$1" = "-br" ]; then exit 23; fi; printf "1: lo: <LOOPBACK>\\n"')
         self.assertEqual(self._run().returncode, 0)
@@ -123,6 +209,39 @@ class DiagnosticScriptContract(unittest.TestCase):
         self.assertIn("AICPM_DIAG_ERROR ip_br_link rc=24", report)
         self.assertIn("AICPM_DIAG_ERROR ip_link rc=24", report)
 
+    def test_missing_usb_root_has_a_marker_and_never_reads_host_sysfs(self):
+        self.usb.rmdir()
+        result = self._run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = self.report.read_text(encoding="utf-8")
+        self.assertIn("AICPM_DIAG_ERROR scan_usb rc=1", report)
+        self.assertNotIn("/sys/bus/usb/devices", report)
+
+    def test_unreadable_usb_root_has_a_marker(self):
+        self.usb.chmod(0)
+        try:
+            result = self._run()
+        finally:
+            self.usb.chmod(0o700)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            "AICPM_DIAG_ERROR scan_usb rc=1",
+            self.report.read_text(encoding="utf-8"),
+        )
+
+    def test_usb_device_enumeration_collects_name_vendor_product_and_id(self):
+        device = self.usb / "1-1"
+        device.mkdir()
+        for name in ("idVendor", "idProduct", "product"):
+            (device / name).write_text("fixture\n", encoding="utf-8")
+        result = self._run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = self.report.read_text(encoding="utf-8")
+        self.assertIn("1-1", report)
+        for name in ("idVendor", "idProduct", "product"):
+            self.assertIn(f"read:{device / name}", report)
+        self.assertNotIn("AICPM_DIAG_USB_EMPTY", report)
+
     def test_mktemp_and_mv_failures_preserve_an_existing_complete_report(self):
         for command in ("mktemp", "mv"):
             with self.subTest(command=command):
@@ -133,6 +252,33 @@ class DiagnosticScriptContract(unittest.TestCase):
                 self.assertEqual(self.report.read_text(encoding="utf-8"), "old-complete\n")
                 self.assertEqual(self._temps(), [])
                 self._defaults()
+
+    def test_internal_tail_redactor_and_chmod_failures_do_not_publish(self):
+        self._assert_fatal_preserves_complete_report("tail", "exit 41")
+        self._defaults()
+        self._assert_fatal_preserves_complete_report("awk", "exit 42")
+        self._defaults()
+        self._assert_fatal_preserves_complete_report("chmod", "exit 43")
+        self._defaults()
+        self._assert_fatal_preserves_complete_report(
+            "chmod",
+            'if [ ! -e "$CHMOD_STATE" ]; then : > "$CHMOD_STATE"; exec /bin/chmod "$@"; fi; exit 43',
+        )
+
+    def test_checked_append_mutation_cannot_publish_a_partial_report(self):
+        self.report.write_text("old-complete\n", encoding="utf-8")
+        copy = self._copy()
+        original = copy.read_text(encoding="utf-8")
+        self.assertIn('printf \'%s\\n\' "$1" >>"$TMP" || { fatal; return 1; }', original)
+        copy.write_text(
+            original.replace('printf \'%s\\n\' "$1" >>"$TMP" || { fatal; return 1; }', "fatal; return 1", 1),
+            encoding="utf-8",
+        )
+        result = self._run_copy(copy)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.report.read_text(encoding="utf-8"), "old-complete\n")
+        self.assertEqual(self._temps(), [])
+        self.assertIn("report collection internal failure", result.stderr)
 
     def test_repeated_start_replaces_complete_final_without_tmp_residue(self):
         self.assertEqual(self._run().returncode, 0)
@@ -156,15 +302,7 @@ class DiagnosticScriptContract(unittest.TestCase):
         self.assertEqual(exported(board, "RK_ENABLE_WIFI"), "n")
         self.assertEqual(exported(board, "RK_ENABLE_WIFI_CHIP"), "")
         build = read_text(BUILD)
-        post = build[build.index("function post_overlay()"):]
-        post = post[:post.index("\n}\n")]
-        firmware = build[build.index("function build_firmware()"):]
-        firmware = firmware[:firmware.index("\n}\n")]
-        rootfs = build[build.index("function build_rootfs()"):]
-        rootfs = rootfs[:rootfs.index("\n}\n")]
-        self.assertIn("overlay/$RK_POST_OVERLAY", post)
-        self.assertIn("post_overlay", firmware)
-        self.assertNotIn("post_overlay", rootfs)
+        self._assert_overlay_pipeline(build)
         subprocess.run(["git", "diff", "--quiet", BASE_COMMIT, "--", BASELINE_WPA], cwd=ROOT,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
 
@@ -175,7 +313,7 @@ class DiagnosticScriptContract(unittest.TestCase):
             r"(?:/(?:sbin|bin|usr/bin)/)?(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)|"
             r"(?:busybox|command|env)\s+(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)|"
             r"ip\s+link\s+set)(?=$|[\s;|&()])|/dev/aicpm-l9110s|>\s*/(?:sys|proc|dev)/|"
-            r"/(?:etc/(?:wpa_supplicant|.*mqtt|.*cloud)|.*(?:credential|secret|private))"
+            r"/etc/(?:wpa_supplicant|.*mqtt|.*cloud)"
         )
         indirect = re.compile(
             r"(?im)(?:^|[;\n])\s*[A-Za-z_][A-Za-z0-9_]*=(?:insmod|modprobe|rmmod|gpioset|gpioget|gpioinfo|pwm|wpa_supplicant|hostapd|udhcpc|dhclient|ifconfig|reboot|shutdown|poweroff)(?=$|[;\s])|"
@@ -193,6 +331,79 @@ class DiagnosticScriptContract(unittest.TestCase):
                 self.assertTrue(forbidden.search(mutant) or indirect.search(mutant))
         self.assertIn("REPORT=/run/aicpm-firstboard-report.txt", script)
         self.assertNotRegex(script, r"(?:AICPM_|REPORT=)\\$\\{|/run/\\$")
+
+
+    def test_review_hardening_contract_is_present(self):
+        script = read_text(SCRIPT)
+        for token in (
+            "AICPM_DIAG_REDACTED_LINE", "USB_ROOT=/sys/bus/usb/devices",
+            "append_line", "fatal", "PRIVATE KEY", "AICPM_DIAG_USB_EMPTY",
+        ):
+            self.assertIn(token, script)
+        self.assertNotIn("/usr/", script)
+
+    def test_source_modes_and_precise_overlay_sequence(self):
+        self.assertEqual(stat.S_IMODE((ROOT / SCRIPT).stat().st_mode), 0o755)
+        self.assertEqual(stat.S_IMODE((ROOT / SAFE_WPA).stat().st_mode), 0o644)
+        self.assertEqual(stat.S_IMODE(Path(__file__).stat().st_mode), 0o644)
+        build = read_text(BUILD)
+        self._assert_overlay_pipeline(build)
+
+    def test_overlay_pipeline_rejects_order_target_mode_and_dataflow_mutations(self):
+        build = read_text(BUILD)
+        moved = build.replace(
+            "\tpost_overlay\n\n\tif [ -n \"$GLOBAL_INITRAMFS_BOOT_NAME\"",
+            "\tif [ -n \"$GLOBAL_INITRAMFS_BOOT_NAME\"",
+            1,
+        )
+        moved = moved.replace(
+            "\tbuild_mkimg $GLOBAL_ROOT_FILESYSTEM_NAME $RK_PROJECT_PACKAGE_ROOTFS_DIR\n",
+            "\tbuild_mkimg $GLOBAL_ROOT_FILESYSTEM_NAME $RK_PROJECT_PACKAGE_ROOTFS_DIR\n\tpost_overlay\n",
+            1,
+        )
+        mutations = (
+            ("$tmp_path/overlay/$RK_POST_OVERLAY/* $RK_PROJECT_PACKAGE_ROOTFS_DIR/", "$tmp_path/overlay/$RK_POST_OVERLAY/* $RK_PROJECT_PACKAGE_OEM_DIR/"),
+            ("--chmod=u=rwX,go=rX", ""),
+            ("src=$2", "src=$1"),
+        )
+        with self.assertRaises((AssertionError, ValueError)):
+            self._assert_overlay_pipeline(moved)
+        for old, new in mutations:
+            with self.subTest(old=old):
+                self.assertIn(old, build)
+                mutated = build.replace(old, new, 1)
+                with self.assertRaises((AssertionError, ValueError)):
+                    self._assert_overlay_pipeline(mutated)
+
+    def test_deny_scanner_rejects_review_mutants(self):
+        script = read_text(SCRIPT)
+        deny = re.compile(r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install|iw|rfkill)(?=$|[;|&()\s])|"
+                          r"(?:busybox|(?<![A-Za-z0-9_])command|env(?:\s+-\S+)*|exec|sh\s+-c)\s+['\"]?(?:modprobe|tee|dd|cp|install|iw|rfkill)|ip\s+(?:addr|route|link\s+set)|"
+                          r"(?:printenv|env|(?:export)\s+-p|set)(?=$|\s)|(?:^|[;\n])\s*[A-Za-z_][A-Za-z0-9_]*=(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install)(?=$|[;\s])|(?:cat\s+)?/etc/shadow|/proc/self/environ|/etc/wpa_supplicant|"
+                          r"/(?:data|oem)/[^\n]*(?:mqtt|cloud|device|private)|(?:^|[;\n])\s*target=/(?:sys|proc|dev)/|>\s*['\"]?\$\{?target|(?:tee|dd|cp|install|mv)\b[^\n]*(?:/(?:sys|proc|dev)/|\$\{?target)|sed\s+-i")
+        self.assertIsNone(deny.search(script))
+        for mutant in (
+            "/usr/sbin/modprobe x", "/usr/bin/tee /sys/x", "/usr/local/sbin/modprobe x",
+            "busybox modprobe x", "command modprobe x", "env -i modprobe x", "exec modprobe x",
+            'sh -c "modprobe x"', "cmd=tee", 'runner=/usr/bin/tee; "$runner" /sys/x',
+            "tee /sys/x", "dd of=/dev/x", "cp x /proc/x", "install x /dev/x", "mv x /sys/x",
+            "target=/sys/x; echo 1 > \"$target\"", "ip addr add x", "ip route add x", "ip link set eth0 up",
+            "iw dev", "rfkill block all", "printenv", "env", "export -p", "set", "cat /etc/shadow",
+            "cat /proc/self/environ", "cat /etc/wpa_supplicant.conf", "cat /data/mqtt.conf", "cat /oem/cloud.json",
+            "sed -i x /sys/x",
+        ):
+            self.assertIsNotNone(deny.search(mutant), mutant)
+
+    def test_redacts_mixed_secret_formats_and_keeps_normal_diagnostics(self):
+        self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
+        result = self._run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = self.report.read_text(encoding="utf-8")
+        for secret in ("two words", "alpha beta", "json secret", "camel secret", "private key value", "wireless secret", "quoted password", "phrase with spaces", "broker secret", "short secret", "high-entropy-private-body"):
+            self.assertNotIn(secret, report)
+        self.assertGreaterEqual(report.count("AICPM_DIAG_REDACTED_LINE"), 13)
+        for normal in ("devices online", "capability=usb-host", "api version=1"):
+            self.assertIn(normal, report)
 
 
 if __name__ == "__main__":
