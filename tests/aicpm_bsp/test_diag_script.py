@@ -254,8 +254,6 @@ class DiagnosticScriptContract(unittest.TestCase):
                 self._defaults()
 
     def test_internal_tail_redactor_and_chmod_failures_do_not_publish(self):
-        self._assert_fatal_preserves_complete_report("tail", "exit 41")
-        self._defaults()
         self._assert_fatal_preserves_complete_report("awk", "exit 42")
         self._defaults()
         self._assert_fatal_preserves_complete_report("chmod", "exit 43")
@@ -264,6 +262,16 @@ class DiagnosticScriptContract(unittest.TestCase):
             "chmod",
             'if [ ! -e "$CHMOD_STATE" ]; then : > "$CHMOD_STATE"; exec /bin/chmod "$@"; fi; exit 43',
         )
+
+    def test_tail_failure_is_a_degraded_readonly_report(self):
+        self._cmd("tail", "exit 41")
+        result = self._run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = self.report.read_text(encoding="utf-8")
+        self.assertIn("AICPM_DIAG_ERROR dmesg_tail rc=41", report)
+        self.assertTrue(report.startswith("AICPM_FIRSTBOARD_REPORT_V1"))
+        self.assertEqual(self._temps(), [])
+        self.assertIn("collection failure: dmesg_tail rc=41", result.stderr)
 
     def test_checked_append_mutation_cannot_publish_a_partial_report(self):
         self.report.write_text("old-complete\n", encoding="utf-8")
@@ -395,11 +403,11 @@ class DiagnosticScriptContract(unittest.TestCase):
             self.assertIsNotNone(deny.search(mutant), mutant)
 
     def test_redacts_mixed_secret_formats_and_keeps_normal_diagnostics(self):
-        self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
+        self._cmd("dmesg", "printf '%s\\n' 'password=two words' 'token: Bearer alpha beta' '\"password\": \"json secret\"' 'clientSecret=camel secret' 'privateKey=private key value' 'wifiPsk=wireless secret' 'wifiPassword: quoted password' 'passphrase=phrase with spaces' 'mqtt_pass=broker secret' 'pwd=short secret' 'authToken=auth token value' 'refreshToken: refresh token value' 'sessionToken=session token value' 'preSharedKey=shared key value' '-----BEGIN OPENSSH PRIVATE KEY-----' 'high-entropy-private-body' '-----END OPENSSH PRIVATE KEY-----' 'devices online' 'capability=usb-host' 'api version=1'")
         result = self._run()
         self.assertEqual(result.returncode, 0, result.stderr)
         report = self.report.read_text(encoding="utf-8")
-        for secret in ("two words", "alpha beta", "json secret", "camel secret", "private key value", "wireless secret", "quoted password", "phrase with spaces", "broker secret", "short secret", "high-entropy-private-body"):
+        for secret in ("two words", "alpha beta", "json secret", "camel secret", "private key value", "wireless secret", "quoted password", "phrase with spaces", "broker secret", "short secret", "auth token value", "refresh token value", "session token value", "shared key value", "high-entropy-private-body"):
             self.assertNotIn(secret, report)
         self.assertGreaterEqual(report.count("AICPM_DIAG_REDACTED_LINE"), 13)
         for normal in ("devices online", "capability=usb-host", "api version=1"):
