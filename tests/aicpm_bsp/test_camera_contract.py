@@ -53,20 +53,47 @@ def mask_dts_comments(text):
     return "".join(masked)
 
 
+def dts_structural_view(text):
+    comment_masked = mask_dts_comments(text)
+    structural = []
+    index = 0
+    in_string = False
+    escaped = False
+    while index < len(comment_masked):
+        char = comment_masked[index]
+        if in_string:
+            structural.append("\n" if char == "\n" else " ")
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            index += 1
+            continue
+        if char == '"':
+            in_string = True
+            structural.append(" ")
+        else:
+            structural.append(char)
+        index += 1
+    return "".join(structural)
+
 def node_blocks(text, header):
     masked = mask_dts_comments(text)
+    structural = dts_structural_view(text)
     matches = re.finditer(
-        rf"^[ \t]*{re.escape(header)}[ \t]*\{{[ \t]*$",
-        masked,
-        re.MULTILINE,
+        rf"(?<![A-Za-z0-9_.@-]){re.escape(header)}"
+        rf"(?![A-Za-z0-9_.@-])\s*\{{",
+        structural,
     )
     blocks = []
     for match in matches:
         depth = 0
-        for index in range(match.end() - 1, len(masked)):
-            if masked[index] == "{":
+        for index in range(match.end() - 1, len(structural)):
+            if structural[index] == "{":
                 depth += 1
-            elif masked[index] == "}":
+            elif structural[index] == "}":
                 depth -= 1
                 if depth == 0:
                     blocks.append(masked[match.start() : index + 1])
@@ -401,6 +428,31 @@ class CameraContract(unittest.TestCase):
             "disabled CAM1 block must not contain remote-endpoint: &csi2_dphy2",
         ):
             self.assert_cam1_has_no_media_graph(duplicate_stage)
+
+        compact_stage = self.camera + "&csi2_dphy2 { ports { port@9 { endpoint { remote-endpoint = <&synthetic_endpoint>; }; }; }; };\n"
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 block must not contain remote-endpoint: &csi2_dphy2",
+        ):
+            self.assert_cam1_has_no_media_graph(compact_stage)
+
+        quoted_brace_stage = self.camera + """
+&csi2_dphy2 {
+	note = "}";
+	ports {
+		port@9 {
+			endpoint {
+				remote-endpoint = <&synthetic_endpoint>;
+			};
+		};
+	};
+};
+"""
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 block must not contain remote-endpoint: &csi2_dphy2",
+        ):
+            self.assert_cam1_has_no_media_graph(quoted_brace_stage)
 
         direct_sensor = self.camera + """
 &ov5647_cam1 {
