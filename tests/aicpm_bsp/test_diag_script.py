@@ -450,6 +450,13 @@ class DiagnosticScriptContract(unittest.TestCase):
             "/tmp/tee /sys/x",
             "/busybox-helper /proc/cmdline",
             'runner=/opt/vendor/bin/helper; "$runner" /proc/cmdline',
+            "! /opt/vendor/bin/modprobe rtl8822cu",
+            "if false; then :; else /opt/vendor/bin/modprobe rtl8822cu; fi",
+            "{ /opt/vendor/bin/modprobe rtl8822cu; }",
+            "time /opt/vendor/bin/modprobe rtl8822cu",
+            "if collect_command injected /opt/vendor/bin/helper; then :; fi",
+            "true || collect_command injected /opt/vendor/bin/helper",
+            "`/opt/vendor/bin/helper`",
         ):
             with self.subTest(mutant=mutant):
                 with self.assertRaises(AssertionError):
