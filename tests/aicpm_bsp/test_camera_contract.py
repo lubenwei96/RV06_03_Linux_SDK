@@ -349,8 +349,8 @@ class CameraContract(unittest.TestCase):
             f"disabled CAM1 block must not contain remote-endpoint: {header}",
         )
         self.assertNotRegex(
-            block,
-            r"(?m)^[ \t]*ports?(?:@[^\s{]+)?\s*\{",
+            dts_structural_view(block),
+            r"(?<![A-Za-z0-9_.@-])(?:port(?:@[A-Za-z0-9_.-]+)?|ports)(?![A-Za-z0-9_.@-])\s*\{",
             f"disabled CAM1 block must not contain graph ports: {header}",
         )
 
@@ -435,6 +435,13 @@ class CameraContract(unittest.TestCase):
             "disabled CAM1 block must not contain remote-endpoint: &csi2_dphy2",
         ):
             self.assert_cam1_has_no_media_graph(compact_stage)
+
+        compact_ports_only = self.camera + "&csi2_dphy2 { ports { }; };\n"
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 block must not contain graph ports: &csi2_dphy2",
+        ):
+            self.assert_cam1_has_no_media_graph(compact_ports_only)
 
         quoted_brace_stage = self.camera + """
 &csi2_dphy2 {
