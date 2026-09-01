@@ -10,24 +10,77 @@ DRIVER = "sysdrv/source/kernel/drivers/media/i2c/ov5647.c"
 BINDING = "sysdrv/source/kernel/Documentation/devicetree/bindings/media/i2c/ov5647.yaml"
 
 
-def node_block(text, header):
-    match = re.search(
+def mask_dts_comments(text):
+    masked = []
+    index = 0
+    in_string = False
+    escaped = False
+    while index < len(text):
+        char = text[index]
+        if in_string:
+            masked.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            index += 1
+            continue
+        if char == '"':
+            in_string = True
+            masked.append(char)
+            index += 1
+            continue
+        if text.startswith("//", index):
+            while index < len(text) and text[index] != "\n":
+                masked.append(" ")
+                index += 1
+            continue
+        if text.startswith("/*", index):
+            masked.extend((" ", " "))
+            index += 2
+            while index < len(text):
+                if text.startswith("*/", index):
+                    masked.extend((" ", " "))
+                    index += 2
+                    break
+                masked.append("\n" if text[index] == "\n" else " ")
+                index += 1
+            continue
+        masked.append(char)
+        index += 1
+    return "".join(masked)
+
+
+def node_blocks(text, header):
+    masked = mask_dts_comments(text)
+    matches = re.finditer(
         rf"^[ \t]*{re.escape(header)}[ \t]*\{{[ \t]*$",
-        text,
+        masked,
         re.MULTILINE,
     )
-    if match is None:
-        raise AssertionError(f"missing node block: {header}")
+    blocks = []
+    for match in matches:
+        depth = 0
+        for index in range(match.end() - 1, len(masked)):
+            if masked[index] == "{":
+                depth += 1
+            elif masked[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    blocks.append(masked[match.start() : index + 1])
+                    break
+        else:
+            raise AssertionError(f"unterminated node block: {header}")
+    return blocks
 
-    depth = 0
-    for index in range(match.end() - 1, len(text)):
-        if text[index] == "{":
-            depth += 1
-        elif text[index] == "}":
-            depth -= 1
-            if depth == 0:
-                return text[match.start() : index + 1]
-    raise AssertionError(f"unterminated node block: {header}")
+
+def node_block(text, header):
+    blocks = node_blocks(text, header)
+    if not blocks:
+        raise AssertionError(f"missing node block: {header}")
+    return blocks[0]
 
 
 def direct_properties(block):
@@ -262,7 +315,20 @@ class CameraContract(unittest.TestCase):
                     [f"reg = <{endpoint_reg}>;"],
                 )
 
+    def assert_cam1_fragment_has_no_media_graph(self, header, block):
+        self.assertNotIn(
+            "remote-endpoint",
+            block,
+            f"disabled CAM1 block must not contain remote-endpoint: {header}",
+        )
+        self.assertNotRegex(
+            block,
+            r"(?m)^[ \t]*ports?(?:@[^\s{]+)?\s*\{",
+            f"disabled CAM1 block must not contain graph ports: {header}",
+        )
+
     def assert_cam1_has_no_media_graph(self, camera):
+        masked = mask_dts_comments(camera)
         labels = (
             "ov5647_cam1_out",
             "csi_dphy2_input",
@@ -275,31 +341,36 @@ class CameraContract(unittest.TestCase):
         )
         for label in labels:
             self.assertNotRegex(
-                camera,
+                masked,
                 rf"\b{label}\s*:",
                 f"disabled CAM1 graph label must be absent: {label}",
             )
         for header in (
-            "&i2c3",
             "&csi2_dphy2",
             "&mipi1_csi2",
             "&rkcif_mipi_lvds1",
             "&rkcif_mipi_lvds1_sditf",
             "&rkisp_vir1",
         ):
-            self.assertNotIn(
-                "remote-endpoint",
-                node_block(camera, header),
-                f"disabled CAM1 block must not contain remote-endpoint: {header}",
+            for block in node_blocks(masked, header):
+                self.assert_cam1_fragment_has_no_media_graph(header, block)
+        for i2c3 in node_blocks(masked, "&i2c3"):
+            for sensor in node_blocks(i2c3, "ov5647_cam1: camera@36"):
+                self.assert_cam1_fragment_has_no_media_graph(
+                    "ov5647_cam1: camera@36", sensor
+                )
+        for sensor in node_blocks(masked, "&ov5647_cam1"):
+            self.assert_cam1_fragment_has_no_media_graph(
+                "&ov5647_cam1", sensor
             )
 
     # Catches a disabled CAM1 graph being retained and later becoming a dangling DTB phandle.
     def test_cam1_disabled_path_has_no_media_graph(self):
         self.assert_cam1_has_no_media_graph(self.camera)
 
-    # Proves the no-graph contract rejects an accidental CAM1 endpoint reintroduction.
+    # Proves the no-graph contract covers every CAM1 fragment but ignores comments and unrelated siblings.
     def test_cam1_no_graph_contract_rejects_endpoint_mutation(self):
-        mutated = self.camera + """
+        formal_label = self.camera + """
 &i2c3 {
 	port {
 		ov5647_cam1_out: endpoint {
@@ -312,7 +383,73 @@ class CameraContract(unittest.TestCase):
             AssertionError,
             "disabled CAM1 graph label must be absent: ov5647_cam1_out",
         ):
-            self.assert_cam1_has_no_media_graph(mutated)
+            self.assert_cam1_has_no_media_graph(formal_label)
+
+        duplicate_stage = self.camera + """
+&csi2_dphy2 {
+	ports {
+		port@9 {
+			endpoint {
+				remote-endpoint = <&synthetic_endpoint>;
+			};
+		};
+	};
+};
+"""
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 block must not contain remote-endpoint: &csi2_dphy2",
+        ):
+            self.assert_cam1_has_no_media_graph(duplicate_stage)
+
+        direct_sensor = self.camera + """
+&ov5647_cam1 {
+	port {
+		endpoint {
+			remote-endpoint = <&synthetic_endpoint>;
+		};
+	};
+};
+"""
+        with self.assertRaisesRegex(
+            AssertionError,
+            "disabled CAM1 block must not contain remote-endpoint: &ov5647_cam1",
+        ):
+            self.assert_cam1_has_no_media_graph(direct_sensor)
+
+        commented_graph = self.camera + """
+/*
+&csi2_dphy2 {
+	ports {
+		port@0 {
+			csi_dphy2_input: endpoint {
+				remote-endpoint = <&ov5647_cam1_out>;
+			};
+		};
+	};
+};
+*/
+"""
+        self.assert_cam1_has_no_media_graph(commented_graph)
+
+        i2c3_sibling_graph = self.camera + """
+&i2c3 {
+	unrelated-camera-diagnostic {
+		port {
+			endpoint {
+				remote-endpoint = <&synthetic_endpoint>;
+			};
+		};
+	};
+};
+"""
+        self.assert_cam1_has_no_media_graph(i2c3_sibling_graph)
+
+        quoted_comment_markers = 'note = "literal // and /* */";\n'
+        self.assertEqual(
+            mask_dts_comments(quoted_comment_markers),
+            quoted_comment_markers,
+        )
 
     # Catches reserved CAM pins reintroduced directly or through camera control aliases/properties.
     def test_unverified_control_gpio_not_bound(self):
