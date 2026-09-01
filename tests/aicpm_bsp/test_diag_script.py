@@ -26,6 +26,12 @@ def exported(board, name):
 class DiagnosticScriptContract(unittest.TestCase):
     """Exercise the actual init script using disposable read-only command fakes."""
 
+    @staticmethod
+    def _safety_gate(script):
+        forbidden = re.compile(r"(?im)(?:^|[;|&()\s])(?:/(?:usr/(?:bin|sbin|local/(?:bin|sbin))|sbin|bin)/)?(?:modprobe|tee|dd|cp|install|iw|rfkill)(?=$|[;|&()\s])|(?:busybox|(?<![A-Za-z0-9_])command|env|exec|sh\s+-c)\s+['\"]?(?:modprobe|tee|dd|cp|install|iw|rfkill)|/dev/aicpm-l9110s|/etc/shadow|/proc/self/environ|>\s*/(?:sys|proc|dev)/")
+        if forbidden.search(script):
+            raise AssertionError("unsafe production command")
+
     @classmethod
     def setUpClass(cls):
         script = read_text(SCRIPT)
@@ -41,6 +47,7 @@ class DiagnosticScriptContract(unittest.TestCase):
         )
         if gate.search(script):
             raise AssertionError("dynamic harness refuses unsafe production script")
+        cls._safety_gate(script)
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

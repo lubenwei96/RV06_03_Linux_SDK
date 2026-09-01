@@ -42,6 +42,10 @@ redact_append()
 	awk 'BEGIN { private_key = 0 }
 {
  lower = tolower($0)
+ if (lower ~ /presharedkey/) {
+  print "AICPM_DIAG_REDACTED_LINE"
+  next
+ }
  if (private_key || $0 ~ /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/ || lower ~ /(^|[^a-z0-9])(psk|password|passwd|passphrase|pwd|ssid|bssid|token|secret|credential|authorization|bearer)([^a-z0-9]|$)/ || lower ~ /(api|access|mqtt|cloud|device|wifi|client|private)[^a-z0-9]*(key|token|secret|password|passwd|pass|psk|passphrase|credential|pwd)/) {
   print "AICPM_DIAG_REDACTED_LINE"
   if ($0 ~ /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/) private_key = 1
@@ -95,8 +99,7 @@ collect_dmesg()
 	rc=$?
 	redact_append "${SCRATCH}.collect" || return 1
 	if [ "$rc" -ne 0 ]; then
-		fatal
-		return 1
+		record_failure dmesg_tail "$rc" || return 1
 	fi
 	return 0
 }
