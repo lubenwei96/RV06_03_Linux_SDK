@@ -1,0 +1,4320 @@
+{
+  "archive_name": "rtl88x2CU_WiFi_linux_v5.15.8.5-3-g88098843f.20240412_COEX20221215-3130-with-gplv2-copying.tar",
+  "archive_sha256": "b665da126a6a306d89653dcf2e964154e082be5e817230b97fce6ebbc285d47e",
+  "archive_size_bytes": 36853760,
+  "binary_blob_candidates": [],
+  "expanded_size_bytes": 36121813,
+  "file_count": 716,
+  "files": [
+    {
+      "path": "COPYING",
+      "sha256": "f6b78c087c3ebdf0f3c13415070dd480a3f35d8fc76f3d02180a407c1c812f79",
+      "size_bytes": 18729,
+      "type": "file"
+    },
+    {
+      "path": "Kconfig",
+      "sha256": "4f6b30a0ba573deead7ccbc9b6abbebab47ba60df72f507a6dd668310fa84abf",
+      "size_bytes": 110,
+      "type": "file"
+    },
+    {
+      "path": "Makefile",
+      "sha256": "ec5553a6cc267fbb1445e392cb399b7a771985acd3bc1a75763b6d831713d41d",
+      "size_bytes": 82201,
+      "type": "file"
+    },
+    {
+      "path": "clean",
+      "sha256": "f54a06dee8971d7ba898ce2484402da26d42d57ba941d7cfb2919af39c78a1b6",
+      "size_bytes": 64,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-ccm.c",
+      "sha256": "601fe30781f68093a3e95909b81ee6316b96df3113c2c3c2b8dde87e74be4518",
+      "size_bytes": 5078,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-ctr.c",
+      "sha256": "5769326ce7fece31e0a6e4170b4d58089996d355c26b2579ae29bf44a5454390",
+      "size_bytes": 1668,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-gcm.c",
+      "sha256": "91fa5c89ae5ed5a406edbdb45b19437c41754a8e287df64645b5aebb774d2e7c",
+      "size_bytes": 6627,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-internal-enc.c",
+      "sha256": "3bb826c341e3d58882a66dd027667d5df88c7b3deddac50830bf1986a505f469",
+      "size_bytes": 2726,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-internal.c",
+      "sha256": "1dadb0c22c4bc7bc98f4b728e759bd355177510fa8eb730917b63b9241d72632",
+      "size_bytes": 42188,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-omac1.c",
+      "sha256": "a4eec1ab34f3a520861d360309c2661be419ee486feb9af5257c667857973617",
+      "size_bytes": 4570,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes-siv.c",
+      "sha256": "3757d1fd16dec5f48a2ccec1a6eaf3868d80526da388417f5cc75fbedea12d1a",
+      "size_bytes": 4148,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes.h",
+      "sha256": "6ab11ee70a56d804e689194936250627c24c1644befe559fc41070fad751b143",
+      "size_bytes": 552,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes_i.h",
+      "sha256": "28b083b80a7c51e7fbd99ac2b8d02c13eadba16336bed21d777aeb6a0789da8a",
+      "size_bytes": 4228,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes_siv.h",
+      "sha256": "b1fb28abac83195ad6f9da2f17a40905d3ee809b18eb51f4ce4f6b8485ddfb5f",
+      "size_bytes": 565,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/aes_wrap.h",
+      "sha256": "b8db43cb468039b0fe8dc25fa4c82473eeb490a5f87257c57fabb0a17641ea8e",
+      "size_bytes": 2975,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/ccmp.c",
+      "sha256": "717a000c48b474aaa8538973c3f89e431016ae6f9fab71ed633fae078af2428f",
+      "size_bytes": 10110,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/gcmp.c",
+      "sha256": "c51b10ee235da188c22e7c7eeedf399fb44e281de5f9e80cb30289e5ceb06bb7",
+      "size_bytes": 5372,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/rtw_crypto_wrap.c",
+      "sha256": "f20da3d469aa8adb47acc4a1a54e813481148cf27034aaad4b49fc359de5c4b6",
+      "size_bytes": 1418,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/rtw_crypto_wrap.h",
+      "sha256": "91fa8ac5d7956a7ce5509ad7b4bc0d6224ae918551fc8f1d333db4bfc84d1ba6",
+      "size_bytes": 1860,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/sha256-internal.c",
+      "sha256": "a46226b266c28d2d2ee2474847b5232c59dabba0a1809e7b43596294579736ad",
+      "size_bytes": 6187,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/sha256-prf.c",
+      "sha256": "5cca53a2f54159475307f351c984879b4aab29669360b0df6004b1861d7bc3cb",
+      "size_bytes": 2945,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/sha256.c",
+      "sha256": "a5d8d4e226c29a7b44a36c4039baec0c6ec51653f157b904630b64de39ddeeb3",
+      "size_bytes": 2718,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/sha256.h",
+      "sha256": "2569b8c478beeca9797fdd0dcb56672acf0e0bb88a1b750d22053f7d0488d437",
+      "size_bytes": 1095,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/sha256_i.h",
+      "sha256": "68d5281f084c197c6d400ad8d5f1444ad33f08ae71141546775509a90dad3db3",
+      "size_bytes": 589,
+      "type": "file"
+    },
+    {
+      "path": "core/crypto/wlancrypto_wrap.h",
+      "sha256": "ecdf1d8c59290535549e82caa1f39f22c1a3a85b867444200d3ae1810ac5ab01",
+      "size_bytes": 1482,
+      "type": "file"
+    },
+    {
+      "path": "core/def_module_country_chplan.h",
+      "sha256": "e46d34c309c63cb648bcddc3c62d40208874108de250a8ab9fe63fe20bb0833a",
+      "size_bytes": 84946,
+      "type": "file"
+    },
+    {
+      "path": "core/efuse/rtw_efuse.c",
+      "sha256": "0829113c4577b606196ea6f9fc5496930ec2358813a4b72b61034834512d7aee",
+      "size_bytes": 100701,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh.c",
+      "sha256": "d9500b5bfec2e9c161a8a93699bc14ac0f939bab4635eb760be59ebd18e6a0e9",
+      "size_bytes": 121960,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh.h",
+      "sha256": "e8ef5640449fe1e16f96642808a0095fe77d03b49919060355274449b552a746",
+      "size_bytes": 20503,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh_hwmp.c",
+      "sha256": "8cc03c196c47db7301c9c742dc9be01cf189401925ca8e18d152b2e3dd336c13",
+      "size_bytes": 46292,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh_hwmp.h",
+      "sha256": "5b1cdacd5c48c62ca3da60a75e60529827e981a5595873ecf8f86b0c69551e86",
+      "size_bytes": 2155,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh_pathtbl.c",
+      "sha256": "aaf5adc50a8fd774b7ebc60fb02159a59423b409c21779fd8a5d1e08be906e1a",
+      "size_bytes": 33222,
+      "type": "file"
+    },
+    {
+      "path": "core/mesh/rtw_mesh_pathtbl.h",
+      "sha256": "74cfb8c987a0242f628f2d0a72c249a2772674f573f672574f71c472cd1a581b",
+      "size_bytes": 7614,
+      "type": "file"
+    },
+    {
+      "path": "core/monitor/rtw_radiotap.c",
+      "sha256": "799b46d2c12bfafbcb2fe49681dfaaa355dd8bb498a377b56725e7e91e04c77b",
+      "size_bytes": 18188,
+      "type": "file"
+    },
+    {
+      "path": "core/monitor/rtw_radiotap.h",
+      "sha256": "98868f0985c0d56d9bb453e4393b23e2652e84c134cd2a54a240101dfb622e81",
+      "size_bytes": 1470,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_ap.c",
+      "sha256": "cbf49649c17a094dc92e37d6b7d51b81e96bfe29fc806bef7da64706ca14216a",
+      "size_bytes": 183595,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_beamforming.c",
+      "sha256": "0bcfa0c0bcb792fa373c5d862fa1a699d0341446ef3ccaeb86c5cd233ecc279c",
+      "size_bytes": 61699,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_br_ext.c",
+      "sha256": "cf73a908c4412490d4e05f770e4efbf181e29788f31d2692ae2d9706b73bf579",
+      "size_bytes": 46439,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_bt_mp.c",
+      "sha256": "2021e9ed50cdfda353c2778897ad8a401d9a51bfb203399725890837e26a8d57",
+      "size_bytes": 50554,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_btcoex.c",
+      "sha256": "242c33952b7252ea6f295aeb39b1ff4ba02a234147bab68efa3611d943b9d081",
+      "size_bytes": 50933,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_btcoex_wifionly.c",
+      "sha256": "d72cc4fda2ecbef48b342c72e997edf338316d6fd8bcd1ab7de7f86578c5ca6b",
+      "size_bytes": 1389,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_chplan.c",
+      "sha256": "cedf6538e2971231ab0311f9a96f39ea3342bef4259d49f3f1faac4daf570497",
+      "size_bytes": 119129,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_chplan.h",
+      "sha256": "8e858d97f68fad6d25b409cd5ad8058bf1b26db6acf2d84d155e468391097f6e",
+      "size_bytes": 18446,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_chset.c",
+      "sha256": "b7e2322b70cf68345f00bf0fd0eef338a46539a698802be1393de7f2879f97f5",
+      "size_bytes": 10621,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_chset.h",
+      "sha256": "367c83ae8f417841071f31db703b12548147d73111ca3f23eca3a3495b44fa04",
+      "size_bytes": 4168,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_cmd.c",
+      "sha256": "32b2ba8f85fc7113b62c07c7e61d16812257872d0999210759fa2a99f269c252",
+      "size_bytes": 136966,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_debug.c",
+      "sha256": "bca7a8fafe15e51cce637abc90fd2bdfeaf6327b60efe5cb0d741d2a25e5a6f6",
+      "size_bytes": 264518,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_dfs.c",
+      "sha256": "9c905ea787fc2cba428adde4a292efa9a82ae2938b4cb2584c38e07ff63d4613",
+      "size_bytes": 47837,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_dfs.h",
+      "sha256": "4d7b4db2a634438336aa35f76488b1e9ea72e851986d438547c0ce659cd6800d",
+      "size_bytes": 4935,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_eeprom.c",
+      "sha256": "8ae455444e7dbf0fcfe34a915bb73f11775f43baf363eab0d74c9663009b0b85",
+      "size_bytes": 7066,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_ft.c",
+      "sha256": "c2e8cc1230fb9a0421063efd6676ddba2fd14b5a29a78d3a188bdb123b0406f0",
+      "size_bytes": 27036,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_ieee80211.c",
+      "sha256": "00085bfc2fcbe37884644208c179b0a98c7d90d1f68245f472bbaa08868d9bb6",
+      "size_bytes": 88778,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_io.c",
+      "sha256": "6d9a1c67ff55b64ce94f09c122b6140d580e18bce2c84e216ced8207770c6fdd",
+      "size_bytes": 27668,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_ioctl_query.c",
+      "sha256": "c4f800b037d70d8ae9bd85140217f670653ea06622745d5aad4e3c8e94e49390",
+      "size_bytes": 710,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_ioctl_set.c",
+      "sha256": "788b7c59a4deab92ce129b8ea4c01f961a9f3e750ce3bd2c80a453a6c25946d5",
+      "size_bytes": 24701,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_iol.c",
+      "sha256": "bb10842aa4a1a9e1172e18bed5cae90d513a0e9c7972dd6985ccc258aa3746d4",
+      "size_bytes": 10979,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mbo.c",
+      "sha256": "cf1572184cbb64c0dbfc4f10c36b8317976b6a1b9ba2e7e4731a7c113dfcab13",
+      "size_bytes": 41072,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mem.c",
+      "sha256": "0d9d7a2ea987ea8fba9741f97769595c61d3b86a60d2843c2a91d8031070d45e",
+      "size_bytes": 1160,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mi.c",
+      "sha256": "7ff0ef436b74230d7d2fbe6f75c12171efc603c0a496553385439ff7a667ffbf",
+      "size_bytes": 46480,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mlme.c",
+      "sha256": "bd54b556eb18b7abb04565777dcb211b4f56c07942deb0a74fe9f35a68fcd150",
+      "size_bytes": 184290,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mlme_ext.c",
+      "sha256": "0d76224203ecebbba63b7fbe098080beb31dbbe6359a56de9230b984c8cbbbb2",
+      "size_bytes": 495631,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_mp.c",
+      "sha256": "c68dedb6bf2aecf333a8c413e668449d02b711149f4c0cf90fe4a0cb4ad513fc",
+      "size_bytes": 109262,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_odm.c",
+      "sha256": "4cb804e8329ca84f75a57ab73078a99137ef0c9216915d814f87a45aadc48d1d",
+      "size_bytes": 21207,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_p2p.c",
+      "sha256": "bc5d29fe9b5df29e696d22cd195a0779b8f527817d3c81fbb23f13f6bb2d5484",
+      "size_bytes": 154915,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_prealloc.c",
+      "sha256": "7bef3415270dec6c57a80700139f1a3a22c20c1c82b2d82713bc7edcb85739e7",
+      "size_bytes": 14630,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_pwrctrl.c",
+      "sha256": "5c4f0a8bf00b88cdd9ef322b1adc6fcef6a27d30d003b482290fe3af864ab8a5",
+      "size_bytes": 86674,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_recv.c",
+      "sha256": "25a06607873d028a7d96dae89d1c2775109585c216c0726e1f1e6cdc74d5b4f1",
+      "size_bytes": 146237,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_regdb_rtk.c",
+      "sha256": "5738a68ed03a4d8b59c6bc8345b6805ba40baa0d20e09e3b8d455ba33b68b79b",
+      "size_bytes": 47692,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_rf.c",
+      "sha256": "cf5e80a3d695eae1532498137fcdb2f2fdc035a5a15cb3c61a1bb695c2b5ab09",
+      "size_bytes": 61364,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_rm.c",
+      "sha256": "3eaf22cc365cb20ba0e1ac3575d1e5deccd0fc3fc4b7be4f2a723abe5a10297d",
+      "size_bytes": 70183,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_rm_fsm.c",
+      "sha256": "661fc0fa513c232c867a210690b0e0de29ba664c879de7e58b3fd9488ec9f635",
+      "size_bytes": 24055,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_rm_util.c",
+      "sha256": "b118b76b9be70370d5889addb77364596c2024d533656389eaf6e7b90649b651",
+      "size_bytes": 10276,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_roch.c",
+      "sha256": "004a2ee89de5d8e63437366434a504127a58b149cbb7d4b33111dd3499018fa0",
+      "size_bytes": 20147,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_rson.c",
+      "sha256": "7fb23a5310b3ad551027d53285c79bd239e003b8f4348c079ffcde7184ef730e",
+      "size_bytes": 18626,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_sdio.c",
+      "sha256": "4bff20a9521e48e178f31a45fc033705c852e4a286d5c0ccb9d186d661514a50",
+      "size_bytes": 4278,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_security.c",
+      "sha256": "5e8a83346d9bdff537fb4976196dab18c527d6ee450029c498c1fdd432dfd449",
+      "size_bytes": 81912,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_sreset.c",
+      "sha256": "c5cd86b87fbca2630ac883370b0e34e813f50436c3359cb027b8db400bd5323a",
+      "size_bytes": 10577,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_sta_mgt.c",
+      "sha256": "e85f90738c2dd555dd78ca7277b3e89f6326255bc1d9d1f6421e6a6b287db483",
+      "size_bytes": 40519,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_swcrypto.c",
+      "sha256": "7aad63516737ef0fe6ae0dce11c7c19d4ee7a78470a3ecc16faab88bdde580bd",
+      "size_bytes": 7698,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_tdls.c",
+      "sha256": "9c6eca854742b1c262d9d1843c400077289b95272c3904715298d875eda6bd52",
+      "size_bytes": 108943,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_txpwr.c",
+      "sha256": "c426adc8023b4cd26e25c5f3fbba2d2b072fe0847bfde4a77114d2deed1267f8",
+      "size_bytes": 2986,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_txpwr.h",
+      "sha256": "ebba22006be2f664e18175b75a77e2a77b7a577c783c055f07b5a4b5bb88e76e",
+      "size_bytes": 1719,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_vht.c",
+      "sha256": "0e0f85fc3a14ba44230e2a78cf6e0e34b788131b5661267821379c4d35cfb2b2",
+      "size_bytes": 43182,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_wapi.c",
+      "sha256": "a1e92158cd4815acd79875444a209151aa47a2bff1a3bfa58c16103bd329a5c1",
+      "size_bytes": 42577,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_wapi_sms4.c",
+      "sha256": "a19dcb9404b630781fde446a23f0046f0ce976f2ea03d2559607f73d65dae83e",
+      "size_bytes": 27653,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_wlan_util.c",
+      "sha256": "b78e95be357df08a2e72ce0b63989b459dccf25488aa8cc812d324a591edce7a",
+      "size_bytes": 172462,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_wnm.c",
+      "sha256": "e971db94d6245018502833914eba57d3ce7875689a0bd5243f8064782bb7641d",
+      "size_bytes": 39355,
+      "type": "file"
+    },
+    {
+      "path": "core/rtw_xmit.c",
+      "sha256": "4f96a516e4803e3a2bc6b36f95aa41078681290580a59f00f3cb9597d1848a45",
+      "size_bytes": 178970,
+      "type": "file"
+    },
+    {
+      "path": "core/wds/rtw_wds.c",
+      "sha256": "e5ad2011db96a623c8c959c782542b4b5cc86e690b1fbe49346ae78d57b64c69",
+      "size_bytes": 17729,
+      "type": "file"
+    },
+    {
+      "path": "core/wds/rtw_wds.h",
+      "sha256": "e943d5a341622e9094ad936a597522fc2d3a560809801fbe02c86280a3dd1ecc",
+      "size_bytes": 2058,
+      "type": "file"
+    },
+    {
+      "path": "hal/HalPwrSeqCmd.c",
+      "sha256": "9dcd788ffe4815b7958cb395a4c911c6dfdcc7bf842f3c6ce0d5b98230388eb0",
+      "size_bytes": 5519,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/btc_basic_types.h",
+      "sha256": "02250199d59db7b1ea5d3f873206a05f77a7cecd81393bf12bc11e858218e96a",
+      "size_bytes": 1247,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtc8822c.c",
+      "sha256": "d2e22cc0972cf7b70f73c84beb60ee3673b9c2e1d9296efd466e9549c19bae38",
+      "size_bytes": 21908,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtc8822c.h",
+      "sha256": "8422bc36551ed23a97fbf75b9b2e2c594abff042be949cb4454bfc073d8c6cd3",
+      "size_bytes": 1294,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtc8822cwifionly.c",
+      "sha256": "871c66aad95c8ee7e298b2b78dea6e960a8f696202d35bc40919f709fc0965ad",
+      "size_bytes": 1584,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtc8822cwifionly.h",
+      "sha256": "1dbba91c021e9d3ae08c56cea4c17ee63615c32735f5e9b74c6e2e20e23803e3",
+      "size_bytes": 1235,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtccommon.c",
+      "sha256": "d9e2964147a2adb3f178a13cb18b589a40bff476d6e4327842714a56548e0c19",
+      "size_bytes": 170664,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtccommon.h",
+      "sha256": "32c497b2db74406f36c72ca981c0685fc7745a65511c1d7f482effe362ae90cf",
+      "size_bytes": 4415,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/halbtcoutsrc.h",
+      "sha256": "2d1d59f927468ed83150a5d0143043db077a938a5c54dfef52c77a6dfc73533a",
+      "size_bytes": 53187,
+      "type": "file"
+    },
+    {
+      "path": "hal/btc/mp_precomp.h",
+      "sha256": "700ced0f9212021f3a9d7217ede7200aea6e5c2de72f8e48256590e4be3173b2",
+      "size_bytes": 3521,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/efuse_mask.h",
+      "sha256": "2eb4c6ec1f1ed53c10670c237134b6a3caa72d6717f31a90ad87bbe93228e308",
+      "size_bytes": 4749,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_PCIE.c",
+      "sha256": "7cb476571b4d170566e5c0dbf523d34c3103b7ade82f90277e8332f78d5de601",
+      "size_bytes": 3056,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_PCIE.h",
+      "sha256": "a2000be3addf16acfb855b6d9c3d465af7f5a41a498f72ec31fcc99b7545d026",
+      "size_bytes": 1165,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_SDIO.c",
+      "sha256": "37021935b547c7e5c3082f84ff7c2fabb39cc5ba80c59ea81223801a5a435e06",
+      "size_bytes": 3057,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_SDIO.h",
+      "sha256": "51a0cb7304435577d09da8937efbb7a5465a9e797d3f35d2416562dd66d830c2",
+      "size_bytes": 1166,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_USB.c",
+      "sha256": "b2151255f622e7dcdb36cda937e9d7176f0621989c6698e99922d746bdc6a85f",
+      "size_bytes": 3037,
+      "type": "file"
+    },
+    {
+      "path": "hal/efuse/rtl8822c/HalEfuseMask8822C_USB.h",
+      "sha256": "075ccde6a36091ebee27fad8bb2b4be4777eff94996853feaec323ae2c89e78c",
+      "size_bytes": 1159,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_btcoex.c",
+      "sha256": "60c57ecbb3450a8577379ad898c75e93b13bf5cd53bd74009efb0f0d5079bf64",
+      "size_bytes": 188897,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_btcoex_wifionly.c",
+      "sha256": "78b1b5e3cd0f7a4bfe9facfc1b7195cb25cef13f58ca885785f36b4fbe06b8f2",
+      "size_bytes": 8890,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_com.c",
+      "sha256": "9257e1b27ae9797852ee15c8b4c9d32b24bf85757b828fdbc5408d7a15aadb73",
+      "size_bytes": 535825,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_com_c2h.h",
+      "sha256": "9a46b20ff302a75a70f2f1945451d71cec9570bd58a50dd9b765b8c683be3295",
+      "size_bytes": 5007,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_com_phycfg.c",
+      "sha256": "08f61bed2d2b46bef4313c256480fd596dc2a73f3b154060bffe2d4b8fc56f10",
+      "size_bytes": 193893,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dfs.c",
+      "sha256": "751c6c4246eadbf192f0d4fd9cb852d18ed2b7037760c6d45099d370cb27b2e4",
+      "size_bytes": 15088,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dfs.h",
+      "sha256": "3d71156648c14ec827e669ef8d8ac6849b379f0a5bb837475a328fb7101a89fe",
+      "size_bytes": 2904,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dm.c",
+      "sha256": "fff9a5bd8cc97d762a623a7410fca75b7c883a2f0886b320ff5ba2e50af2b7a1",
+      "size_bytes": 61280,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dm.h",
+      "sha256": "ce7e9c629365c412d49b0a0469eea83e84de1d1d8c236300432fb4ef4d7db1fc",
+      "size_bytes": 4004,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dm_acs.c",
+      "sha256": "c688341c98661695703f6fd7eb9b2ecbefdb2515a33fe58cfaf708dfe4370fbd",
+      "size_bytes": 18918,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_dm_acs.h",
+      "sha256": "8e4fa8dc3bccd17eaae66f9d2861f8e75d6c71c6bc9e0bcdb12433f8b612baeb",
+      "size_bytes": 5939,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_halmac.c",
+      "sha256": "b0caa96a0d74e7cd74fac6b826bc02915d30e7fbc066d77863eee1430132f075",
+      "size_bytes": 139175,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_halmac.h",
+      "sha256": "a35b2d534ae005740448b94b4a73d2ca017d972f466a41109b97bf93d2cd623b",
+      "size_bytes": 11169,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_hci/hal_usb.c",
+      "sha256": "2233819a592eadbb89161082750011a02273b762e41ccbc95bcaace0dfd373e5",
+      "size_bytes": 13712,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_intf.c",
+      "sha256": "29882e4ce451db6c7ebdd7cee6ae38d3ddaf689b2e6de5269eda47e85ee0629d",
+      "size_bytes": 65030,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_mcc.c",
+      "sha256": "757a1071de89456d7935784e840048ccaf8118029b54ec080efb50dee0346d08",
+      "size_bytes": 130405,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_mp.c",
+      "sha256": "6904346ff8b0f3603a6c4b4e90f558c878d840337f10786c5940011764232f53",
+      "size_bytes": 100120,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_phy.c",
+      "sha256": "473c93dcde3442164672d374b74e5664de190ca6fae6ccce348cd64b16410006",
+      "size_bytes": 6367,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_pwr_table.c",
+      "sha256": "3e5333a7d55ad5ebf013edff1b32db43be43bf9ab63e192f24435209c0778ad0",
+      "size_bytes": 21632,
+      "type": "file"
+    },
+    {
+      "path": "hal/hal_pwr_table.h",
+      "sha256": "3c367932c7f235170167036c334203992e367f3b5443062e5c846015878caef9",
+      "size_bytes": 3666,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_2_platform.h",
+      "sha256": "bcd1b830d0070cc9a3398b273d1406060c476f6fe03949efc3e7e424fd758128",
+      "size_bytes": 2863,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_8822c_cfg.h",
+      "sha256": "b05c633c45c8d836fc9f15338a81d8216d7b8f798c9103d82f8be69d97a89707",
+      "size_bytes": 2429,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_cfg_wmac_8822c.c",
+      "sha256": "7a5a2cb41a27f1eb44ec9135045769b39998ce8e8c65213677b89b33c8f0664a",
+      "size_bytes": 6281,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_cfg_wmac_8822c.h",
+      "sha256": "0e95ca26844131f836ba57ac3bd9d4091fdd84d0bea3323bbb48cbd492ea2c0f",
+      "size_bytes": 1329,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_common_8822c.c",
+      "sha256": "d43d50a5e89c72845f84888c97b92b9f6111cc8edba512367f1ce4420436e8ae",
+      "size_bytes": 6005,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_common_8822c.h",
+      "sha256": "e5fb35b03fd94f166a6eac656b5366cffd9bb99136168ff532843c28b443165e",
+      "size_bytes": 1206,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_gpio_8822c.c",
+      "sha256": "a8183e06fb8a809ac493c9af3bc2dd4a932475faf59f8916af7b584bba2fc73c",
+      "size_bytes": 41505,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_gpio_8822c.h",
+      "sha256": "d492ff1f7df5af2fc404cb4ac0a8f5521e4b8eecf81a4cb63e39ac8fa5f9207b",
+      "size_bytes": 1275,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_init_8822c.c",
+      "sha256": "54580e6bc387c0978234e387b47136f97f47e6571bc3fcfe086ce62230200f3a",
+      "size_bytes": 45209,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_init_8822c.h",
+      "sha256": "2ce0c75c5faa04044c0c99cfad0a3af605e59f533fa8d091d2b79b72b1b11b00",
+      "size_bytes": 1511,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_phy_8822c.c",
+      "sha256": "75a113323e86d95bfcff880ce38fc8a9df843d8e8436412249c6889d0f05f2b1",
+      "size_bytes": 2346,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_pwr_seq_8822c.c",
+      "sha256": "316c58925e89407f507e499976b0ff0fce3988167cefda79a6652977665fa9d8",
+      "size_bytes": 21304,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_pwr_seq_8822c.h",
+      "sha256": "f50e27bea8992f9007021f110df26633ff4ae44d38324434dbeb1d239019410e",
+      "size_bytes": 1434,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_usb_8822c.c",
+      "sha256": "7bba163728b2514f3970d40f90a188f2777e5af2007b64d220a030a6fa8cecf4",
+      "size_bytes": 4501,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_8822c/halmac_usb_8822c.h",
+      "sha256": "dc0fa293aba5446aab70ad11902aac5d68f703ec6808d3ace9e2e57c397b90dd",
+      "size_bytes": 1427,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_88xx_cfg.h",
+      "sha256": "b52658e0d9f080e674b7c69201e9e753888155c2da44ac3e023a0659b317b456",
+      "size_bytes": 1377,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_bb_rf_88xx.c",
+      "sha256": "f2b8edfc981da9e680321c76c301108a1fd4e79fe294746df93cd0526d33c065",
+      "size_bytes": 16397,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_bb_rf_88xx.h",
+      "sha256": "e2e374fc6c2e1de26651ca3a63bba31e5e58e9ad4badac7069408a2a40ceb569",
+      "size_bytes": 2309,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_cfg_wmac_88xx.c",
+      "sha256": "538c8fed0a88ebb3550eab52f82ee8f2c444393477f96b5508470fc8041a8f2f",
+      "size_bytes": 31343,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_cfg_wmac_88xx.h",
+      "sha256": "67cb261ff058bb96d339823628056f8f0d10378675b8034887e25cfa159e7fe1",
+      "size_bytes": 4054,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_common_88xx.c",
+      "sha256": "228961faec9889f434cb683614299f42399ade6459e743216cfeb7d95c919b43",
+      "size_bytes": 98504,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_common_88xx.h",
+      "sha256": "2284c89604bc43a0de9b6e88293585af5ddb74627d6d7caab246511e035c7b57",
+      "size_bytes": 5216,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_efuse_88xx.c",
+      "sha256": "4c8d0734abaf6b2d81f4a4488518d29a4cd36d4cfdbb26aad3e2f1431fdf8b8f",
+      "size_bytes": 81112,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_efuse_88xx.h",
+      "sha256": "4cd1e43fcd506d9ad36491f496d94dbde3d6b28427ecc561b0e0b621e0760cfa",
+      "size_bytes": 4249,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_flash_88xx.c",
+      "sha256": "4419b2a1a0cf8593b150b85eec554526e83d29094072649c270aaee95de74319",
+      "size_bytes": 9258,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_flash_88xx.h",
+      "sha256": "68ac3067b8b75783b14adb5487422ca91641271745204de70cac2f0e4b1d7fb0",
+      "size_bytes": 1292,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_fw_88xx.c",
+      "sha256": "b705ba6e54bcf1ef0c7aac80c3e4e5839acca6bad37028ab0ef2ea844fcb8abd",
+      "size_bytes": 32926,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_fw_88xx.h",
+      "sha256": "7d73a7ec412a473d278c72adb0db7803e777637da3e764f4d8370f02858b4382",
+      "size_bytes": 2024,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_gpio_88xx.c",
+      "sha256": "6bfeecaff0efc5d2b7467252bb5c94dce39029fa634c0a5c3c7655fe84b179c7",
+      "size_bytes": 7097,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_gpio_88xx.h",
+      "sha256": "5fd71fa3d70aabe1dc2599cadb01847f3382e222e5535c763917482b89e1223f",
+      "size_bytes": 1632,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_init_88xx.c",
+      "sha256": "61d41c46233656961669e977b12da54278647d3d641c99a004ef05d7b97870cd",
+      "size_bytes": 30133,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_init_88xx.h",
+      "sha256": "93f5ddee49630eb55603c4c9fb89886cb371b42f8e1edebe8a07f90d56551dc1",
+      "size_bytes": 1970,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_mimo_88xx.c",
+      "sha256": "afa00e4c61e19f36f61ab21ac212ba9b6271e501b51aff91a4ed87e8ffbaad2b",
+      "size_bytes": 26233,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_mimo_88xx.h",
+      "sha256": "6128d2f1ba564685ca5fd2b86d3e35c146e20bc49544c21fbd8737613194bea0",
+      "size_bytes": 2713,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_usb_88xx.c",
+      "sha256": "bd51dc12b6c10c7056b0dd5eb6af27325c431c8b61b869ebd487f245e6dad207",
+      "size_bytes": 14294,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_88xx/halmac_usb_88xx.h",
+      "sha256": "99fd80cd52be687278cc8b58ae701c9760a200e31a493889f8f9b5b7ea873966",
+      "size_bytes": 2814,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_api.c",
+      "sha256": "a30231b438107ee52437c5b8860fa9e4346e0cb7a22cc64daeb518dc30b58f33",
+      "size_bytes": 19004,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_api.h",
+      "sha256": "f0c45121d580e996cabb00c1887f7a128fb4db5f660bf6b8e0a49b14c7e69cb6",
+      "size_bytes": 3562,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit2.h",
+      "sha256": "439daa18b8a606950ff883ff7c2473d636bc0f07b39f908b9d60df87f65c11a5",
+      "size_bytes": 2940253,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8197f.h",
+      "sha256": "24306dac978771553c64bacef5aeb9081b5e759bd523a3068bd5b824308b8c58",
+      "size_bytes": 920016,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8812f.h",
+      "sha256": "d3b7cef4131cdd3637954def88541861026dd1623fd0e27f2207265091c16ce1",
+      "size_bytes": 1139664,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8814b.h",
+      "sha256": "424659566cd2df0809b6706dadccc6c90651aa8905959cfd931fa076441e8224",
+      "size_bytes": 1356468,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8821c.h",
+      "sha256": "4913612487cfcd96a6a4af7d8e02eda0e9281477d08dd1398acb3f4a0a16d4ba",
+      "size_bytes": 1003983,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8822b.h",
+      "sha256": "8edb7f5eb371a6f6a1db133542878ac4166ef1dce292fc2b9aca4079086a98e4",
+      "size_bytes": 952652,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8822c.h",
+      "sha256": "e4c9d973c36dd62e188873ce088f927ee89604655bfa84187ef8c580d4c2ca95",
+      "size_bytes": 1129570,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_bit_8822e.h",
+      "sha256": "28295a5b3f8d39696fc117799dcc05695355de705c4af973a6112535ee2fb487",
+      "size_bytes": 1142004,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_dbg.c",
+      "sha256": "01d9bbf7ac685eac9536a0dafc8c49a61c67576e6d4bcde02f09a06066b1d975",
+      "size_bytes": 4496,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_dbg.h",
+      "sha256": "cedd87e6c6028efc79064e883ae5c62665cc2d9a334cd4613fbe2e637bd30d7e",
+      "size_bytes": 862,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_fw_info.h",
+      "sha256": "6bfc7e74143e76f4dbee52910921a60ad6289508a523fce9589d10c85151f584",
+      "size_bytes": 5066,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_fw_offload_c2h_ap.h",
+      "sha256": "560a5c6d7277335853e48897cc304fd32146c8483faee0b4b8a9c67c10285177",
+      "size_bytes": 49024,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_fw_offload_c2h_nic.h",
+      "sha256": "ab86cf0b16784f7b4efe52785034858c30ea55d3b1c8f5ef1dc6e6cf5aff0824",
+      "size_bytes": 34620,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_fw_offload_h2c_ap.h",
+      "sha256": "b6cccaa0767bede5d944e391f1b3db668e6da2cc5fbd18f56092fe3222d6abbb",
+      "size_bytes": 76493,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_fw_offload_h2c_nic.h",
+      "sha256": "53d5b3db921bee92d423cc3056519c04b752528f389c43630b4b45f516978011",
+      "size_bytes": 52517,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_gpio_cmd.h",
+      "sha256": "79a61ad06e6731b30c99aa8945f096a2465b17f0210b57cf68f4320d136c2df6",
+      "size_bytes": 3023,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_h2c_extra_info_ap.h",
+      "sha256": "8e4e00251a350fdb0e475a478f9b320247547a5fbcc71bda250c8b2bae5e3ee8",
+      "size_bytes": 14644,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_h2c_extra_info_nic.h",
+      "sha256": "3188708634ae6ac7d43b7e053584fb42faa73ebd81d9b0ce35a01d2b00e129e5",
+      "size_bytes": 10306,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_hw_cfg.h",
+      "sha256": "1564e006d1f03b3f3a5d671eaca8c10fc5c4d6cb8ff62cb8344cbbd1e8bb2982",
+      "size_bytes": 3963,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_intf_phy_cmd.h",
+      "sha256": "a8f5ad851351c0f1a363b2f40970881a67baba1ba1cd44fda4dadf65a9cd179d",
+      "size_bytes": 1516,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_original_c2h_ap.h",
+      "sha256": "0cf89c990b2aeb108810b8555cdfe0efdead1f1d58bdacbf302d88917385f0af",
+      "size_bytes": 44001,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_original_c2h_nic.h",
+      "sha256": "47c8238137ef084f7ec7c293ba9c94a95037dac2d0dcb78fcf92029fd76ee39e",
+      "size_bytes": 29353,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_original_h2c_ap.h",
+      "sha256": "92273e5103496d7ae66bd738f18ebf7f0c7f16daa2208317735b40a94c9fee05",
+      "size_bytes": 105410,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_original_h2c_nic.h",
+      "sha256": "3110d58ac79b8fa8b28be839cd52cf7cf2ec1301a743153a3e13bfea36aac9e1",
+      "size_bytes": 71528,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_pcie_reg.h",
+      "sha256": "a9282c591737d4f34962096122140e47a0862d2bc601bc8214493a5650e6f5b0",
+      "size_bytes": 1758,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_pwr_seq_cmd.h",
+      "sha256": "b5349c067f875107a4d1fa16cd359aaa48486f90f43c277f5ef6eee716628494",
+      "size_bytes": 2802,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg2.h",
+      "sha256": "e3ba510a4fa20117f3e26f87361a49600999092aed79d80df110756417f38aff",
+      "size_bytes": 241977,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8197f.h",
+      "sha256": "1f96965ae933c4931f167843eaaf35c2e0e28582fa9910487789f4e2a5edeeaf",
+      "size_bytes": 26703,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8812f.h",
+      "sha256": "d0d35f90a26c6a71968bee685517d49a18c655f0419f722bb3260ed7e73fcfdd",
+      "size_bytes": 34237,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8814b.h",
+      "sha256": "c8decece6e87a1e0f64e32f8c91fe98209b5712b44181481c2d05ed0706d5558",
+      "size_bytes": 42058,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8821c.h",
+      "sha256": "d725cf1e7812ee4b43093a8e24b318146d3e32abc509d1960d37451828d6a447",
+      "size_bytes": 30896,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8822b.h",
+      "sha256": "e724a609f70f42b1bfce7c229c6ae9b861c8379d4f7e43c8893a21bb35c43938",
+      "size_bytes": 28030,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8822c.h",
+      "sha256": "5be0f6d9dc8348269e3fbe4fe72636ab1db49d3c576fbff6334fb677c15d04aa",
+      "size_bytes": 33949,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_reg_8822e.h",
+      "sha256": "b63dfc6f186db866bc0eb308885054f0a9354fd2f193713937d2a023cbd3f45b",
+      "size_bytes": 34137,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_rx_bd_nic.h",
+      "sha256": "d9b93cfd4cdc86e3ba34886e181dfa17f3c6e829ada3818f0809de8ed908c8b5",
+      "size_bytes": 1640,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_rx_desc_ap.h",
+      "sha256": "94c1f2dce32c2268821103295b9fed24761e43120b8eceb2805781b8d5630f89",
+      "size_bytes": 26548,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_rx_desc_chip.h",
+      "sha256": "e66df9470be4d250e1ccc9a6828aefa10f100bf81908e62d629cbf965a50ffc2",
+      "size_bytes": 47385,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_rx_desc_nic.h",
+      "sha256": "4710734dc636e29d93ba1ee5bcd425f7a0c70c09807d3bb0a7b74c0eb489b736",
+      "size_bytes": 18877,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_sdio_reg.h",
+      "sha256": "e0e40629d4561dd90c4c4dd31f0314fab0e87e16923c0e1fa83012322cbf267b",
+      "size_bytes": 1946,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_state_machine.h",
+      "sha256": "a43aa550e6dbe97f2568a1d7bf6cdcb2611d393d27d234b2b84cb432e0e7fa17",
+      "size_bytes": 4522,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_bd_nic.h",
+      "sha256": "243093e56f98cbc0ef65bb8c696f0f68f3f38989e3df20d857353b05cb9779f1",
+      "size_bytes": 4683,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_ap.h",
+      "sha256": "9087e103b9fbd857a7e024717a8f28827166c1709a1a1882d438f910ce124bc9",
+      "size_bytes": 114526,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_buffer_ap.h",
+      "sha256": "f4220635c03362b2dfba061b086b2a3f552b38db27bb1762e8247d13b09df5b2",
+      "size_bytes": 65437,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_buffer_chip.h",
+      "sha256": "e75cdabdfbd680417151bb982bf1b8919a6b4b01196169fb62dcdbc66b0cdd4d",
+      "size_bytes": 28716,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_buffer_nic.h",
+      "sha256": "ccfa2fbd5285576bfa8bb5a74e9826c68ec5843b322ad53399c03b47feef092a",
+      "size_bytes": 28741,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_chip.h",
+      "sha256": "b44fcda12f7257ed78ea209e880d3196ec467325e00c4294bf12094098db9633",
+      "size_bytes": 224170,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_ie_ap.h",
+      "sha256": "1e5c642313801a98b9debbdcb24cfcd1267c2c1c3f409095793e0ca1a29ab4ac",
+      "size_bytes": 66778,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_ie_chip.h",
+      "sha256": "0dec4ad8fd8718071e8c4b661bf7fd0f12bd3c97bba22668feefd102c4a6b109",
+      "size_bytes": 26556,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_ie_nic.h",
+      "sha256": "bdb25f4d0f3c5de318da16d71fd47223b571dcd3eb166c9458b091c94df15101",
+      "size_bytes": 28462,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_tx_desc_nic.h",
+      "sha256": "c577fd588a348d7abbca9d267bb6488e5ab6a86979af1832a805b74a99190156",
+      "size_bytes": 54426,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_type.h",
+      "sha256": "d8c2425f373f0b778a7c8140652729d6617a0ab7022cb6facb912c41158fc7ad",
+      "size_bytes": 80971,
+      "type": "file"
+    },
+    {
+      "path": "hal/halmac/halmac_usb_reg.h",
+      "sha256": "1242e2e55c4b6bbc44a47bad60261b6f2749ac23f1e6295a217b27be3ac9a8b4",
+      "size_bytes": 798,
+      "type": "file"
+    },
+    {
+      "path": "hal/led/hal_led.c",
+      "sha256": "16189088db5a31bc61124ea229f802e066b638677301b0287def591a614ace93",
+      "size_bytes": 6541,
+      "type": "file"
+    },
+    {
+      "path": "hal/led/hal_usb_led.c",
+      "sha256": "9c25b014968e082e94a1695f23b559df610160bbef2008e1807b010b80258f30",
+      "size_bytes": 112449,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/ap_makefile.mk",
+      "sha256": "bd335fc1ce6072d043bb9debc8401e2323b544a94415b7a47732f9ad993ae2cb",
+      "size_bytes": 9268,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halhwimg.h",
+      "sha256": "a8623a3dd08a0808b6b8e516398adec1503e076d61ca1da1093919e9ed43535c",
+      "size_bytes": 4122,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_ap.c",
+      "sha256": "4496a30ff5c6796c9e0e95ee0c546ee926f5a4ea1b39e098fb237254eb47ec0f",
+      "size_bytes": 72585,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_ap.h",
+      "sha256": "470600c4e45acc241ded65937d784777bde316cccb3b8e9520220af14bb2fca4",
+      "size_bytes": 4391,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_ce.c",
+      "sha256": "4d365ed9bf1bfc9bd1bdf8967fb75385d2e583b0891a5293e42a6043fbc46c06",
+      "size_bytes": 44760,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_ce.h",
+      "sha256": "4b047fd278cf35673dc1750b7ec1bcd186c36baa9c857a8f2d321a5f1f0459e6",
+      "size_bytes": 3593,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_iot.c",
+      "sha256": "a4df8d8e8b8450e546133b51a7eb363dbc8391516bb1f92019904d50e405b9ac",
+      "size_bytes": 26438,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_iot.h",
+      "sha256": "54f1f7768a3aab71664ef067d327ab9372ceb4c5fe0abc068c4893caa95eaba9",
+      "size_bytes": 3459,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_win.c",
+      "sha256": "2686e15162f1f6a19978df0961b5a10387b0c0a73f93963708d7c7f043dab2b7",
+      "size_bytes": 47569,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halphyrf_win.h",
+      "sha256": "0ad43d506b3c366a2f61260b1c5d4ad24936fee6444c5515666be40011b6e2dc",
+      "size_bytes": 3421,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf.c",
+      "sha256": "990955842344cb1d576ffe0ddcf616d91ceba16bb5ac7d92c0077f95116c493a",
+      "size_bytes": 143203,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf.h",
+      "sha256": "a997239a9fe67b169c6f092f38db84a7e6e3375c5801bee0f6d15fd7cbb37e9c",
+      "size_bytes": 32584,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_debug.c",
+      "sha256": "5134e90806d664c50168d3dbd3c1698b14d7cd1a98716d1941188d337f7ce9f3",
+      "size_bytes": 12463,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_debug.h",
+      "sha256": "95117ddd1aab3f7e75de0dc1f49a625ca38df9fe3694a381591542ff16e0ac15",
+      "size_bytes": 4231,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_dpk.h",
+      "sha256": "cfbf5030f50ae3b88e93457eabba698d43a119669e8ca87a66a7b4929921df54",
+      "size_bytes": 6425,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_features.h",
+      "sha256": "95d3b46ff5c4a221342dfd913d9f81f7d6e8b82d525ee563282e08468bffa9d8",
+      "size_bytes": 1306,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_iqk.h",
+      "sha256": "eccca720dbe3bb0308dcb92ef393241034c6023df9892e1d0c821a9196a0bcf0",
+      "size_bytes": 5285,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_kfree.c",
+      "sha256": "82a84eddbc8b3b30d00a64c23f98d6b821ca06f95af9507ddc3a79a125813746",
+      "size_bytes": 161584,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_kfree.h",
+      "sha256": "1a3b8673cc0960b3ccd619702c7c7ca8938cfc4a6eb60d6f627323fabcbb0844",
+      "size_bytes": 10752,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking.c",
+      "sha256": "38dbad98ca17978c21f45ff60d59ceec5b0c0f73487d35bec3ab0affd3a2e397",
+      "size_bytes": 6232,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking.h",
+      "sha256": "47233258be2bc01102e7f9b26eccda47d96857763af8b0b38428e69819fed952",
+      "size_bytes": 1404,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_ap.c",
+      "sha256": "e35721fc8f7c4048a9cee67a74e9f8b1388e3d7ea884fdabd1553433bc169ad8",
+      "size_bytes": 56843,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_ap.h",
+      "sha256": "9b502e27d1abeeb34cb0023025f4a97cbdbe6edee4b4f1d8fc2118fdbbf707a3",
+      "size_bytes": 12459,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_ce.c",
+      "sha256": "f0234e44d0aac38e209bcd5d85ef432213d52b3c3cddb07e413a6dde4e2e1a9d",
+      "size_bytes": 34131,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_ce.h",
+      "sha256": "874ba178643d3b2d8bcdce463a9ea717c5cf0b0b5a7dd552fc3441f69a89ba97",
+      "size_bytes": 10873,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_iot.c",
+      "sha256": "adf7c2e68572cdf33393c3902cf8209ed1fec7a7b77efbda6cef96221e55ee3a",
+      "size_bytes": 31409,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_iot.h",
+      "sha256": "af028479f26a9152db29d38dd3569935eaae707c2e4c5e8b166ab897f9baadcf",
+      "size_bytes": 9681,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_win.c",
+      "sha256": "4e7f875ad67f439ec5c0dc481444352e44e9f65cc73fa245f6c8cebd8d15d774",
+      "size_bytes": 35297,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_powertracking_win.h",
+      "sha256": "35c30d55889d32b1252af6cdd1011484fc752dbe68e11c029c417990dca8ef9c",
+      "size_bytes": 10284,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_psd.c",
+      "sha256": "7f0516165e37f12a2a32e6873454258c34fab655bcff9b45fdfedc2143e66171",
+      "size_bytes": 43863,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_psd.h",
+      "sha256": "ebd2183f6ab5d71557184da215cb99f1acf593b22fa668434c3b7a0f389e7a7e",
+      "size_bytes": 1693,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_txgapcal.c",
+      "sha256": "40b95db2cdfd157552df5020c16878b9e95213bff99612ce35b6860a264fab6d",
+      "size_bytes": 9859,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/halrf_txgapcal.h",
+      "sha256": "51e3225a93250dbfdcabc5d6f3046abeb5bd2d67d16c967427b7a2d1490998dc",
+      "size_bytes": 1110,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halhwimg8822c_rf.c",
+      "sha256": "f321bf106ac99993b4aba84692af2976148b120f5e2d4d4b123c50ad3c173423",
+      "size_bytes": 1321011,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halhwimg8822c_rf.h",
+      "sha256": "04b7f50d86b5e4677dc065d8c3ad0059420aed3b88256c73b3853dbda0bd82d5",
+      "size_bytes": 3916,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_8822c.c",
+      "sha256": "197da5eea50b5478da9957a0173d42886f55de32fbe14f9f4410d8c2e7d6b03b",
+      "size_bytes": 50261,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_8822c.h",
+      "sha256": "7c65066fa61eaefbf016c1b1bcc82aa505bfd9e89498e70f578423eb3a3bd0f9",
+      "size_bytes": 2732,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_dpk_8822c.c",
+      "sha256": "34322f9452e92174d0a5f58da19f24c9d418e40664a464aeef8a9d09cef1ec74",
+      "size_bytes": 66867,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_dpk_8822c.h",
+      "sha256": "e62ca6b6d578085f08400fb6a6841f8f766b1a24efd47b8c6eee3a1117179cca",
+      "size_bytes": 2329,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_iqk_8822c.c",
+      "sha256": "0994807cfbf69706d3e3eb4e8de5d726c44c24c89eb37d4c5dda076e77260c9f",
+      "size_bytes": 176041,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_iqk_8822c.h",
+      "sha256": "7292b54858a0f81fb0c542035de456a551c6cff191d09db83786624cf8e2c02e",
+      "size_bytes": 2718,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_rfk_init_8822c.c",
+      "sha256": "8fc881b1d5e7b736235e3db5dcd4b4ea04c13bcfcff0a8c35701828e4748262c",
+      "size_bytes": 53568,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_rfk_init_8822c.h",
+      "sha256": "e515a0a5f5225eaf05209f5ced0dd71bbd099763919b86eb22f7c4970bc52ca1",
+      "size_bytes": 1104,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_tssi_8822c.c",
+      "sha256": "76b8efe8005ff8371c9afb597c9300a792cd0f8e0dfd008b837c8471b83c35c7",
+      "size_bytes": 92417,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_tssi_8822c.h",
+      "sha256": "b2e43c0fef19ec1b23ad7c4237c0aab15f7b254d617cab1b15ca2eb33d3a8004",
+      "size_bytes": 3948,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_txgapk_8822c.c",
+      "sha256": "9ca512eaf8494c0c28f5759680cce36f83761e40cc044cc97a23e3027878c901",
+      "size_bytes": 30580,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/halrf_txgapk_8822c.h",
+      "sha256": "84c27b25b271d476584ba706c1fc934f0d9cc65d185fab13073fd94e028e12bd",
+      "size_bytes": 1299,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/halrf/rtl8822c/version_rtl8822c_rf.h",
+      "sha256": "d5c7f6d639cdce1d32d3d089d8a8c0caa78e297e6ac8d0f6e87feb2061ed61f7",
+      "size_bytes": 1031,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/mp_precomp.h",
+      "sha256": "f681f677d32c9e59a1e0955239d916a594356ba8465b149d7b3ebcc6427a4b8d",
+      "size_bytes": 968,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm.c",
+      "sha256": "7ed227f31388b7d48b0756ac179e55bcf9975a422de1056def3f69883d9877be",
+      "size_bytes": 101912,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm.h",
+      "sha256": "6afb5c977ed7e628dfc83eff9599462852b779d089da925e72c018e6a2a382f5",
+      "size_bytes": 43236,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm.mk",
+      "sha256": "bc19063f0cacac7cab4dfaba80774475adf6db927b6c4826cf98cf711e78894e",
+      "size_bytes": 11091,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_adaptivity.c",
+      "sha256": "a1f986329f45dccfc1d0cfb70ebec49df747b0c63df9beec1732355e38574fb1",
+      "size_bytes": 37262,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_adaptivity.h",
+      "sha256": "d0c5c567473cd10e09c506db0da19a88d1922457fcaaf031f531f4ed76f47c82",
+      "size_bytes": 4341,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_adc_sampling.c",
+      "sha256": "9d1eb3cae8d34c092ba2eb405c1011ac1ebbea84b57d0dbc8b03d31615bf12bd",
+      "size_bytes": 57752,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_adc_sampling.h",
+      "sha256": "032885f0152b2bea3d0d7861e3309dd6061326e074468cb596dcd64b3c452e96",
+      "size_bytes": 4335,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_antdect.c",
+      "sha256": "fed9df02ed4faf7dc12291e8d5f35ede79aabb124fb7a3d3f02399e42520a425",
+      "size_bytes": 33964,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_antdect.h",
+      "sha256": "196afe26990c618af5b3c9df4a855e4d7bd862ae47c0cc29e4bd4f31010cc390",
+      "size_bytes": 2180,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_antdiv.c",
+      "sha256": "5c4044c918302d8114398ba1f63a84fdb3358a01ca3d993ae81dea493ce3e1ff",
+      "size_bytes": 223543,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_antdiv.h",
+      "sha256": "a3671b02753430a1c4e1a9e4b94dc1053a86cc5c8a1f86498d76caa753bf8a8b",
+      "size_bytes": 15530,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_api.c",
+      "sha256": "860fc4a21a49231d3b827395745f8ef798fe2678540481c3d0b63f6aafa96685",
+      "size_bytes": 113626,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_api.h",
+      "sha256": "f9eded86c17e205fbb1dbcca3f0ca72cc2f5f716dca59f9968cf9903ffcee0c3",
+      "size_bytes": 6808,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_auto_dbg.c",
+      "sha256": "f84e12a16979ef64111dc9b1bee4cd663631845b18cc2beea15a3bc3f2a89df7",
+      "size_bytes": 22112,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_auto_dbg.h",
+      "sha256": "53e061ad97d4e721f05bb2440f2d7971c917b6f832584f2ca4d9bbba69f38aef",
+      "size_bytes": 2938,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_beamforming.c",
+      "sha256": "7cb5c568654767386b6c83bb1e2592ec705aa408edefbc5e49cb7a8942ecb4fa",
+      "size_bytes": 63743,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_beamforming.h",
+      "sha256": "a6c7df1fde00f494e34a96260f502f78df4af10fc4efb5ee6a9505f4a01df09a",
+      "size_bytes": 9712,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cck_pd.c",
+      "sha256": "302604bc5d4043df43a2871f5baf07ea5e90ef231af0b05addc0b6cf0ef0809b",
+      "size_bytes": 55064,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cck_pd.h",
+      "sha256": "ee6294a08fdbf526f1158197e07e324f0dbc6d691e7190b400b21782a7ba3397",
+      "size_bytes": 5773,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cck_rx_pathdiv.c",
+      "sha256": "64a4c6dad24cde0a4e56ab5da4e6d41e56d95a55aab97d34d1ef8e595678277f",
+      "size_bytes": 4982,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cck_rx_pathdiv.h",
+      "sha256": "2ad50ee4c875fa540142869063bec55666829eae08f4e44de563cd96dc6eb50b",
+      "size_bytes": 2193,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_ccx.c",
+      "sha256": "f8530e53fb25a7f8e9311baff5a5ce446cdd3663e3a36df9ad0a955665fc24f7",
+      "size_bytes": 110062,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_ccx.h",
+      "sha256": "811115969eb02f0502d4b6a39d06dee196c70564f25f8f2a8d59f02889d3d383",
+      "size_bytes": 12970,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cfotracking.c",
+      "sha256": "1991bffe5ef6a97590b299dee92ba9f06d64adde894a7bba20ef7168ff0a3e0a",
+      "size_bytes": 20181,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_cfotracking.h",
+      "sha256": "60fccb8e65eb8953392e124f26cf4989e60dbd5b66c62cf52185843ff25fb942",
+      "size_bytes": 2372,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_debug.c",
+      "sha256": "d5299c5cd040a5e932271459f0aac94618f7f9adfbce75e9bee73760936cb5fe",
+      "size_bytes": 197987,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_debug.h",
+      "sha256": "40105a6361b5733ffb0fce20678de23b19100ba59f6267d4a4088078dc08cb10",
+      "size_bytes": 13136,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dfs.c",
+      "sha256": "8cee646ea063755d1ca8e4ad33baa2df93ec42f638bab12cc9848b8c430ded23",
+      "size_bytes": 105203,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dfs.h",
+      "sha256": "e6c603688dd63064ad3533a7b773eeed3ff060fe755cd8a789bb871ec95e0d65",
+      "size_bytes": 6257,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dig.c",
+      "sha256": "c3ca7abb832cda54f2ec0dfa6562e13e7717d7942bc9394e709a8082ed07079a",
+      "size_bytes": 113536,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dig.h",
+      "sha256": "f5587e20acc5bf302a6cc3b57e91715144e4f08d7a387e5341fdf40c05391de3",
+      "size_bytes": 10537,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_direct_bf.c",
+      "sha256": "45e0de626d4996ff752ec297097b6af4213697fa7239c966aad9c4ad167c5fe8",
+      "size_bytes": 11785,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_direct_bf.h",
+      "sha256": "aaa9c972b7d02c0e6e2d8cee69662ef68c6be7b5f948195ceaf97dbd44719b26",
+      "size_bytes": 1560,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dynamictxpower.c",
+      "sha256": "540258963434377dbf2cb925982634d255016dc7c266e62ed46025771c71da77",
+      "size_bytes": 22653,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_dynamictxpower.h",
+      "sha256": "399527db8b095693767beee2098ad3bea574ec10304837826ba760ca3c1cab11",
+      "size_bytes": 4300,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features.h",
+      "sha256": "8d4b7383cbaef56ca9b6f63e4387362cd9fee45be6e0b0695245593e4e8f7c94",
+      "size_bytes": 2929,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features_ap.h",
+      "sha256": "5f0fd845c1a0b4ecb38aba0c60457a2f1ec07f63a5fba50fe4278ae81610db3a",
+      "size_bytes": 7457,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features_ce.h",
+      "sha256": "5db166ebfecbc03c69269ea52b5029657cbb0bee904f9ea0cb108dcc0b3628ee",
+      "size_bytes": 6451,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features_ce2_kernel.h",
+      "sha256": "bb8d81a86252b2367de17976d5c5dbdfab4d23ae76e689feff32328ae1621627",
+      "size_bytes": 2290,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features_iot.h",
+      "sha256": "69af1487b3d0acef539a2f216204f8b651cca75e0371027127a51c998e1f7abf",
+      "size_bytes": 4848,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_features_win.h",
+      "sha256": "6c2ad125ddeb20245849f3739112e460eef6d003bb6c0f842e075c10b2453090",
+      "size_bytes": 6234,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_hwconfig.c",
+      "sha256": "457987f2ab5a6d84b991ee46bfc72ff0db3b00a6ea51f0e95fbbf86726baaa4f",
+      "size_bytes": 58171,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_hwconfig.h",
+      "sha256": "2a8a4ca24949842b577c8ba74ae32a0b657d342374cdf327549a116601fc0708",
+      "size_bytes": 2751,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_interface.c",
+      "sha256": "f26d8889cccbdb026616db32a1d6fa6a85f0a690826b4e0b64ef317a33d764be",
+      "size_bytes": 44426,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_interface.h",
+      "sha256": "37c33d7eda71d3eaaad9a4a76b7d9546635521b753fb5e6945c5b0be0464f610",
+      "size_bytes": 9654,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_lna_sat.c",
+      "sha256": "fbbd0f39cf5c48bdebe3694c08a67e981dacb718c6c77dd323509f8c3b98aa79",
+      "size_bytes": 49382,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_lna_sat.h",
+      "sha256": "f3539395f4965a03c07d3a452eee66ac3122554c42bb76cee2e8186fe888711e",
+      "size_bytes": 5116,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_math_lib.c",
+      "sha256": "b81de0b8305fe8d09bbd646f259df797f25a41875d8f81554b5cdf23fe627add",
+      "size_bytes": 6310,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_math_lib.h",
+      "sha256": "8c67a6a11d6d39e87f382d4973083c0964c297a80dac3458af355658264effdc",
+      "size_bytes": 3751,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_mp.c",
+      "sha256": "fb6463fd8871372dfdc193f6d85be521c348eeff762c2ce7b968724043491a3e",
+      "size_bytes": 12848,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_mp.h",
+      "sha256": "d1580f923ac5861baad258701228c6e1c4435a79c2a9ad6c1c3f209dce6336ef",
+      "size_bytes": 2681,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_noisemonitor.c",
+      "sha256": "7f0d84fc047eafac2128aed620278b1b2bd20fa81dc3fca5b04858f9d260e1c2",
+      "size_bytes": 14017,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_noisemonitor.h",
+      "sha256": "e23e83bb215dfbd4217bf26c0976a893f4efd078f88b102555dfb76a8027eb41",
+      "size_bytes": 1454,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pathdiv.c",
+      "sha256": "b692b58d2f574cb7fad1781b4bf12459245c3809c67fb906c54baa6ac73ef724",
+      "size_bytes": 32563,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pathdiv.h",
+      "sha256": "c8a2ca5ce72466dba336a5cd97afbc5eb7034077880bcfee9a1943f720ed4578",
+      "size_bytes": 3939,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_phystatus.c",
+      "sha256": "6163e964113ad5d503c2e139d3e5e9a93a180076e21da92d9f659062d184b23e",
+      "size_bytes": 100471,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_phystatus.h",
+      "sha256": "97815412add68e92174fe4db1ba76bb3208991a30a9c9a5ee339f03f654aef87",
+      "size_bytes": 25276,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pmac_tx_setting.c",
+      "sha256": "1b67c149e8a208de0879830758459347c528b969eb88a29abff749d70d7f8947",
+      "size_bytes": 18205,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pmac_tx_setting.h",
+      "sha256": "d79e4d550c1948daaf790a830d0b0e968975586edd6a25345223a75cc43eadac",
+      "size_bytes": 3174,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pow_train.c",
+      "sha256": "3553dbac96511cf6d7a63721e50b3d3ed0997a32dfdd4229534c1f69349c36a2",
+      "size_bytes": 5136,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pow_train.h",
+      "sha256": "00448944db7727d02d5b7434361cf9066b6162ce0c7ece2ecc1a76b8cb171863",
+      "size_bytes": 2731,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_pre_define.h",
+      "sha256": "6316991a951472694584003a9cdb040bd14da601cdf800a1163e2fb4955540d4",
+      "size_bytes": 30232,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_precomp.h",
+      "sha256": "11588dcc1d19180e3d25dfddea2121d4edad41a2beca6ec6bb6c873360e0c487",
+      "size_bytes": 21993,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_primary_cca.c",
+      "sha256": "29175f2f7d7783b4706249cd8f8f7a9098c18c00a1fc53cf795f87c4382594f8",
+      "size_bytes": 4856,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_primary_cca.h",
+      "sha256": "932ca4315eabb89f9a180cf7fb45d38677ab5310325a08673aa278db839a6148",
+      "size_bytes": 2332,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_psd.c",
+      "sha256": "842e945110c8fa915011f273bf1876425a446af198f75dfdf6a025d37c419dad",
+      "size_bytes": 18557,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_psd.h",
+      "sha256": "70c40479020a0edc72d57c8c3fe2052b931df2fffefb4773408fc0298023286c",
+      "size_bytes": 2027,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_rainfo.c",
+      "sha256": "7ecd643e2da1eca15a218c65181220a18858186d6d27b6edc73fc99c58c180e1",
+      "size_bytes": 68506,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_rainfo.h",
+      "sha256": "ae02ceb4a626c258899b24a1f5202ffc6ef41255efca85d51bd4cb1589ffe2f8",
+      "size_bytes": 9090,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_reg.h",
+      "sha256": "54e438c963d0e264aec4a6a0f3b732a2207b17b1e43f268d8e9f375640253086",
+      "size_bytes": 9327,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_regdefine11ac.h",
+      "sha256": "83edbf246560a3cc01a389534f429e7cd65ab809d4d5f4b879228b6f4c7574c2",
+      "size_bytes": 3494,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_regdefine11n.h",
+      "sha256": "20466b0d326244a9eae5adb16b55353fed1865268e4788c4c5a370599925688e",
+      "size_bytes": 7759,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_regtable.h",
+      "sha256": "fbd2fb686b2dbbfa6bfc0fb7109869b3eb2e19bf10a231b8bb178e0142ffc2ef",
+      "size_bytes": 26570,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_rssi_monitor.c",
+      "sha256": "ab6c4643d436b2acbee3ffc337a07da4590b7d2dce35a9ab2681f546d8a2fb52",
+      "size_bytes": 5171,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_rssi_monitor.h",
+      "sha256": "68b0c6adfd4c7a363957a6cb9280bf8a16670debfa6dc28cb621f423f8d76a76",
+      "size_bytes": 1908,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_smt_ant.c",
+      "sha256": "c1aa29bc598483ff1b89725b7f7fec7dd0718f12682c387b9251aff189f8f5e2",
+      "size_bytes": 74551,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_smt_ant.h",
+      "sha256": "bacd3de5657b533720cd5523287145bd72acc903907b7bb140c476112273f434",
+      "size_bytes": 6909,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_soml.c",
+      "sha256": "bc4ab9a3f55ec30de97ac16456250b868b460ba4eea8ec0a4e4f939080bd9c81",
+      "size_bytes": 48206,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_soml.h",
+      "sha256": "4906519cee708acd08dab2a96d069af14296d4def0b5033effb6a08ff7611bf4",
+      "size_bytes": 5341,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/phydm_types.h",
+      "sha256": "118d09be360e8ecdf81a6e930adbd6975b9329c3cf3e6a67d9774b03448ac384",
+      "size_bytes": 10249,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/halhwimg8822c_bb.c",
+      "sha256": "d8251ffb6fbc5bc09513e62a537ca80147bf1acc53d827015e4e72df44908ab3",
+      "size_bytes": 86980,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/halhwimg8822c_bb.h",
+      "sha256": "02a05dd5f70bafe260f318d9ca90d1821a2445967e3dd5d718802a50878ec4df",
+      "size_bytes": 2186,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/mp_precomp.h",
+      "sha256": "a93238150249019ab93070968ca7260c694d69f358b9aca490c378cf96ea0c54",
+      "size_bytes": 656,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_hal_api8822c.c",
+      "sha256": "3cc66fda4ea0a49c3e39126057062c493193db6b2bad9073b491ac0747a464c3",
+      "size_bytes": 67596,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_hal_api8822c.h",
+      "sha256": "adebd4836e4712e3b92b3e5ecf6aeb0aaf4e77ef9f7e7965a93cea8a8769c572",
+      "size_bytes": 5405,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_regconfig8822c.c",
+      "sha256": "3febf5d7a21b5bbf528198fa9c77ac3d2b4dc461ae818dc8b437ddaff10eeb6a",
+      "size_bytes": 7282,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_regconfig8822c.h",
+      "sha256": "8ed55d3e65efb48abc853bfa7569fc4cded28fd496ba0854ec5a7cb1f873661d",
+      "size_bytes": 2189,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_rtl8822c.c",
+      "sha256": "27545f6c3b3879f4695abcfe6e1da0ca09e89f801104726d66279cc4f05089e2",
+      "size_bytes": 1948,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/phydm_rtl8822c.h",
+      "sha256": "72ff11a90a1cd30d02de23027744c19b5d08b61473bc13e609783c5ddbf4a95b",
+      "size_bytes": 1266,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/rtl8822c/version_rtl8822c.h",
+      "sha256": "98d4400b88bafe3a1146df63218d65a749d11988212564b62d92b3c6d6652276",
+      "size_bytes": 1293,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/sd4_phydm_2_kernel.mk",
+      "sha256": "a6b99dd947e9fb8d0e948eb8e186617656a84a291f60f63b62f38dce1c2360e8",
+      "size_bytes": 6730,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/halcomtxbf.c",
+      "sha256": "37f7141d2e85babc534ca0dade7fd958c50ae27f2c1b80da202d494507a1c9a2",
+      "size_bytes": 14472,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/halcomtxbf.h",
+      "sha256": "f6de100fa9b969890ca33d94e980ac2d5046299c9db9546988b28811809b7162",
+      "size_bytes": 4097,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8192e.c",
+      "sha256": "f880be183c36cd921e72b02736c5b1fdfccf4196bc07334a075daa1fb2238696",
+      "size_bytes": 13389,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8192e.h",
+      "sha256": "b504f8995ce49d5e7b5ab1c16513aff002fe2dfc17017857a2a8997f20db84d5",
+      "size_bytes": 1882,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8814a.c",
+      "sha256": "1e3e147dca6c3e4194176ea69ff0f305bcfcbfdf8ca0c7701fca9b192e3875dd",
+      "size_bytes": 22123,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8814a.h",
+      "sha256": "99b48fc2abda4a7b2e435af45af5823ec3bbb7cee229cc6487e401e65446b605",
+      "size_bytes": 2453,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8822b.c",
+      "sha256": "0153774c29837ab337c4a290d5b37b38f16ae265ee316f3dd50696a924e94053",
+      "size_bytes": 38515,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbf8822b.h",
+      "sha256": "bf9465b9e367014ef6a10764bc59902c573e734a3f18ccca309b0254d8ccf8aa",
+      "size_bytes": 2268,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbfinterface.c",
+      "sha256": "5176bb51ec11bda7c8a4dbcb816eaf5859563325bca34a268e3782a04aef1170",
+      "size_bytes": 42144,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbfinterface.h",
+      "sha256": "fe11b5a3d2937f9a446da84e02dac62d21a6a46a40f52250005c6744152140e1",
+      "size_bytes": 3932,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbfjaguar.c",
+      "sha256": "a8213cd0eaf9dcc08e207d1393ac8b94fd1e3c40bffd35361c41c501435a9f2e",
+      "size_bytes": 17230,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/haltxbfjaguar.h",
+      "sha256": "fd8e1602d56c09b92c312833ba41bc10798cb44027064ee980f858e970faba98",
+      "size_bytes": 2253,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/phydm_hal_txbf_api.c",
+      "sha256": "daed0051989af575c27657417dc6a2d2e387deafeb6e9fa95f208b5f4d1848f1",
+      "size_bytes": 25650,
+      "type": "file"
+    },
+    {
+      "path": "hal/phydm/txbf/phydm_hal_txbf_api.h",
+      "sha256": "3e3ab9b7733f589e7281d4e539116297275156f6d4b5edcd1570af44181c7a1c",
+      "size_bytes": 2908,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/hal8822c_fw.c",
+      "sha256": "e429b1e09e70b639c50028be82e56906af1c1d00f6c178393ea7228d29d75172",
+      "size_bytes": 3622532,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/hal8822c_fw.h",
+      "sha256": "d98fd08087ced54fe6362f7ec62a227d392d58df33ddd9f955e393e956180537",
+      "size_bytes": 1444,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/hal8822c_fw_10M.c",
+      "sha256": "e263781f6cbb21cc8e821bcff8a54b5ebd9b60ee749f89eb67908eb19f866393",
+      "size_bytes": 3494756,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/hal8822c_fw_10M.h",
+      "sha256": "3b0b6348ae889c095a8890ae2d258946b6dd617c9e9882e4047120c878cf5339",
+      "size_bytes": 1444,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c.h",
+      "sha256": "3d32eee32cf29aad7fdbedcf7b4b2436105a0b7d7f8de4fe287950cc1cc24a1e",
+      "size_bytes": 5973,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c_cmd.c",
+      "sha256": "5335b779ba3d6d5a114cb3ad2e5a065ea790818536460f459df02bd750abef3e",
+      "size_bytes": 18300,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c_halinit.c",
+      "sha256": "d5cd3a842c179574edd18385d119212787b6d6e7e44eb8ba360efc77e4923b38",
+      "size_bytes": 8520,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c_mac.c",
+      "sha256": "9af8c2e928081734d714500cc174e7a95b3861a2106f254bd72d9b977ce8cb1c",
+      "size_bytes": 5359,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c_ops.c",
+      "sha256": "ad7c06acfb3680157b4e124c91fd7e13c0f2f977245bd0d59a0374654d8c4721",
+      "size_bytes": 121586,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/rtl8822c_phy.c",
+      "sha256": "5102c632d91f92bdca8ba3b1971177068a467bb898418b7d411c434dc8d9085a",
+      "size_bytes": 67135,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu.h",
+      "sha256": "aaed42ddba0eabf5e55c141a2a877b1ec7512d63d9c90e9d87ec3569aca3bc83",
+      "size_bytes": 2177,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_halinit.c",
+      "sha256": "2d9429df1dffd8518fe0d1dd11a764a3249bbb0c90a425a4f151841619f8afd0",
+      "size_bytes": 12742,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_halmac.c",
+      "sha256": "4f83f34fbc48247ac38d3008ada0be3a8f935d409b26b183c2e5238a431fd9e9",
+      "size_bytes": 8307,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_io.c",
+      "sha256": "9ba2e68bddde404a4e95b14a4675554f995e72a98bf17932b7f8ba96a4d7da2c",
+      "size_bytes": 1570,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_led.c",
+      "sha256": "ec07d349df52b0113eb3027684a879b27e3ad52f8be7eafdc8e20ea898387da1",
+      "size_bytes": 3494,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_ops.c",
+      "sha256": "5cda30f517b2d702b3b7c4a6f4f35da948804162a530a390379acb68f5bcc85d",
+      "size_bytes": 10122,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_recv.c",
+      "sha256": "839c60824667cd8156da50ff73e73727946cc00599c1a865a96951e3d34f25bd",
+      "size_bytes": 5359,
+      "type": "file"
+    },
+    {
+      "path": "hal/rtl8822c/usb/rtl8822cu_xmit.c",
+      "sha256": "2e837742cc194ca9adef53ad62a46196ae83cc390cd6c11fac2f03f61063bd64",
+      "size_bytes": 31921,
+      "type": "file"
+    },
+    {
+      "path": "halmac.mk",
+      "sha256": "807e0adbd47221d12b50a779e218f564cb5761c2d14177642ebcef3f931ef17c",
+      "size_bytes": 2194,
+      "type": "file"
+    },
+    {
+      "path": "ifcfg-wlan0",
+      "sha256": "8c992fd464937c5c508b1167ea44b62f0e93065fcd4f8f04a6ac6b0378dd8064",
+      "size_bytes": 54,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188EPhyCfg.h",
+      "sha256": "6b9c2c226f19f87c35089e66fbee2de170b69d8d5efb49ba5eaf89872fdad5e7",
+      "size_bytes": 6466,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188EPhyReg.h",
+      "sha256": "2e355849a6c225c2dc9f9053b0e3136ba22ec66ffba6cec9a640f113bcb29403",
+      "size_bytes": 35292,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188EPwrSeq.h",
+      "sha256": "bb2ad1b51fe82123ab86ff8330e3c9a6d8fbeb5d585c5a1584ca6a06897223a0",
+      "size_bytes": 13293,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188FPhyCfg.h",
+      "sha256": "b3e1e47b6dbc2a64ccb2f14c529afee30ea585b8c6279466c3719ccf615cb4f8",
+      "size_bytes": 2739,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188FPhyReg.h",
+      "sha256": "89e058dc6a4ad705ffc53fa4207a65355588349393f2d34a04520129dd1e3d20",
+      "size_bytes": 36757,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8188FPwrSeq.h",
+      "sha256": "d3cea7ada994f8738d4e336957a96afeb2607e135af7c1e2dcaa86d9d320dd1d",
+      "size_bytes": 18294,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192EPhyCfg.h",
+      "sha256": "eef6afce5aff6d1a62fa56f9ff18556b5d87853d333d6f57b8d25eacca624d62",
+      "size_bytes": 3381,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192EPhyReg.h",
+      "sha256": "60e62bc0bcc0c63e19c80bf23e39d8b4102967d72424e02478b56d2d903a7e7b",
+      "size_bytes": 36633,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192EPwrSeq.h",
+      "sha256": "d521f020dcb5759a5a7ee00e95bc1db813a9dfc0d26e749fa15fe9bc38fa19a3",
+      "size_bytes": 13239,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192FPhyCfg.h",
+      "sha256": "d231929909105571b537bdf8498702ed5a020a6ca881e504c56575853315e079",
+      "size_bytes": 2631,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192FPhyReg.h",
+      "sha256": "055065514271f9edc9a2871a8d31bb1633454c157937db0bd773fe3275626151",
+      "size_bytes": 35868,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8192FPwrSeq.h",
+      "sha256": "e7d491b6ef16c149874abe521e2ad73d78472aeaf831fc7c2fceae02bdd8f365",
+      "size_bytes": 20068,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8703BPhyCfg.h",
+      "sha256": "722b0ab8be3324b3edcbbcdb3d491b9a2a260ac8a485e1fbc295e2e967ee5e26",
+      "size_bytes": 2639,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8703BPhyReg.h",
+      "sha256": "4a9b47372caa0d6131c8eed50cb9ea3fd5d3b9334f7ef6b961abd5c14f9fcffd",
+      "size_bytes": 35975,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8703BPwrSeq.h",
+      "sha256": "f3e86a055bedbf2d09f6727978bc11b6206d4acbcb24ac8147976386e6e7f004",
+      "size_bytes": 17658,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8710BPhyCfg.h",
+      "sha256": "2c4b50024330c92546df4799a7615d4b4052e296e4b124d256e4574474c00f06",
+      "size_bytes": 2557,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8710BPhyReg.h",
+      "sha256": "6106f25ea6d845a4b9cb732ae491dba3138a7247d51b3ab764077783c92a718d",
+      "size_bytes": 35868,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8710BPwrSeq.h",
+      "sha256": "1f1c1b044a9eaf140d915591b37e3437fb936580f97bc3fb1b876e3c58859e64",
+      "size_bytes": 12170,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723BPhyCfg.h",
+      "sha256": "0b7b12b2cfba33e51d80ee943958c705e6784ec1b969884498143a5814c18b4d",
+      "size_bytes": 2643,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723BPhyReg.h",
+      "sha256": "4e236b766e26d395ea7baa1d6d8ce2e3b3ff050d8dfa85b71cd209996bc0df1e",
+      "size_bytes": 35866,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723BPwrSeq.h",
+      "sha256": "50353f35ff95fbfb90f314f3c289c7a68b371944764158de4332aa7e8e46125f",
+      "size_bytes": 23154,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723DPhyCfg.h",
+      "sha256": "b6d692893fd02a67e8b36b0f920b7686d4204ccc776944902f96f43ef0a2ea2b",
+      "size_bytes": 2637,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723DPhyReg.h",
+      "sha256": "659d800e0336774906e91358a233bd532e81c579cd28dd7c380f963b2552183f",
+      "size_bytes": 35868,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723DPwrSeq.h",
+      "sha256": "3d1b1e8244b9ced39aac87eafbd3363e979114ed604c2719ca5f433aedbefc3f",
+      "size_bytes": 18490,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8723PwrSeq.h",
+      "sha256": "8a028db9627683504dc588dddb104cbf0fb096a692fd3534d310916af382bd04",
+      "size_bytes": 15800,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8812PhyCfg.h",
+      "sha256": "a850259ae1c0a5bb1179b9c49e36170f53285810e8304d59e0270ac34e827fba",
+      "size_bytes": 3379,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8812PhyReg.h",
+      "sha256": "0fec41e7269ffae640cae6a39a42092fba196f6db6530591019b063e7cf782db",
+      "size_bytes": 24840,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8812PwrSeq.h",
+      "sha256": "a80695bc7fe7cfa956238a4129712499122d2e2f8e8cf21cbf7522cc2e0bda29",
+      "size_bytes": 18593,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8814PhyCfg.h",
+      "sha256": "6c518283deb52984ecf0074ed9958ebedb162108287052fbce8661db94f7955d",
+      "size_bytes": 4583,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8814PhyReg.h",
+      "sha256": "aba2d0b8a9e6a08c283d1fa8b6256e4997c5acacce837e23341a6e4a52f3d99c",
+      "size_bytes": 30530,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8814PwrSeq.h",
+      "sha256": "9a6ccf90167bec82f596ce23d656daec1e6c02a9fe0074d63bac2134de6bf504",
+      "size_bytes": 22300,
+      "type": "file"
+    },
+    {
+      "path": "include/Hal8821APwrSeq.h",
+      "sha256": "72a90c493ec4ad10d3b5989d0e2a12aed2b8d6db7cf92ba6f6c6f4f9334707e3",
+      "size_bytes": 18069,
+      "type": "file"
+    },
+    {
+      "path": "include/HalPwrSeqCmd.h",
+      "sha256": "ae4996104c3afad56015ee0f0ade01d53d44448ef031b1e9d790dc84ad9feedc",
+      "size_bytes": 4123,
+      "type": "file"
+    },
+    {
+      "path": "include/HalVerDef.h",
+      "sha256": "c6555de54323c1c623374694abf486578858b2df4ba22044969e0dfee01a7c7c",
+      "size_bytes": 11244,
+      "type": "file"
+    },
+    {
+      "path": "include/autoconf.h",
+      "sha256": "71978171295d9aa91029edabbd35b6b16fe8c93ce73cf2e350436b3c317305e1",
+      "size_bytes": 8761,
+      "type": "file"
+    },
+    {
+      "path": "include/basic_types.h",
+      "sha256": "dcc55ff91515b683d3664ed7badf05c12d930823ac2857a6cc734babb3cf4667",
+      "size_bytes": 10755,
+      "type": "file"
+    },
+    {
+      "path": "include/byteorder/big_endian.h",
+      "sha256": "1b3fbccdd8580a03db36f0b7ee80426c73647864475157b386f87df493bd1155",
+      "size_bytes": 3214,
+      "type": "file"
+    },
+    {
+      "path": "include/byteorder/generic.h",
+      "sha256": "d7d1a7f9a65034f934cc2c4ae7bbb19adf0deed977da9c044d6ef7e85be0e10d",
+      "size_bytes": 7177,
+      "type": "file"
+    },
+    {
+      "path": "include/byteorder/little_endian.h",
+      "sha256": "fff4070d3ff221c36026d15161868f73fb9a084209241810203b54a824838fe5",
+      "size_bytes": 3386,
+      "type": "file"
+    },
+    {
+      "path": "include/byteorder/swab.h",
+      "sha256": "315ac9b586300cc5ffe25176a954330dc8ebd46b556d5b6633ede86af78e5c7b",
+      "size_bytes": 3272,
+      "type": "file"
+    },
+    {
+      "path": "include/byteorder/swabb.h",
+      "sha256": "a17fb22bc977b78ad7629c674f1c385eb83c4359ca4407e3bf4e49ae63c3906f",
+      "size_bytes": 4020,
+      "type": "file"
+    },
+    {
+      "path": "include/circ_buf.h",
+      "sha256": "e48b81badd7cc73bca87973b8856e0ad9494527825e4d5ed8237a4aa771cfedf",
+      "size_bytes": 864,
+      "type": "file"
+    },
+    {
+      "path": "include/cmd_osdep.h",
+      "sha256": "cc825b163619a37fb314b544aa8b681a4fb10724f585c68dcd8b47e390da0ba6",
+      "size_bytes": 1084,
+      "type": "file"
+    },
+    {
+      "path": "include/cmn_info/rtw_sta_info.h",
+      "sha256": "80bcccf7145f86f09671b7c5206b58c1db0c185a1568a2928e6883f33a033e82",
+      "size_bytes": 8624,
+      "type": "file"
+    },
+    {
+      "path": "include/custom_gpio.h",
+      "sha256": "c5b7fde8ba9182e96637080bfb71d999d6a60b8971a9e0cf6f7855cfb5ecf83d",
+      "size_bytes": 1045,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_conf.h",
+      "sha256": "1e4ee6f9fa3ee187af1246d1376cb3f846a6ae076ec2ffffbef5dbfad15900fe",
+      "size_bytes": 26536,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types.h",
+      "sha256": "5b68ac561d3fa88549799d9ceb1c273e109ebb67a07023da3e12f1a8e2607c98",
+      "size_bytes": 60506,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_ce.h",
+      "sha256": "1a8ce3914d75f1266d15c4956403b9daddf9c9b735fd1ff617c1e850da0a8423",
+      "size_bytes": 2489,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_gspi.h",
+      "sha256": "2f81652b4538e61e52d270badd5b1b9d49909ad31b028ab22926769a76afc4a8",
+      "size_bytes": 1367,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_linux.h",
+      "sha256": "317836f6209559b9182c474147bd57967c242b129246b97e5ccd4e9c19d0a593",
+      "size_bytes": 725,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_pci.h",
+      "sha256": "920918fa4d30a2890e5c440dbba6a77b9e4fe6851570bf0c406d391908e4ccc0",
+      "size_bytes": 1396,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_sdio.h",
+      "sha256": "00cf8ace20c014204e678a7d2a5a5232d297b936f2973aadb42759f1f3ed839a",
+      "size_bytes": 2993,
+      "type": "file"
+    },
+    {
+      "path": "include/drv_types_xp.h",
+      "sha256": "fd0391d45d652d66b80b1ca42a52bf1844975d9143f6cc408ac15f9c97e770c0",
+      "size_bytes": 2542,
+      "type": "file"
+    },
+    {
+      "path": "include/ethernet.h",
+      "sha256": "e37b192c6c60f54b1a48099545d6b3ac7a29e5b7fb0cf1e901fa8c874385ab02",
+      "size_bytes": 1567,
+      "type": "file"
+    },
+    {
+      "path": "include/gspi_hal.h",
+      "sha256": "2111de0fac211a8685264c4322ef0f79b99dd0d6d14edaf9e7a653bfd4c10d50",
+      "size_bytes": 983,
+      "type": "file"
+    },
+    {
+      "path": "include/gspi_ops.h",
+      "sha256": "0ef8b933bb20fba66b6b69a78137241e1821e83260a0d4d82d1f79cd9e57cb9c",
+      "size_bytes": 7785,
+      "type": "file"
+    },
+    {
+      "path": "include/gspi_ops_linux.h",
+      "sha256": "adbdce7bd70a98046469209490f910a6e320205393cac37eb19519628ae4275a",
+      "size_bytes": 722,
+      "type": "file"
+    },
+    {
+      "path": "include/gspi_osintf.h",
+      "sha256": "037a918879292c55452132a04b725a7c63b8b999d3c3c9fbfb8a9df68dab1773",
+      "size_bytes": 717,
+      "type": "file"
+    },
+    {
+      "path": "include/h2clbk.h",
+      "sha256": "5b1178121ea8a0f97d7f378bf88220742e917ad8322976a9e306ef29822f3614",
+      "size_bytes": 847,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_btcoex.h",
+      "sha256": "7df2beebd0deaf829fe2fb7a06383aa646ea7e36ab117200c970b8fba3fbdaec",
+      "size_bytes": 4759,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_btcoex_wifionly.h",
+      "sha256": "734557a63c73ebb401d49d79cb1f50aef5857574ae4717244bd8a7706be2b86f",
+      "size_bytes": 3738,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_com.h",
+      "sha256": "57d4ee47baf59e674bc665ac01b9c8b304e9b4fd423d51bb68c3977c589170fb",
+      "size_bytes": 27586,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_com_h2c.h",
+      "sha256": "adc99bfacb5e5b7427a8a299a97a04a4d3cc234f400c59306fe74105e23ef557",
+      "size_bytes": 48686,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_com_led.h",
+      "sha256": "793db0d7bb40c30814c0bbb6fc3099d041486f72984c1ebd3315dad6925f456f",
+      "size_bytes": 15385,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_com_phycfg.h",
+      "sha256": "bc130fd87a2cf28c4b11987126f7a311f4be886bce6778fa11f2a76e8ff8e4a9",
+      "size_bytes": 11103,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_com_reg.h",
+      "sha256": "cea689610c48601e149552714c027ad1463f5695bb2c57fa34512acce2a736d6",
+      "size_bytes": 68654,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_data.h",
+      "sha256": "936fdb07340f8d8ce91984b8f0588acdcfc881ed27f6a499a025c1d167b9be00",
+      "size_bytes": 23857,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_gspi.h",
+      "sha256": "a47697cce0255cc2c14d26b21693bbc4d37cdeb02ee24ec7d87589738acb1f29",
+      "size_bytes": 1177,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_ic_cfg.h",
+      "sha256": "7a57cd9156c2003834588fb7c57a604be8694b40ee0ea04a969cd9dfdf1196ed",
+      "size_bytes": 22157,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_intf.h",
+      "sha256": "ace19e22f68a861620f86b8ff950af13555e3fce4aa5369eb0e171d998305b52",
+      "size_bytes": 35132,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_pg.h",
+      "sha256": "3e1970fa9a42ebd998ce41509e9a7e1fa34fd388e6c4cebfa7abdc2efc46de1d",
+      "size_bytes": 36352,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_phy.h",
+      "sha256": "4efa26cec13b7a837d0dec475079e6c0cdf4e566550bc1a39579331304614260",
+      "size_bytes": 5490,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_phy_reg.h",
+      "sha256": "aedae41e139e20f00c568b67d828bf63bcb5c3f232519e78b2dc7bf58febcd83",
+      "size_bytes": 14701,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_sdio.h",
+      "sha256": "6afa34d3802ddcf86230ad5b2561ffdbc0c689408d63f19a64c7e0acc70fea88",
+      "size_bytes": 4553,
+      "type": "file"
+    },
+    {
+      "path": "include/hal_sdio_coex.h",
+      "sha256": "12622108bd73610d7cb826073a11dadda46fba8a9a3b63200f186328d7c79787",
+      "size_bytes": 1351,
+      "type": "file"
+    },
+    {
+      "path": "include/ieee80211.h",
+      "sha256": "90224d98ea9e1f365034b0b1f09866e93b3f12fe0119c97df6cf78b594fa1be3",
+      "size_bytes": 62960,
+      "type": "file"
+    },
+    {
+      "path": "include/ieee80211_ext.h",
+      "sha256": "dd1bd6976d338674ab70a2184abc4258e3a8e2df66160beb8ef9e9060d6056ad",
+      "size_bytes": 7435,
+      "type": "file"
+    },
+    {
+      "path": "include/if_ether.h",
+      "sha256": "073cf56b2bd8d4a3aea56f7090e60796011e5787393b0c85ef628333fe061f25",
+      "size_bytes": 4578,
+      "type": "file"
+    },
+    {
+      "path": "include/ip.h",
+      "sha256": "237f50ece80e5eb231de96bfd466b8889fad2a189a9ebf6e27f513f3299c2e4e",
+      "size_bytes": 4040,
+      "type": "file"
+    },
+    {
+      "path": "include/linux/wireless.h",
+      "sha256": "40ad2a1c8c29a9fe2d6e64fdb8bd66b7a4ee5779eeeaeb969b32a93da3651be0",
+      "size_bytes": 2738,
+      "type": "file"
+    },
+    {
+      "path": "include/mlme_osdep.h",
+      "sha256": "831b0c5a9dd2c29f6609bfccd20d1d2dafa67014db50620f8c8e7069a602c090",
+      "size_bytes": 1919,
+      "type": "file"
+    },
+    {
+      "path": "include/nic_spec.h",
+      "sha256": "1080f2840c60675f26ebd8a13c6d528ca8f1769d5328610da6c43ad27ee4fb76",
+      "size_bytes": 1238,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_intf.h",
+      "sha256": "83d209bda9e220aa4c4020ce7fdf4d9b9ac86af33f190d18552b1c208a28462f",
+      "size_bytes": 4190,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_service.h",
+      "sha256": "e52f33ceb640cfd58991cfdf623991e61c0a9e5d4c5a69be2e4d5951ce46f3b0",
+      "size_bytes": 33284,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_service_bsd.h",
+      "sha256": "045d1fb426a36abd50c597d6b017f9c61051583d25263a4efb1c124b7216ad95",
+      "size_bytes": 21760,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_service_ce.h",
+      "sha256": "3ed7676591dd0eff18bfe5006898f5322fb650dbed29932845d004b0cafe8236",
+      "size_bytes": 4527,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_service_linux.h",
+      "sha256": "b904e4a1671d8b860eeaa7ffc995aa5051f44fbbe2ee7d8f4f9def9efc83ab65",
+      "size_bytes": 16903,
+      "type": "file"
+    },
+    {
+      "path": "include/osdep_service_xp.h",
+      "sha256": "09819bc2b5243397832cfc0e19f07fd8d342caf00d62e11b945bc4f09c296bbb",
+      "size_bytes": 4848,
+      "type": "file"
+    },
+    {
+      "path": "include/pci_hal.h",
+      "sha256": "f32a84a8436fbc9d1275b64a80dc6607aa76f409c7942ff1b878cda86c89a261",
+      "size_bytes": 1693,
+      "type": "file"
+    },
+    {
+      "path": "include/pci_ops.h",
+      "sha256": "c0d0e1112a3c3cd9205dc54eab72fa78ea6825e07f010f9f19a8c85c4b935944",
+      "size_bytes": 4516,
+      "type": "file"
+    },
+    {
+      "path": "include/pci_osintf.h",
+      "sha256": "022235d8085357ae67e8c996383738d460a7bbcd93041a0a880be91a05937be4",
+      "size_bytes": 2136,
+      "type": "file"
+    },
+    {
+      "path": "include/recv_osdep.h",
+      "sha256": "c38e91bf047390fdf64f31e81e9b5da7935363721447761540762f648fcf1216",
+      "size_bytes": 2860,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_cmd.h",
+      "sha256": "8a686a9b9354c2073634ad0f575d0af82e647cd0886bac8191527b38d8b64c92",
+      "size_bytes": 5140,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_dm.h",
+      "sha256": "92193abf1d694671271ff3646985ad2b8642acfcb47b849f7a1eb0f7814607e5",
+      "size_bytes": 1038,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_hal.h",
+      "sha256": "893dc707b6dbf80a7477173814a3e4b7ed32f1125c8d665b5b7460f5c99e436e",
+      "size_bytes": 12466,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_led.h",
+      "sha256": "3b56a78310091f99107401b582cfadc50b510c81a6d9c5df708d95d23ddd544f",
+      "size_bytes": 1395,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_recv.h",
+      "sha256": "beef9d25091296b901f7178057574bbfee2e1143e06982bdd1fd2235a60940f8",
+      "size_bytes": 3447,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_rf.h",
+      "sha256": "c8bdb70135cc9a3bad85bd7a8f98df51a8de0b7bc7f5b24516b19dd95072e7a2",
+      "size_bytes": 953,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_spec.h",
+      "sha256": "289b2a3a4d397891f87d0c7304cc90befb8ab8a8ad581992e687f45d5f7d19d0",
+      "size_bytes": 5784,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_sreset.h",
+      "sha256": "07bbdfc8c40ffc2be9638d0a4f5f2fecc5ac71a2b6c3c636db2e12c8ff6f9997",
+      "size_bytes": 921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188e_xmit.h",
+      "sha256": "1d8e10d073519b8057e63e37c1a36f3c3bff0d6434db62614c03055cc6d329d3",
+      "size_bytes": 7984,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_cmd.h",
+      "sha256": "c6cda90ac45cd13f5d2708662d211db62b1aeb1fdde48fd88fe46ddae2fb7339",
+      "size_bytes": 11716,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_dm.h",
+      "sha256": "747fd5ffe543699e40bb475950bfe93e4f0269401f8f1b6dfa269ef03416cd33",
+      "size_bytes": 1421,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_hal.h",
+      "sha256": "cf747016eb6d12a53239881d45983aa5a527478967c96c8ee509443612d427c7",
+      "size_bytes": 9370,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_led.h",
+      "sha256": "fa514b4fb9a79541be00985090a9dfcd0412bf4849a817fac32b23464ff0d660",
+      "size_bytes": 1551,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_recv.h",
+      "sha256": "c9c6844bdb372658b805faec2ae3216a0a60ccf97e024258f3648857b8de6773",
+      "size_bytes": 2416,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_rf.h",
+      "sha256": "34486b48d79b6e758161417ebece779f2effa3fce108acd125ddbf43c6c7d3c7",
+      "size_bytes": 856,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_spec.h",
+      "sha256": "33aea7e5c7d28d1cafffbad336185e67ab1630eb686f86523c56767162e7661d",
+      "size_bytes": 11584,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_sreset.h",
+      "sha256": "fe270d41f3398ec4ac2e3bac12d8872f5858ce3eaf377a2f33a9c0270512ed7e",
+      "size_bytes": 919,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8188f_xmit.h",
+      "sha256": "fa62aef38eabd150bd682ca38719cefde628810ada07b7797404243ef9910d2f",
+      "size_bytes": 19977,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_cmd.h",
+      "sha256": "d1900b71e883b7bc7a95aa949306e4a8adf659de5fe3feacbdde400e1bcbaaa9",
+      "size_bytes": 5921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_dm.h",
+      "sha256": "c3a3aa1bcbdb2054dc6545fb0d8f7aba155163ced1721273779cbbb6377484f0",
+      "size_bytes": 1039,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_hal.h",
+      "sha256": "7955eddaf05b117f07d70c2c40065e98da50b786c972715130556a3e65368810",
+      "size_bytes": 13221,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_led.h",
+      "sha256": "08ac4fb16b38891914ab73d1f2c7746ec7a30c45b821bf92153b9e9fb15c16b4",
+      "size_bytes": 1359,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_recv.h",
+      "sha256": "752b94a0c9f4752c29086fdcbba0a53b149c2a49469e8f2a4e7dea8fb2fdef18",
+      "size_bytes": 9198,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_rf.h",
+      "sha256": "94f7dfd35122a16a0672085259109dad81768444b61765351e37490932463d84",
+      "size_bytes": 883,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_spec.h",
+      "sha256": "c975298f3efacf83068658a67cec7e6770f842d89fc9106363fbe5a7df9e0cfa",
+      "size_bytes": 13195,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_sreset.h",
+      "sha256": "8628c913dd141c4b1fef3675a782ee9515f174c6c8fbda96cfb9b20a2d0fb866",
+      "size_bytes": 922,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192e_xmit.h",
+      "sha256": "6ae4d9bec9aa09daaa3b3c397cb3bcf1c442b142e16c850eec0c345971d3dfe2",
+      "size_bytes": 20301,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_cmd.h",
+      "sha256": "9e493fbc675b39bcf900d2eecad3b6b79e7a38063c3be824fc70fcea3c45ea30",
+      "size_bytes": 12818,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_dm.h",
+      "sha256": "0a9486ed62a811a98db25beff3dbee828f3f0d1ef2ba6eec65150e25d8e904ed",
+      "size_bytes": 1213,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_hal.h",
+      "sha256": "97558be810b391115283fb44d585b9d5c42c35de5b0ad515b4bf0e8c0abed5f4",
+      "size_bytes": 10980,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_led.h",
+      "sha256": "47a1650abbdbadeec0ec0bc332cb59c3c25c3b3139104d873e216e84732dc181",
+      "size_bytes": 2106,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_recv.h",
+      "sha256": "13f29c1324517242fbae2d2b3956c24e0e13bd5a0005545bb31a6c12b519a8d9",
+      "size_bytes": 4077,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_rf.h",
+      "sha256": "c09aa35670b4abf9d283aacce9e6128e9b2fdfb4dbcf9505a14a8e5bae9b121b",
+      "size_bytes": 2955,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_spec.h",
+      "sha256": "f88ee2697feca4506bf9e98b7ba63886fbbb6c66b1d26c511cb648a6c2defbee",
+      "size_bytes": 22011,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_sreset.h",
+      "sha256": "e649e2da3f496e87b1e7d0e12cddd2e8c1e9bec469e237f6d64f2712cc4919ab",
+      "size_bytes": 976,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8192f_xmit.h",
+      "sha256": "f2beb67650fdbeee11adb524d0a8d0c7fb2d6c1dd9c670fcb4e8c22da38142f2",
+      "size_bytes": 25050,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_cmd.h",
+      "sha256": "11782e969e248368d4c4bc6908821d2073a1cc44ae0ded8b8a39296a41c68e20",
+      "size_bytes": 11717,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_dm.h",
+      "sha256": "ac1005e0247e2f135defc8739323c97fbf500695acd1279cefbd315b075ac980",
+      "size_bytes": 1421,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_hal.h",
+      "sha256": "e0de62da0369065206e1173d1f503aeae011f25ea64f78bb3c26611e6c3c2b5e",
+      "size_bytes": 9498,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_led.h",
+      "sha256": "811e909dd0fcf769dea1dbf305b03cd1eee547ea9cd2a1d4ff261a4a10268727",
+      "size_bytes": 1581,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_recv.h",
+      "sha256": "36952b2506d8cbd154c60c4d40ceb86b7520efcabee93b4219df644a222bf7fd",
+      "size_bytes": 2543,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_rf.h",
+      "sha256": "5c6de21a6de95e802335d2757d44a6ccc2b9ca9e6ed3cbbe9cbdd3f7cf207fd8",
+      "size_bytes": 856,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_spec.h",
+      "sha256": "d6e1c779beedd3107b1ceb43021de32974b89b71a223601522066d374253d111",
+      "size_bytes": 18909,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_sreset.h",
+      "sha256": "c332c4f31ac9b0099662a719947c752564954fa74b7afb7276d17fe562424ead",
+      "size_bytes": 921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8703b_xmit.h",
+      "sha256": "3a4dd13c7b54d72069be5bd0c508bba2d6d397bdd40bfb90b6e74c7c9315db84",
+      "size_bytes": 20368,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_cmd.h",
+      "sha256": "656d477a44eecb676ebf536fd0594315f9c937a756b3e9809eabc5dcb6daf40f",
+      "size_bytes": 10052,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_dm.h",
+      "sha256": "6c40d7a245a6df0ebf150b307b475d2ad0b6d69e5a345456dcf1d258e1d7975c",
+      "size_bytes": 1421,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_hal.h",
+      "sha256": "bc09e67855b1d7e9d75f9dd284dfe6965c2be98acfec51e2fa7657f3936975c2",
+      "size_bytes": 9070,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_led.h",
+      "sha256": "a4d887b7d2c071257a96cfcb8b5e0f9d408c47e9e8aa3df58b959fc175b1e9e9",
+      "size_bytes": 1566,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_lps_poff.h",
+      "sha256": "51114c5a6cf98f76755917a3a8a1d7c1a381aecf7be074f993ed600303b433dd",
+      "size_bytes": 2791,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_recv.h",
+      "sha256": "c60eb813a5b0cbb95f2574c961182bde00f9294c81fcfb5e3508cd2e661c3215",
+      "size_bytes": 3437,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_rf.h",
+      "sha256": "4028624ba03963862d014f100d9a8c0e2cb08bf9a562298f6a15352cf64cac52",
+      "size_bytes": 763,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_spec.h",
+      "sha256": "3be943ccae27738906ce2634bfd17ed4bdad722a0389fc03351e3f1224ff7b24",
+      "size_bytes": 17256,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_sreset.h",
+      "sha256": "3ac330de1fd748bf8fa409b067caf5e4083e80098f7de147b7aaa4e19134cade",
+      "size_bytes": 921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8710b_xmit.h",
+      "sha256": "b6dea4532d41cb61729d848155c9a54debdd5c58a87088dafa5aecd4122731de",
+      "size_bytes": 24353,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_cmd.h",
+      "sha256": "6242d32334869053a44b585af52b5c2addd02985348fca0f62eb235a01ff9192",
+      "size_bytes": 11717,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_dm.h",
+      "sha256": "bb33cd910b9d181f358cc7158c6c80bd3a19427e5876c44368e8333579aa2a34",
+      "size_bytes": 1420,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_hal.h",
+      "sha256": "7b9136b1f7f468bd018dfc79898e0a4eaa919a79a310c38ac4537f9d410404c9",
+      "size_bytes": 9830,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_led.h",
+      "sha256": "b5687d971725d86e6d9f401bf4889c5a7564e5e893eac27a275e72d1dc28ee2e",
+      "size_bytes": 1558,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_recv.h",
+      "sha256": "3201eca00a7567844e526f85c72cfd92e5dce7363fe7196f838707538cc725d6",
+      "size_bytes": 2544,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_rf.h",
+      "sha256": "460242b6cfe006ef6e9b32363090e31f758f36b4abd529a04358a44a1cec4bb3",
+      "size_bytes": 856,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_spec.h",
+      "sha256": "4142c22ca7c65b95acaecaf82141fcdf2cf617a05357345bc26ec46b21f84ea8",
+      "size_bytes": 11649,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_sreset.h",
+      "sha256": "7419ff0ee01f75a3d9c05ffde0c64990bd519980d925056c35f9fbe856ea7d89",
+      "size_bytes": 921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723b_xmit.h",
+      "sha256": "3672c03063abe7307d8c3654060fb3cd05fcbe87d5475ad03e9e801db888d42f",
+      "size_bytes": 20357,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_cmd.h",
+      "sha256": "4f05ff9093fa8dc37298595949c6042b490c12c3104d865a9426d917caa38f51",
+      "size_bytes": 10460,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_dm.h",
+      "sha256": "ce0e01b1d5dff972ac24595e50b8ecec0ea1c009455a9fa3139cb4851b21dbee",
+      "size_bytes": 1421,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_hal.h",
+      "sha256": "6524305a463207de4457efbe35b1325bf368262d3489352d3558718ae431dd18",
+      "size_bytes": 10137,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_led.h",
+      "sha256": "572a61446bd8bc3f08e2145db4c889c14196e5c389c06827b67178b9df51af51",
+      "size_bytes": 1566,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_lps_poff.h",
+      "sha256": "de6fb3092a244db5f22df2e9b7cd92a7694d83ccb49536ff63d6e8e76879e621",
+      "size_bytes": 2791,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_recv.h",
+      "sha256": "1fe4878e680ece5ad8299ba8dbfab17d70d6742a1fc4d9cdc5d2ae3d06fce8a9",
+      "size_bytes": 4185,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_rf.h",
+      "sha256": "26d01642b47d992ece0862b2d71bd7e96fe3c21fc4271132e2640f71ceab6e86",
+      "size_bytes": 845,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_spec.h",
+      "sha256": "787e371459d50a98abdf9d0e72ef571b6c5393c7f4ea724447ff6f915cd5ce05",
+      "size_bytes": 16407,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_sreset.h",
+      "sha256": "fa91e9f88c3191ba07d79bd8653710cf1d2bc408402e0d68ab2580e8da5073a8",
+      "size_bytes": 921,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723d_xmit.h",
+      "sha256": "3587f0f84e0e34103a740f52b9a9de6523d36da2cfddebe778650daac249a059",
+      "size_bytes": 24633,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723f_hal.h",
+      "sha256": "c271fe958b53940cc0dce1914e29f6b47dab3767d193dffcf585860000195f13",
+      "size_bytes": 10053,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723fs_hal.h",
+      "sha256": "90e8334c2c7869c72abc1fcecdcb8aae72c0e0cbf47259cb55714449b7e91d28",
+      "size_bytes": 1088,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8723fu_hal.h",
+      "sha256": "d90a5e0c5df06ec24f5dd5ba6cab629b0676c8b34dea022a45798309cddbd098",
+      "size_bytes": 1977,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_cmd.h",
+      "sha256": "d4bf58b150d1a577ae0ae5c2777b13b3921998de75f708654eaf8f26ade243ed",
+      "size_bytes": 6953,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_dm.h",
+      "sha256": "169799c90f5a12f1039cb2886b183eb353f080bbe43ca788160dd77cf6448c08",
+      "size_bytes": 1034,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_hal.h",
+      "sha256": "acdc215bc12db3b4547c944e332cc0abc13328b177249dca6f548d31c19ea74a",
+      "size_bytes": 15043,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_led.h",
+      "sha256": "601a93513f921a859144b213f44d48e0d0ba5c299f39a9e97222091713c3d380",
+      "size_bytes": 1511,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_recv.h",
+      "sha256": "ad01ac82ae8ab7501a914dd3935e80fd8e3dae0d64966a8f940bc367326388b5",
+      "size_bytes": 7810,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_rf.h",
+      "sha256": "1f85b568d44bfe16db0fe6dda75a99825c11e219e2e5e0c66d32fad4b2518644",
+      "size_bytes": 881,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_spec.h",
+      "sha256": "7a8ff327cf0a4b98427429dd35f06c83a2ccb20db9ccb026c361900b84171c8c",
+      "size_bytes": 10660,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_sreset.h",
+      "sha256": "3672d68f9b02f503bfccc54afb3300b796bc755042df738eb379acbc14de2e6d",
+      "size_bytes": 918,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8812a_xmit.h",
+      "sha256": "4ccc90fe25e48657386ce2a530dc516eccfd300eb0a3250b5138e1980e638ff0",
+      "size_bytes": 15755,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_cmd.h",
+      "sha256": "9bde538af9512905714b577d12dcbbac89e5e033bb35420b1822432f1f98ba99",
+      "size_bytes": 10806,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_dm.h",
+      "sha256": "58338b75a7ee871c3571eac4b6a3eacff78c902332ee90064499ad90b7e96be3",
+      "size_bytes": 897,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_hal.h",
+      "sha256": "03fed438cec9897ce8317e91660ccc8cd58a2a04914a626262e91744a4d204ae",
+      "size_bytes": 13771,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_led.h",
+      "sha256": "bf4802007e7d6b1a1783984dbd0dbb802e128563c0d41aa5adb0549d4817f199",
+      "size_bytes": 1447,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_recv.h",
+      "sha256": "b245b95e9b70348e67edfb325defbfa8aea2859ad174dd37b393b6a8dcc9473d",
+      "size_bytes": 10072,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_rf.h",
+      "sha256": "c9db3ed2dd71762723c177148fdce10df06023991478bee21c50315af4cba5ac",
+      "size_bytes": 883,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_spec.h",
+      "sha256": "dea1aa519118e18cdb834966def9751d68884c095793e41bb14063e39a32a61d",
+      "size_bytes": 26176,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_sreset.h",
+      "sha256": "8461bcc2fc04fb0f31a7c0a05d9c0b32b12e59da2e3f628375a146284b233739",
+      "size_bytes": 920,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814a_xmit.h",
+      "sha256": "8593062542a9b6afa2e730969419c7bfb6ce028ac43f67bb5cfedd2c8d4ed00e",
+      "size_bytes": 20173,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814b_hal.h",
+      "sha256": "4a7c0c89984daa2bc738027aee0817b8f601180b68102606de78d496eabe4b8c",
+      "size_bytes": 8946,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814be_hal.h",
+      "sha256": "3a6a384de67f6c0d38257e62230b7145c1a4a3e790be679a4f2be8ac5b587b6b",
+      "size_bytes": 1084,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8814bu_hal.h",
+      "sha256": "5e9ddaacae5c2f7b765fdb747b148cbeccc1c8606f4cbd9d389c7a1593dce057",
+      "size_bytes": 1833,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821a_spec.h",
+      "sha256": "49e12ab3fb31fe5728151e164180d0cc281cd0e06060b9d81edf5889c2ab9161",
+      "size_bytes": 3448,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821a_xmit.h",
+      "sha256": "5049a0ad127968a895659e0e045426b1a151ab39f4e922e34ec8ac7a8ed71b4a",
+      "size_bytes": 4375,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821c_dm.h",
+      "sha256": "b6d1c1705a62465892b783b75623810e0e21447404126769ac1bd11512291972",
+      "size_bytes": 887,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821c_hal.h",
+      "sha256": "2922919f28f3ee0aeb33cd5e497f65b1ac2f10182cc525068710d887aec89ef2",
+      "size_bytes": 2841,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821c_spec.h",
+      "sha256": "945f0f79491b949c63e517fc42b38c008852a4cf0a24e8c9482ec4b4ed4f3124",
+      "size_bytes": 7562,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821ce_hal.h",
+      "sha256": "50ed6bb413699bf3722e0c42f16e85578a8f6164dfacece92535bd2b17d4d915",
+      "size_bytes": 841,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821cs_hal.h",
+      "sha256": "9c8499c45e47ae83141d4e7e168293ab70b083a8e3a6a6ee6b45c5eaf9808a07",
+      "size_bytes": 839,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8821cu_hal.h",
+      "sha256": "7fa89bc9e53cd5860ab4de3e1d02934ab8be0d40a3414e8995b5e8da73ae878f",
+      "size_bytes": 894,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822b_hal.h",
+      "sha256": "67f9132c858e19363569379697fd513452898c9da75ba4f4c16ca1253afe23e1",
+      "size_bytes": 8802,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822be_hal.h",
+      "sha256": "b1a28845bce77d29d6eac43a027f36a4fe4c05f52930b3910e54f7f83b6f57ed",
+      "size_bytes": 992,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822bs_hal.h",
+      "sha256": "6f3de986bc76679e478646a4c8382b8059d7af16f88a0e6bb375d4fd15e57890",
+      "size_bytes": 1095,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822bu_hal.h",
+      "sha256": "bc97c9c40bfa0e58231c030accbe7b1acd7f46b7d9e4021453b7075578e6abe3",
+      "size_bytes": 2024,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822c_hal.h",
+      "sha256": "a90f1aeeb9d1c8cdb650fa815974041eec53678e16e122a795f469580e4fda55",
+      "size_bytes": 9351,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822ce_hal.h",
+      "sha256": "7c4a112c8d1a5bb45ebca1712ee5754f3f2c7a1286125a1015affba21a2802e8",
+      "size_bytes": 992,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822cs_hal.h",
+      "sha256": "83f31b05a9183074857a8379e8dcdc793fac6127faf1148fe9c80d92dbc8bfb6",
+      "size_bytes": 1095,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822cu_hal.h",
+      "sha256": "2a19c2f38c38572e88491ff1ae2a84c8030f30513d935eec3f395a393c4eb0ce",
+      "size_bytes": 2035,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822e_hal.h",
+      "sha256": "6e0372d410d6bdb7d494f775724c59f675e983e2f00c92325f45d4b493711cd4",
+      "size_bytes": 9351,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822ee_hal.h",
+      "sha256": "816df1767abdd45f6a4534410b5aa30bdec2458e1e073beb112cd24cdf743fa8",
+      "size_bytes": 992,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822es_hal.h",
+      "sha256": "e52c72f38c251b7ab7fc8abdb2d48e448e3ff0c350e0a4bb430371e6f99a65ee",
+      "size_bytes": 1095,
+      "type": "file"
+    },
+    {
+      "path": "include/rtl8822eu_hal.h",
+      "sha256": "63d3312bd77a1dcbd408695c22ad4bdb030f6ba8465b1bf1d7b52d517deb5a7f",
+      "size_bytes": 2025,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_android.h",
+      "sha256": "fa834045841353181d2922c0ea1a878a62fc4f2229d79c1f284c2c0d9be8dd55",
+      "size_bytes": 3734,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ap.h",
+      "sha256": "7405a6c71f91c6f9b329792869f5f601234abc7fdb947bdeb82132273d12c057",
+      "size_bytes": 7103,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_beamforming.h",
+      "sha256": "52057f663e40eca8850eda581b46772dc0536812d8d5f411532fdcc7839efe9a",
+      "size_bytes": 8948,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_br_ext.h",
+      "sha256": "e52e20502b73719cafa7d3595918509fe7424fc8fce70a0ca07753c68a703670",
+      "size_bytes": 1997,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_bt_mp.h",
+      "sha256": "ca241102ab38177e91704c75be2f34e4f107d787015b898bca8c12a67f041547",
+      "size_bytes": 7863,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_btcoex.h",
+      "sha256": "c28b8050143a4c127fcba51bf49b94c1ced2704672f0d474f6997851cdff42b0",
+      "size_bytes": 19860,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_btcoex_wifionly.h",
+      "sha256": "52a15fa8c9788771fc9dadb3f3063696c372527b5729853e84c1f36024356b64",
+      "size_bytes": 1083,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_byteorder.h",
+      "sha256": "f5677d91e6c532ea65b8185163f7e1a1d45eb8b0063b7115e500725b4ce6afa3",
+      "size_bytes": 1145,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_cfg.h",
+      "sha256": "2b68c1cbd11ae0575ec3e5aa1ba87533e499f7d3d0a696d59523b86dedac001e",
+      "size_bytes": 1069,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_cmd.h",
+      "sha256": "ece5cd5e07dbe9c9c134763937138201c80c85bbb839315ae3e098446d441c75",
+      "size_bytes": 19629,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_debug.h",
+      "sha256": "3009ff97452a8906e5454ccd2cc94b46aec161d97aca69cade714cc3796e6adc",
+      "size_bytes": 31341,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_eeprom.h",
+      "sha256": "a913fa3277956c0ac46dc96ca24713930d4781062a51e0df721afd5281d99568",
+      "size_bytes": 4122,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_efuse.h",
+      "sha256": "9caf04c30e9a1e7e305f27cdb59709a3e12bef6e5e6cc4128649bc167065bb71",
+      "size_bytes": 11202,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_event.h",
+      "sha256": "787237d2313abd14395431a7f157912703587e2748d273cc89d7a051e1170a38",
+      "size_bytes": 1963,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ft.h",
+      "sha256": "c7022bb9e1be9b614ffeb2c1a0d69da097e6f7e7e9a67263d719cc1d01ab6a07",
+      "size_bytes": 5996,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ht.h",
+      "sha256": "59b437f776c88bbf491eb72d34601f8b57e7e478f336320e43245e1f365d93d6",
+      "size_bytes": 12333,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_io.h",
+      "sha256": "dbd41d9d1025efd7d835afbd781905b9e3c1fc34de4fd1b59466d98eb0d63517",
+      "size_bytes": 18945,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ioctl.h",
+      "sha256": "105a72f1fd9eaba41f71fad208fc5ac0306a4d2326e5a18db25a0f2a335f9234",
+      "size_bytes": 1547,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ioctl_query.h",
+      "sha256": "227e8796fa2936fda940e736127405bf5d18d57c0213a30da93b502d961f0d42",
+      "size_bytes": 721,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_ioctl_set.h",
+      "sha256": "321900d762f719ef5bd0eaa6bb56e82d01e3fe4cc005fc02f13bfb0bcf57f36a",
+      "size_bytes": 1876,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_iol.h",
+      "sha256": "01270900eda87feb26089eadda38b42ebc2d15cbee6d10a1be261783fc78c113",
+      "size_bytes": 5477,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mbo.h",
+      "sha256": "20209a9eae766986325ca445f3542ef0cf650c7f3f8525e42a06d84b9056d200",
+      "size_bytes": 4910,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mcc.h",
+      "sha256": "55f392709669bb257ee39ffb31da68b4ad844f9b402faa6747df2a7f611aa4e0",
+      "size_bytes": 9455,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mem.h",
+      "sha256": "77455b372063c4609414bd1f13cafc30ae1a6cdae59350373838c66d0d9cd131",
+      "size_bytes": 1217,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mi.h",
+      "sha256": "2ea5f2a007f65e13107dc56188f02bc08c66a7a1785abe33effb7a48f8526998",
+      "size_bytes": 12919,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mlme.h",
+      "sha256": "7209641ce40c884d1882bad23adec2c3f6bbe0d9f04a0e9f6ecfa7e254fbbbd6",
+      "size_bytes": 46043,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mlme_ext.h",
+      "sha256": "57004c844b0bafaa036449328f66cdf40bcf11c5707ca4dc93c492343a4541a4",
+      "size_bytes": 44791,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mp.h",
+      "sha256": "5543f628b968cb1f50fb87a96253e4f9044f35344e0cf271a6ddacd94fbd0a76",
+      "size_bytes": 27714,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_mp_phy_regdef.h",
+      "sha256": "983c17160fb4fe5a4ead66336509ee169c089edd8c39845b3103e477e934754c",
+      "size_bytes": 38095,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_odm.h",
+      "sha256": "b1659c9e8f1a0d783ba32c09c781442cd32d4c33271db2cdf00b01f12b10aae5",
+      "size_bytes": 4621,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_p2p.h",
+      "sha256": "421804f1db778e570e7bbeb26a62456aecb1ec2c0c2ce18f6298e75f88b06d4d",
+      "size_bytes": 7883,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_pwrctrl.h",
+      "sha256": "7737729fca0b7078d242de65568586a5bcaa84ce39beabeec174e0aa2182b281",
+      "size_bytes": 24632,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_qos.h",
+      "sha256": "1a3c64c3f9de128f1c929a03c5de474418b3817ded307276efcf1c97811d196f",
+      "size_bytes": 2116,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_recv.h",
+      "sha256": "2887abe82cb1d5eab53a59a2b71f61be3f2effb03ddb1a0df3f1dfc3e6ae70d0",
+      "size_bytes": 23487,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_rf.h",
+      "sha256": "34ccb93acf338fa5788afb5d4d00cf9c4bac5ca0d52e930163ee87c2fe03b52a",
+      "size_bytes": 12068,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_rm.h",
+      "sha256": "a0c753cdc626bd0adc3f0c5c8bca83413bc41389c8fabf5d9c269179edaafc34",
+      "size_bytes": 3081,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_rm_fsm.h",
+      "sha256": "df2f596d6a3bfd863164029a3adcc0d4176e464841374710ca02ffc4b9003737",
+      "size_bytes": 9655,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_rm_util.h",
+      "sha256": "8b4c2994d34c0cef10fe881472e1f96b6a0579e43332c57909afa3016e06fb4c",
+      "size_bytes": 2023,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_roch.h",
+      "sha256": "d97d34e506d6885a9801581865c83ae35e10e5646713df2393231923bdf4f08d",
+      "size_bytes": 2208,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_rson.h",
+      "sha256": "4cc5feb4e46b7d233fd9f041ac57b879b73f08ac9a1bfc024e5f558029490b0a",
+      "size_bytes": 2491,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_sdio.h",
+      "sha256": "0aedf013dd364fdd166437ce9f37f1614bb91dc1cb27edbd5735928eb4bebfcb",
+      "size_bytes": 1173,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_security.h",
+      "sha256": "1fea64f67c07621ae2a400743b3eae4e100f695d947e15997cb8db9aec54241c",
+      "size_bytes": 12049,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_sreset.h",
+      "sha256": "b6ed4d1d40db1b747cce9353b019665a736a4fb871aaa08e3aacb73a5d522122",
+      "size_bytes": 1859,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_swcrypto.h",
+      "sha256": "f7c50ac27968f82def6458171deab488e82912c6ec511e1129bcb2adca044679",
+      "size_bytes": 1925,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_tdls.h",
+      "sha256": "b8818b870249f266c2efb48baa660ffb7edfda518cb51ede2f8f3fb15729aadc",
+      "size_bytes": 9518,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_version.h",
+      "sha256": "bc4e3d6290439fb984c571a1d3f435eb3365cbb8fd112efcb46ef1b045bc2905",
+      "size_bytes": 116,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_vht.h",
+      "sha256": "d321e8fea7a30ddfdfe4c25277e970beaa113ffa5f9e33e74e544bd2eff8d3b9",
+      "size_bytes": 12961,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_wapi.h",
+      "sha256": "416a1efb1e679604354a720a59fb344751fb9077d7fd76bf8771bfb44ee71995",
+      "size_bytes": 6615,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_wnm.h",
+      "sha256": "5ca89faa5938a4b17c7110c252f95d5a757d75392f2fb0ce8c32ffff73a54b3a",
+      "size_bytes": 6248,
+      "type": "file"
+    },
+    {
+      "path": "include/rtw_xmit.h",
+      "sha256": "b5aa68f0d8d194027d7161f3add6a271f8ab22e9f0665508508e4820bff712b7",
+      "size_bytes": 31264,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_hal.h",
+      "sha256": "58db4bec1e415464c202c7f3ffaf7eccd35a9e9b72db1f1d135319f8b755c723",
+      "size_bytes": 1514,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_ops.h",
+      "sha256": "30cad31aa6d726bd08cd91a3a279908fe2eab306807b0eb60cb5f5bee8d393e4",
+      "size_bytes": 8511,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_ops_ce.h",
+      "sha256": "999bbf3e07309023b60505957d084f4aa3d6a453c73687c8b5fbea5f6d92a0e6",
+      "size_bytes": 1824,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_ops_linux.h",
+      "sha256": "cd4d5af7fb27d7e6b5876cc17daad7c8266b89b442ec94da7d5950c3e6d8f4fa",
+      "size_bytes": 2601,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_ops_xp.h",
+      "sha256": "abecf3b52005544c20f5a1b05722a720922fa2d602be6ec3e5df7462c8f99102",
+      "size_bytes": 1818,
+      "type": "file"
+    },
+    {
+      "path": "include/sdio_osintf.h",
+      "sha256": "037a918879292c55452132a04b725a7c63b8b999d3c3c9fbfb8a9df68dab1773",
+      "size_bytes": 717,
+      "type": "file"
+    },
+    {
+      "path": "include/sta_info.h",
+      "sha256": "b3eff0f3d80cebfbab76614cb7cac5ab3f08d3b802e4cccd4f36d8e6cb583305",
+      "size_bytes": 20890,
+      "type": "file"
+    },
+    {
+      "path": "include/usb_hal.h",
+      "sha256": "478a755199d3dd747ab83174403526deeb5899b6d90362d1132ebc5e1ac7e9be",
+      "size_bytes": 1932,
+      "type": "file"
+    },
+    {
+      "path": "include/usb_ops.h",
+      "sha256": "2611c0dc63f2531006be026bba1a66717a900f56620375bf78bf60c68ca26872",
+      "size_bytes": 4864,
+      "type": "file"
+    },
+    {
+      "path": "include/usb_ops_linux.h",
+      "sha256": "ddd7f06a910f4ca6e12d5578e0c0f92eb73153ad5ea53b92750e5cb4b0884341",
+      "size_bytes": 4684,
+      "type": "file"
+    },
+    {
+      "path": "include/usb_osintf.h",
+      "sha256": "42d33867aa9b76ff0304b8b7118af59428edc5dafdba334f6a078996bcde033a",
+      "size_bytes": 951,
+      "type": "file"
+    },
+    {
+      "path": "include/usb_vendor_req.h",
+      "sha256": "8864908b6e4606e1d297cbba938d1fe03bfa84fb476c674221ff94a190551e7a",
+      "size_bytes": 1941,
+      "type": "file"
+    },
+    {
+      "path": "include/wifi.h",
+      "sha256": "18dcec1db90ba6fc294c3814131a6d86e4754331f08e1e01524730ccc601b85c",
+      "size_bytes": 43258,
+      "type": "file"
+    },
+    {
+      "path": "include/wlan_bssdef.h",
+      "sha256": "196a0c0f7067f16cf73e80ad85666f684b15fc56646e76e97d8a88b3a3dd12e7",
+      "size_bytes": 9975,
+      "type": "file"
+    },
+    {
+      "path": "include/xmit_osdep.h",
+      "sha256": "1641bd6298d77017e86a71bb8bc042939fe77f76f5fb5a421e60dc46bf764326",
+      "size_bytes": 2873,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/custom_gpio_linux.c",
+      "sha256": "8c731633300c3bc9bf9743bea5c18921f7a140198b5b5c29ae7ab142624b33d3",
+      "size_bytes": 8418,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/ioctl_cfg80211.c",
+      "sha256": "e9e5a5e944763883bc15a5b4baa2f823e2e287ff2d6890d7dc7f8169649f76ed",
+      "size_bytes": 341297,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/ioctl_cfg80211.h",
+      "sha256": "1867e59bb643d500c47a450e6935c35998980fb03b460f0f53b37c5ae48b4d1b",
+      "size_bytes": 17144,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/ioctl_linux.c",
+      "sha256": "5a3e1e05487faf66604d91029eb4a3d3120d155c5ecd71c677bddba69e634d7a",
+      "size_bytes": 379137,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/ioctl_mp.c",
+      "sha256": "f48600d8cf5fbe54dc53c494ab32fb75f3b00578a5c8733698f2dea042683501",
+      "size_bytes": 112567,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/mlme_linux.c",
+      "sha256": "a0a5f167c614c198b34eb65871c9482afaf630f00e0e00465ad0dbf54e15bce3",
+      "size_bytes": 13543,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/nlrtw.c",
+      "sha256": "d9553ff85f3b27e0329afd52156f267228265f14e98ba4d37d94f30bd3445a58",
+      "size_bytes": 14340,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/nlrtw.h",
+      "sha256": "0806cc789c384af5808f89cbfc03b369530bf234595aaf7e31cdb42b04d6832b",
+      "size_bytes": 2765,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/os_ch_utils.c",
+      "sha256": "cf9437b5f034df8fa24f8eb236f5062bd9edcd354189db3f0c8b95aa55b94fe6",
+      "size_bytes": 12675,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/os_ch_utils.h",
+      "sha256": "d6816338f31acd1fd8bbf6599f8779412924c8257e4953b72734eeba98f2d357",
+      "size_bytes": 3190,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/os_intfs.c",
+      "sha256": "c6c8114a320dc67b39390f99225ee40907a39ef9a2d27f67e531898eb9907f3e",
+      "size_bytes": 169297,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/recv_linux.c",
+      "sha256": "af6f2813c6a9585a00d51f1e12243575ec16a93d86393971e6ddc145a40337a8",
+      "size_bytes": 20253,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rhashtable.c",
+      "sha256": "432c5f53adc102ed45ec3c0f58b2963eb698029a02a62d56485c8490770cbc27",
+      "size_bytes": 21462,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rhashtable.h",
+      "sha256": "66e777fbc1e6c832005c2ceae9f76fecb22c740faa0560b4a3e8b0b92767d2c6",
+      "size_bytes": 26328,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_android.c",
+      "sha256": "78faf3050187baaa720c577177e426d70b3062816a6d36b51a348f436158cb0c",
+      "size_bytes": 36252,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_cfg.c",
+      "sha256": "dab4512c981af06998f61b5e8d76bbe98d660696b527e268eb78b15995e8bbbe",
+      "size_bytes": 12112,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_cfgvendor.c",
+      "sha256": "d8098c64333f16b369520a2753ee529624979739831000a5fe59229d49edaf74",
+      "size_bytes": 61997,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_cfgvendor.h",
+      "sha256": "30cbaa3e6c03bf4d6cbc14ba49a50d73fdf1c7752323485f7a5da4d2922f1ab4",
+      "size_bytes": 26426,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_proc.c",
+      "sha256": "c8298d336f3ed391aba11be5ff39e63e5e6a3d2bfe6f67f05069282486bae612",
+      "size_bytes": 167292,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_proc.h",
+      "sha256": "8de0845c53d44f53d41caf534c339aa2e40f828404bfba91c288ad79d8e12331",
+      "size_bytes": 2424,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_rhashtable.c",
+      "sha256": "d161e21fdd66057f760f9248f409c83b351d9b2852a2fcb1e6865024b4767f36",
+      "size_bytes": 2296,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/rtw_rhashtable.h",
+      "sha256": "78d0b3ee66ad4cfcc00a4fd5c9d8016cef9f202607dd22e9268741863d41d0d0",
+      "size_bytes": 2806,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/usb_intf.c",
+      "sha256": "84a845bf14cd1dab84353b8b8238af8d2a30bc49e74c11d1b6cd6c74ddf9a379",
+      "size_bytes": 48085,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/usb_ops_linux.c",
+      "sha256": "48743d52b4e7a92a402abc51c18b246509176c01283b98e97d1b38dc4be9635c",
+      "size_bytes": 30891,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/wifi_regd.c",
+      "sha256": "2d22b2ff83348616ff2e48a01d2da28abebaf13a6640cd7cc7f510d6c9c1f5d8",
+      "size_bytes": 37631,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/wifi_regd.h",
+      "sha256": "013c6a6f282a0862eb7fc9d9d49c968549d6f65cfc985bc2ebf65992aef2f40e",
+      "size_bytes": 3509,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/linux/xmit_linux.c",
+      "sha256": "209176384612e111699fbc9aa674905a6441bc01638812c4fcb464240aa64cca",
+      "size_bytes": 14810,
+      "type": "file"
+    },
+    {
+      "path": "os_dep/osdep_service.c",
+      "sha256": "8934206cbf48dda2de181c10a1742d7f62ed686c965797a2bac940899dd34247",
+      "size_bytes": 77292,
+      "type": "file"
+    },
+    {
+      "path": "platform/custom_country_chplan.h",
+      "sha256": "c50113f27e03721979ee11971749643b01f18b56e8461c858172033683115bab",
+      "size_bytes": 1059,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ARM_SUN50IW1P1_sdio.c",
+      "sha256": "265bfda888633cd762f1a2dcdd6f6236545af025535c0af3aed0bab5bccc2512",
+      "size_bytes": 2213,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ARM_SUNnI_sdio.c",
+      "sha256": "0ca559e284f30739002819f03a49a8b18591c0e985393b90222e31fb773da0a2",
+      "size_bytes": 3514,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ARM_SUNxI_sdio.c",
+      "sha256": "fc258f34dc1b685735fce1ca501c77bb8980b6501a69d43ed471b0df19ae5499",
+      "size_bytes": 2715,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ARM_SUNxI_usb.c",
+      "sha256": "02feb30f473c1530cba5eae238bdca87c5b96b17153c695df5ab7dd3a4640907",
+      "size_bytes": 3895,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ARM_WMT_sdio.c",
+      "sha256": "5d8ccf02d89b542409577b89b335cf26f2d06eea3468f73b41c8d56700db7830",
+      "size_bytes": 1532,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_RTK_DMP_usb.c",
+      "sha256": "bc5c60733ad4ee43603b27c187ba078f230e8a2b1ec6405309d801ff23e5f5cb",
+      "size_bytes": 966,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_aml_s905_sdio.c",
+      "sha256": "f58d1bb92ccbcda05b3f29c171950d1cbd570509c6c792f8cf26b2f5892e351a",
+      "size_bytes": 1484,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_aml_s905_sdio.h",
+      "sha256": "665dfeb205aef290fe418203c005688ee454a0b4f737bdede5688a0888d3f6ae",
+      "size_bytes": 1050,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_arm_act_sdio.c",
+      "sha256": "416aad0d6a1e14a2632ae0cfaf86f289f306a6f845c3c734d34e8169ec972849",
+      "size_bytes": 1353,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_hisilicon_hi3798_sdio.c",
+      "sha256": "3f40c75dcf0dce1f88a897759d7e8b743588a964de7ee7e59ac9ff724a9fc3b9",
+      "size_bytes": 2665,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_hisilicon_hi3798_sdio.h",
+      "sha256": "3f778b52ea6b1b784f524d2aefdf1f353d075d4871ff37391a02fe500866946d",
+      "size_bytes": 1043,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ops.c",
+      "sha256": "d5b924bc0d3f77a2e5f8cdbe4c63f3367a4fcb936f9fd263d589dbb0b37d8b09",
+      "size_bytes": 897,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_ops.h",
+      "sha256": "503d74c4ccee18fa34aec2cd07f4bc042d7b6ea1e2cd78ac945f022a459c9954",
+      "size_bytes": 887,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_sprd_sdio.c",
+      "sha256": "3ceb64c27b84cf0177547fe548f2b65c6df8c3b28164e0d99b34ce9ccdc68c53",
+      "size_bytes": 2048,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_zte_zx296716_sdio.c",
+      "sha256": "88fd90e73815dc2df58fd01e2d18bc62e13bd4b89b101c56689c5cd630711010",
+      "size_bytes": 1462,
+      "type": "file"
+    },
+    {
+      "path": "platform/platform_zte_zx296716_sdio.h",
+      "sha256": "87e7d049e0e600bb439f503ac79e896fe1084f5432dfccc897e6b6ccbf700036",
+      "size_bytes": 989,
+      "type": "file"
+    },
+    {
+      "path": "rtl8822c.mk",
+      "sha256": "124eecf2b90c20118e5b4e28b1bcd0590865292b7757110df493117e65bf9690",
+      "size_bytes": 1962,
+      "type": "file"
+    },
+    {
+      "path": "runwpa",
+      "sha256": "99078679add69c16913488ce820d7dac0c67c583baad43e3d733477d6f25b4bf",
+      "size_bytes": 423,
+      "type": "file"
+    },
+    {
+      "path": "wlan0dhcp",
+      "sha256": "75ad0d7b22e94686a8b1d39080900fa63ae29fed05a21f7ae1d1650df562221c",
+      "size_bytes": 294,
+      "type": "file"
+    }
+  ],
+  "imported_at_utc": "2026-09-02T06:45:21Z",
+  "license_files": [
+    "COPYING"
+  ],
+  "required_markers": [
+    "Makefile",
+    "core/",
+    "hal/rtl8822c/",
+    "include/",
+    "os_dep/linux/usb_intf.c"
+  ],
+  "schema_version": 1,
+  "source_root": "rtl88x2CU_WiFi_linux_v5.15.8.5-3-g88098843f.20240412_COEX20221215-3130",
+  "source_tree_sha256": "15ccf3ac98da402e9f31587f69ebae6728405392acca162a04cc488a07376e46"
+}

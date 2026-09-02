@@ -71,13 +71,13 @@ CONFIG_GSPI_HCI = n
 ########################## Features ###########################
 CONFIG_AP_MODE = y
 CONFIG_P2P = y
-CONFIG_MP_INCLUDED = y
+CONFIG_MP_INCLUDED = n
 CONFIG_POWER_SAVING = y
 CONFIG_IPS_MODE = 0
 CONFIG_LPS_MODE = 0
 CONFIG_USB_AUTOSUSPEND = n
 CONFIG_HW_PWRP_DETECTION = n
-CONFIG_BT_COEXIST = y
+CONFIG_BT_COEXIST = n
 CONFIG_WAPI_SUPPORT = n
 CONFIG_EFUSE_CONFIG_FILE = y
 CONFIG_EXT_CLK = n
@@ -190,7 +190,7 @@ CONFIG_SECURE_DMA = n
 CONFIG_SECURE_DMA_MEM_ADDR = 0
 CONFIG_SECURE_DMA_MEM_SIZE = 3686400
 ###################### Platform Related #######################
-CONFIG_PLATFORM_I386_PC = y
+CONFIG_PLATFORM_I386_PC = n
 CONFIG_PLATFORM_ANDROID_X86 = n
 CONFIG_PLATFORM_ANDROID_INTEL_X86 = n
 CONFIG_PLATFORM_JB_X86 = n
@@ -259,6 +259,12 @@ CONFIG_CUSTOMER_HUAWEI_GENERAL = n
 CONFIG_DRVEXT_MODULE = n
 
 export TopDIR ?= $(shell pwd)
+
+# RV1106G is a little-endian Linux platform using cfg80211.  Keep these
+# platform-neutral flags explicit instead of inheriting the vendor I386_PC
+# host-build defaults.
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
+EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT
 
 ########### COMMON  #################################
 ifeq ($(CONFIG_GSPI_HCI), y)
@@ -1043,11 +1049,7 @@ endif
 ifeq ($(CONFIG_RTL8822C), y)
 RTL871X := rtl8822c
 ifeq ($(CONFIG_USB_HCI), y)
-ifeq ($(CONFIG_BT_COEXIST), n)
-MODULE_NAME = 8812cu
-else
 MODULE_NAME = 88x2cu
-endif
 endif
 ifeq ($(CONFIG_PCI_HCI), y)
 MODULE_NAME = 88x2ce
@@ -1478,10 +1480,10 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
 ARCH ?= $(SUBARCH)
 CROSS_COMPILE ?=
 KVER  := $(shell uname -r)
-KSRC := /lib/modules/$(KVER)/build
-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
+KSRC := $(KERNEL_DIR)
+MODDESTDIR := $(M_OUT_DIR)
 INSTALL_PREFIX :=
-STAGINGMODDIR := /lib/modules/$(KVER)/kernel/drivers/staging
+STAGINGMODDIR := $(M_OUT_DIR)
 endif
 
 ifeq ($(CONFIG_PLATFORM_NV_TK1), y)
@@ -1511,8 +1513,8 @@ ARCH ?= arm
 
 CROSS_COMPILE ?=
 KVER := $(shell uname -r)
-KSRC := /lib/modules/$(KVER)/build
-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
+KSRC := $(KERNEL_DIR)
+MODDESTDIR := $(M_OUT_DIR)
 INSTALL_PREFIX :=
 endif
 
@@ -1735,7 +1737,7 @@ EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN -DCONFIG_WISTRON_PLATFORM
 ARCH := arm
 CROSS_COMPILE := /opt/freescale/usr/local/gcc-4.1.2-glibc-2.5-nptl-3/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
 KVER  := 2.6.31
-KSRC ?= /lib/modules/2.6.31-770-g0e46b52/source
+KSRC ?= $(KERNEL_DIR)
 endif
 
 ifeq ($(CONFIG_PLATFORM_FS_MX61), y)
@@ -2630,7 +2632,7 @@ ifeq ($(CONFIG_RTL8723B), y)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
 endif
 
-obj-$(CONFIG_RTL8822CU) := $(MODULE_NAME).o
+obj-m += $(MODULE_NAME).o
 
 ############# MEMORY MANAGMENT #############
 ifneq ($(CONFIG_RTKM), n)
@@ -2657,81 +2659,16 @@ export CONFIG_RTL8822CU = m
 all: modules
 
 modules:
-	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(M)  modules
-#	$(CC_STRIP) --strip-unneeded ${OUT_DIR}/$(M)/$(MODULE_NAME).ko
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) \
+		-C $(KERNEL_DIR) M=$(CURDIR) modules O=$(WIFI_BUILD_KERNEL_OBJ_DIR)
+	test -s $(CURDIR)/88x2cu.ko
+	cp $(CURDIR)/88x2cu.ko $(M_OUT_DIR)/88x2cu.ko
 
-strip:
-	$(CC_STRIP) $(MODULE_NAME).ko --strip-unneeded
-
-install:
-	install -p -m 644 $(MODULE_NAME).ko  $(MODDESTDIR)
-	/sbin/depmod -a ${KVER}
-
-uninstall:
-	rm -f $(MODDESTDIR)/$(MODULE_NAME).ko
-	/sbin/depmod -a ${KVER}
-
-modules_install:
-	$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KSRC) modules_install
-#	mkdir -p ${OUT_DIR}/../vendor_lib/modules
-#	cd ${OUT_DIR}/$(M)/; find -name $(MODULE_NAME).ko -exec cp {} ${OUT_DIR}/../vendor_lib/modules/ \;
-
-
-backup_rtlwifi:
-	@echo "Making backup rtlwifi drivers"
-ifneq (,$(wildcard $(STAGINGMODDIR)/rtl*))
-	@tar cPf $(wildcard $(STAGINGMODDIR))/backup_rtlwifi_driver.tar $(wildcard $(STAGINGMODDIR)/rtl*)
-	@rm -rf $(wildcard $(STAGINGMODDIR)/rtl*)
-endif
-ifneq (,$(wildcard $(MODDESTDIR)realtek))
-	@tar cPf $(MODDESTDIR)backup_rtlwifi_driver.tar $(MODDESTDIR)realtek
-	@rm -fr $(MODDESTDIR)realtek
-endif
-ifneq (,$(wildcard $(MODDESTDIR)rtl*))
-	@tar cPf $(MODDESTDIR)../backup_rtlwifi_driver.tar $(wildcard $(MODDESTDIR)rtl*)
-	@rm -fr $(wildcard $(MODDESTDIR)rtl*)
-endif
-	@/sbin/depmod -a ${KVER}
-	@echo "Please reboot your system"
-
-restore_rtlwifi:
-	@echo "Restoring backups"
-ifneq (,$(wildcard $(STAGINGMODDIR)/backup_rtlwifi_driver.tar))
-	@tar xPf $(STAGINGMODDIR)/backup_rtlwifi_driver.tar
-	@rm $(STAGINGMODDIR)/backup_rtlwifi_driver.tar
-endif
-ifneq (,$(wildcard $(MODDESTDIR)backup_rtlwifi_driver.tar))
-	@tar xPf $(MODDESTDIR)backup_rtlwifi_driver.tar
-	@rm $(MODDESTDIR)backup_rtlwifi_driver.tar
-endif
-ifneq (,$(wildcard $(MODDESTDIR)../backup_rtlwifi_driver.tar))
-	@tar xPf $(MODDESTDIR)../backup_rtlwifi_driver.tar
-	@rm $(MODDESTDIR)../backup_rtlwifi_driver.tar
-endif
-	@/sbin/depmod -a ${KVER}
-	@echo "Please reboot your system"
-
-config_r:
-	@echo "make config"
-	/bin/bash script/Configure script/config.in
-
-
-.PHONY: modules clean
+.PHONY: all modules clean
 
 clean:
-	#$(MAKE) -C $(KSRC) M=$(shell pwd) clean
-	cd hal ; rm -fr */*/*/*.mod.c */*/*/*.mod */*/*/*.o */*/*/.*.cmd */*/*/*.ko
-	cd hal ; rm -fr */*/*.mod.c */*/*.mod */*/*.o */*/.*.cmd */*/*.ko
-	cd hal ; rm -fr */*.mod.c */*.mod */*.o */.*.cmd */*.ko
-	cd hal ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	cd core ; rm -fr */*.mod.c */*.mod */*.o */.*.cmd */*.ko
-	cd core ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	cd os_dep/linux ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	cd os_dep ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	cd platform ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	rm -fr Module.symvers ; rm -fr Module.markers ; rm -fr modules.order
-	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
-	rm -fr .tmp_versions
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) \
+		-C $(KERNEL_DIR) M=$(CURDIR) clean O=$(WIFI_BUILD_KERNEL_OBJ_DIR)
 endif
 
 
