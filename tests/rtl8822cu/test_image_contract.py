@@ -3,6 +3,7 @@ import hashlib
 import os
 import re
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -19,6 +20,11 @@ SAFE_WPA = ROOT / "project/cfg/BoardConfig_IPC/overlay/aicpm-v1/etc/wpa_supplica
 SOAK = ROOT / "project/cfg/BoardConfig_IPC/overlay/aicpm-v1/usr/sbin/aicpm-wifi-soak"
 BOARD = ROOT / "project/cfg/BoardConfig_IPC/BoardConfig-SPI_NAND-NONE-RV1106_AICPM-V1.mk"
 KCONFIG = ROOT / "sysdrv/source/objs_kernel/.config"
+STRIP = (
+    ROOT
+    / "tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin"
+    / "arm-rockchip830-linux-uclibcgnueabihf-strip"
+)
 BSP_BASE = "de6020e1def04073b885389d660caf6d2723231c"
 BASELINE_WPA = (
     "sysdrv/tools/board/buildroot/overlay/etc/wpa_supplicant.conf",
@@ -31,6 +37,16 @@ SECRET_RE = re.compile(
 
 def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def stripped_sha256(path):
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        output = Path(temporary_directory) / path.name
+        subprocess.run(
+            [str(STRIP), "--strip-debug", "-o", str(output), str(path)],
+            check=True,
+        )
+        return sha256(output)
 
 
 def exported(text, name):
@@ -52,15 +68,22 @@ def forbidden_part(part):
 
 
 class ImageContract(unittest.TestCase):
-    def test_01_three_staging_modules_and_markers_are_bound(self):
+    def test_01_staging_and_stripped_rootfs_modules_are_bound(self):
         self.assertTrue(DRIVER_MODULE.is_file())
         expected_module_sha = sha256(DRIVER_MODULE)
-        for tree in STAGING_TREES:
+        for tree in STAGING_TREES[:2]:
             with self.subTest(tree=tree):
                 module = tree / "88x2cu.ko"
-                marker = tree / "wifi_chip_type"
                 self.assertTrue(module.is_file() and module.stat().st_size > 0)
                 self.assertEqual(expected_module_sha, sha256(module))
+
+        rootfs_module = STAGING_TREES[2] / "88x2cu.ko"
+        self.assertTrue(rootfs_module.is_file() and rootfs_module.stat().st_size > 0)
+        self.assertEqual(stripped_sha256(DRIVER_MODULE), sha256(rootfs_module))
+
+        for tree in STAGING_TREES:
+            with self.subTest(marker_tree=tree):
+                marker = tree / "wifi_chip_type"
                 self.assertEqual(b"RTL8822CU_USB\n", marker.read_bytes())
 
     def test_02_rootfs_has_fail_closed_loaders(self):
