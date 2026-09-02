@@ -16,6 +16,9 @@ BOARD = "project/cfg/BoardConfig_IPC/BoardConfig-SPI_NAND-NONE-RV1106_AICPM-V1.m
 BUILD = "project/build.sh"
 BASE_COMMIT = "9257b117a258ca5e12e23901cbf032461c989d39"
 BASELINE_WPA = "sysdrv/tools/board/buildroot/overlay/etc/wpa_supplicant.conf"
+REVIEWED_SCRIPT_SHA256 = (
+    "c0bced971b9119710d5e42d51903c7cc5315556a864b5956be5414659b321135"
+)
 
 
 def exported(board, name):
@@ -127,16 +130,25 @@ class DiagnosticScriptContract(unittest.TestCase):
             raise AssertionError("unapproved slash token may bypass the fake PATH")
         if forbidden.search(script):
             raise AssertionError("unsafe production command")
-        reviewed_script_sha256 = (
-            "c0bced971b9119710d5e42d51903c7cc5315556a864b5956be5414659b321135"
-        )
-        if hashlib.sha256(script.encode("utf-8")).hexdigest() != reviewed_script_sha256:
+        if hashlib.sha256(script.encode("utf-8")).hexdigest() != REVIEWED_SCRIPT_SHA256:
             raise AssertionError("production diagnostic script differs from reviewed bytes")
 
     @classmethod
-    def setUpClass(cls):
-        script = read_text(SCRIPT)
+    def _safety_gate_bytes(cls, raw):
+        if not isinstance(raw, bytes):
+            raise AssertionError("diagnostic script input must be raw bytes")
+        if hashlib.sha256(raw).hexdigest() != REVIEWED_SCRIPT_SHA256:
+            raise AssertionError("raw diagnostic script differs from reviewed bytes")
+        try:
+            script = raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as error:
+            raise AssertionError("diagnostic script is not strict UTF-8") from error
         cls._safety_gate(script)
+        return script
+
+    @classmethod
+    def setUpClass(cls):
+        script = cls._safety_gate_bytes((ROOT / SCRIPT).read_bytes())
         cls.assertIn(cls, "REPORT=/run/aicpm-firstboard-report.txt", script)
 
     def setUp(self):
@@ -178,7 +190,7 @@ class DiagnosticScriptContract(unittest.TestCase):
         self._cmd("logger", 'printf "logger:%s\\n" "$*" >&2')
 
     def _copy(self):
-        source = (ROOT / SCRIPT).read_text(encoding="utf-8")
+        source = self._safety_gate_bytes((ROOT / SCRIPT).read_bytes())
         fixed = "REPORT=/run/aicpm-firstboard-report.txt"
         self.assertIn(fixed, source)
         self.assertEqual(source.count("USB_ROOT=/sys/bus/usb/devices"), 1)
