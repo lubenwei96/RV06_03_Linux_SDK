@@ -277,16 +277,18 @@ def main(argv=None):
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--archive")
     group.add_argument("--verify-staging")
-    parser.add_argument("--staging", required=True)
+    parser.add_argument("--staging")
     parser.add_argument("--manifest", required=True)
     args = parser.parse_args(argv)
     try:
         if args.archive:
+            if not args.staging:
+                parser.error("--archive requires --staging")
             admit_archive(args.archive, args.staging, args.manifest)
         else:
-            if Path(args.verify_staging) != Path(args.staging):
-                parser.error("--verify-staging must equal --staging")
-            verify_staging(args.staging, args.manifest)
+            if args.staging and Path(args.verify_staging) != Path(args.staging):
+                parser.error("--verify-staging conflicts with --staging")
+            verify_staging(args.verify_staging, args.manifest)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"rtl8822cu admission rejected: {exc}\n")
 

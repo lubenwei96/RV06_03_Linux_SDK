@@ -1,6 +1,8 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -224,6 +226,21 @@ class SourceAdmission(unittest.TestCase):
         write_zip(self.archive, files)
         with self.assertRaisesRegex(ValueError, "reserved"):
             self.admit()
+
+    def test_21_verify_cli_uses_documented_interface(self):
+        write_zip(self.archive, source_files())
+        first = subprocess.run(
+            [sys.executable, str(TOOL), "--archive", str(self.archive),
+             "--staging", str(self.stage), "--manifest", str(self.manifest)],
+            check=False, capture_output=True, text=True,
+        )
+        self.assertEqual(first.returncode, 0, first.stderr)
+        verify = subprocess.run(
+            [sys.executable, str(TOOL), "--verify-staging", str(self.stage),
+             "--manifest", str(self.manifest)],
+            check=False, capture_output=True, text=True,
+        )
+        self.assertEqual(verify.returncode, 0, verify.stderr)
 
 
 if __name__ == "__main__":
