@@ -542,6 +542,29 @@ class DiagnosticScriptContract(unittest.TestCase):
                 "safe-fake --report=REPORT=/run/aicpm-firstboard-report.txt",
                 1,
             ),
+            source.replace(
+                date_line,
+                date_line + "\n\tslash=${REPORT%run*}"
+                + "\n\thelper=${slash}opt${slash}vendor${slash}bin${slash}helper"
+                + "\n\tcollect_command injected \"$helper\" || return 1",
+                1,
+            ),
+            source.replace(
+                date_line,
+                date_line + "\n\tslash=${REPORT%run*}"
+                + "\n\tPATH=${slash}opt${slash}vendor${slash}bin:$PATH; helper",
+                1,
+            ),
+            source.replace(
+                date_line,
+                date_line + "\n\trm -f \"$USB_ROOT\"/* || true",
+                1,
+            ),
+            source.replace(
+                date_line,
+                date_line + "\n\tchmod 0777 \"$USB_ROOT\"/* || true",
+                1,
+            ),
         )
         for mutant in mutants:
             with self.subTest(mutant=mutant):
