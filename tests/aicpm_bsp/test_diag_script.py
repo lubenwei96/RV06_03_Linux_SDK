@@ -501,6 +501,16 @@ class DiagnosticScriptContract(unittest.TestCase):
         for normal in ("devices online", "capability=usb-host", "api version=1"):
             self.assertIn(normal, report)
 
+    def test_raw_script_bytes_reject_newline_normalization(self):
+        raw = (ROOT / SCRIPT).read_bytes()
+        mutated = raw.replace(b"\n\n", b"\r\n\n", 1)
+        self.assertNotEqual(mutated, raw)
+        self.assertEqual(
+            mutated.decode("utf-8").replace("\r\n", "\n"), raw.decode("utf-8")
+        )
+        with self.assertRaises(AssertionError):
+            self._safety_gate_bytes(mutated)
+
     def test_global_safety_gate_rejects_absolute_external_commands(self):
         source = read_text(SCRIPT)
         self._safety_gate(source)
