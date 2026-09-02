@@ -43,6 +43,13 @@ endif
 ifneq ($(RK_ENABLE_WIFI_CHIP),)
 
 build-usb:
+ifeq ($(RK_ENABLE_WIFI_CHIP),RTL8822CU_USB)
+	@$(MAKE) -C rtl8822cu/
+	@rm -f $(M_OUT_DIR)/wifi_chip_type
+	@printf '%s\n' RTL8822CU_USB > $(M_OUT_DIR)/wifi_chip_type
+	@chmod 0444 $(M_OUT_DIR)/wifi_chip_type
+endif
+
 ifneq ($(findstring $(RK_ENABLE_WIFI_CHIP),"RTL8188FTV"),)
 	@make -C rtl8188ftv/
 endif
@@ -126,6 +133,8 @@ build-sdio-clean:
 	@make -C aic8800_netdrv/ clean
 
 build-usb-clean:
+	@$(MAKE) -C rtl8822cu/ clean
+	@rm -f $(M_OUT_DIR)/wifi_chip_type
 	@make -C rtl8188ftv clean
 	@make -C ssv6x5x clean
 	@make -C ssv6115 clean
