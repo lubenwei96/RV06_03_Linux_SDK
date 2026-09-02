@@ -71,6 +71,14 @@ class DriverContract(unittest.TestCase):
         self.assertIn("0xC812", text)
         self.assertNotIn("AICPM", text)
 
+    def test_09_imports_rockchip_vfs_internal_namespace(self):
+        text = (DRIVER / "os_dep/linux/os_intfs.c").read_text()
+        namespace_import = (
+            "MODULE_IMPORT_NS("
+            "VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver);"
+        )
+        self.assertEqual(1, text.count(namespace_import))
+
 
 if __name__ == "__main__":
     unittest.main()
