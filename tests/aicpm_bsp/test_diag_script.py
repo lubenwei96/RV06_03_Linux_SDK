@@ -1,3 +1,4 @@
+import hashlib
 import re
 import shlex
 import stat
@@ -79,20 +80,33 @@ class DiagnosticScriptContract(unittest.TestCase):
             "REPORT=/run/aicpm-firstboard-report.txt": "REPORT=/run/aicpm-firstboard-report.txt",
             "USB_ROOT=/sys/bus/usb/devices": "USB_ROOT=/sys/bus/usb/devices",
         }
+        allowed_relative_slash_tokens = {
+            "#!/bin/sh",
+            "$USB_ROOT/*",
+            "$device/idVendor",
+            "$device/idProduct",
+            "$device/product",
+        }
+        reviewed_redactor_sha256 = (
+            "4d994fc5f3d6ea3c3706c725191661291a3ae4b7ada5fedc56bd8cfc14e80a54"
+        )
         lines = set(script.splitlines())
-        for token in tokens:
-            if token in allowed_absolute_tokens:
-                if script.count(token) == 1 and reviewed_absolute_contexts[token] in lines:
-                    continue
+        for token, expected_line in reviewed_absolute_contexts.items():
+            if script.count(token) != 1 or expected_line not in lines:
                 raise AssertionError("absolute data path used outside reviewed collector")
-            if token in allowed_absolute_assignments:
-                if script.count(token) == 1 and allowed_absolute_assignments[token] in lines:
-                    continue
+        for token, expected_line in allowed_absolute_assignments.items():
+            if script.count(token) != 1 or expected_line not in lines:
                 raise AssertionError("absolute assignment used outside reviewed declaration")
-            if token.startswith("/") or token.startswith("`/") or re.match(
-                r"^[A-Za-z_][A-Za-z0-9_]*=/", token
-            ):
-                raise AssertionError("unapproved absolute token bypasses the fake PATH")
+        for token in tokens:
+            if "/" not in token:
+                continue
+            if token in allowed_absolute_tokens or token in allowed_absolute_assignments:
+                continue
+            if token in allowed_relative_slash_tokens:
+                continue
+            if hashlib.sha256(token.encode("utf-8")).hexdigest() == reviewed_redactor_sha256:
+                continue
+            raise AssertionError("unapproved slash token may bypass the fake PATH")
         if forbidden.search(script):
             raise AssertionError("unsafe production command")
 
@@ -465,7 +479,10 @@ class DiagnosticScriptContract(unittest.TestCase):
             self.assertIn(normal, report)
 
     def test_global_safety_gate_rejects_absolute_external_commands(self):
-        self._safety_gate("#!/bin/sh\nprintf ok\n")
+        source = read_text(SCRIPT)
+        self._safety_gate(source)
+        anchor = "\tcollect_command date date -Iseconds || return 1"
+        self.assertIn(anchor, source)
         for mutant in (
             "/usr/bin/tee /sys/x",
             "/bin/cat /proc/cmdline",
@@ -489,8 +506,12 @@ class DiagnosticScriptContract(unittest.TestCase):
             ". /proc/cmdline",
         ):
             with self.subTest(mutant=mutant):
+                mutated = source.replace(
+                    anchor, anchor + "\n\t" + mutant, 1
+                )
+                self.assertNotEqual(mutated, source)
                 with self.assertRaises(AssertionError):
-                    self._safety_gate(f"#!/bin/sh\n{mutant}\n")
+                    self._safety_gate(mutated)
 
     def test_safety_gate_rejects_embedded_absolute_paths_and_context_replacement(self):
         source = read_text(SCRIPT)
