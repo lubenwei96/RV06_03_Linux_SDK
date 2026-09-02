@@ -80,12 +80,27 @@ class DiagnosticScriptContract(unittest.TestCase):
             "REPORT=/run/aicpm-firstboard-report.txt": "REPORT=/run/aicpm-firstboard-report.txt",
             "USB_ROOT=/sys/bus/usb/devices": "USB_ROOT=/sys/bus/usb/devices",
         }
-        allowed_relative_slash_tokens = {
-            "#!/bin/sh",
-            "$USB_ROOT/*",
-            "$device/idVendor",
-            "$device/idProduct",
-            "$device/product",
+        reviewed_relative_contexts = {
+            "#!/bin/sh": ("#!/bin/sh", 1, {"#!/bin/sh"}),
+            "$USB_ROOT/*": ('"$USB_ROOT"/*', 1, {"\tfor device in \"$USB_ROOT\"/*; do"}),
+            "$device/idVendor": (
+                "$device/idVendor",
+                2,
+                {
+                    "\t\t[ -f \"$device/idVendor\" ] || continue",
+                    "\t\tcollect_command usb_vendor cat \"$device/idVendor\" || return 1",
+                },
+            ),
+            "$device/idProduct": (
+                "$device/idProduct",
+                1,
+                {"\t\tcollect_command usb_product_id cat \"$device/idProduct\" || return 1"},
+            ),
+            "$device/product": (
+                "$device/product",
+                1,
+                {"\t\tcollect_command usb_product cat \"$device/product\" || return 1"},
+            ),
         }
         reviewed_redactor_sha256 = (
             "4d994fc5f3d6ea3c3706c725191661291a3ae4b7ada5fedc56bd8cfc14e80a54"
@@ -97,18 +112,26 @@ class DiagnosticScriptContract(unittest.TestCase):
         for token, expected_line in allowed_absolute_assignments.items():
             if script.count(token) != 1 or expected_line not in lines:
                 raise AssertionError("absolute assignment used outside reviewed declaration")
+        for token, (needle, expected_count, expected_lines) in reviewed_relative_contexts.items():
+            if script.count(needle) != expected_count or not expected_lines.issubset(lines):
+                raise AssertionError("relative slash token used outside reviewed collector")
         for token in tokens:
             if "/" not in token:
                 continue
             if token in allowed_absolute_tokens or token in allowed_absolute_assignments:
                 continue
-            if token in allowed_relative_slash_tokens:
+            if token in reviewed_relative_contexts:
                 continue
             if hashlib.sha256(token.encode("utf-8")).hexdigest() == reviewed_redactor_sha256:
                 continue
             raise AssertionError("unapproved slash token may bypass the fake PATH")
         if forbidden.search(script):
             raise AssertionError("unsafe production command")
+        reviewed_script_sha256 = (
+            "c0bced971b9119710d5e42d51903c7cc5315556a864b5956be5414659b321135"
+        )
+        if hashlib.sha256(script.encode("utf-8")).hexdigest() != reviewed_script_sha256:
+            raise AssertionError("production diagnostic script differs from reviewed bytes")
 
     @classmethod
     def setUpClass(cls):
