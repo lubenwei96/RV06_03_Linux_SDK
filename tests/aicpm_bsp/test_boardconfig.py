@@ -32,8 +32,8 @@ class BoardConfigContract(unittest.TestCase):
         )
 
     def test_first_board_gates(self):
-        self.assertEqual(exported(self.board, "RK_ENABLE_WIFI"), "n")
-        self.assertEqual(exported(self.board, "RK_ENABLE_WIFI_CHIP"), "")
+        self.assertEqual(exported(self.board, "RK_ENABLE_WIFI"), "y")
+        self.assertEqual(exported(self.board, "RK_ENABLE_WIFI_CHIP"), "RTL8822CU_USB")
         self.assertEqual(exported(self.board, "RK_ENABLE_ADBD"), "n")
         self.assertEqual(exported(self.board, "RK_ENABLE_MOTOR"), "n")
         self.assertEqual(exported(self.board, "RK_POST_OVERLAY"), "aicpm-v1")

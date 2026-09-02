@@ -421,8 +421,8 @@ class DiagnosticScriptContract(unittest.TestCase):
         board = read_text(BOARD)
         self.assertEqual(exported(board, "RK_POST_OVERLAY"), "aicpm-v1")
         self.assertEqual(exported(board, "RK_ENABLE_WIFI_APP"), "n")
-        self.assertEqual(exported(board, "RK_ENABLE_WIFI"), "n")
-        self.assertEqual(exported(board, "RK_ENABLE_WIFI_CHIP"), "")
+        self.assertEqual(exported(board, "RK_ENABLE_WIFI"), "y")
+        self.assertEqual(exported(board, "RK_ENABLE_WIFI_CHIP"), "RTL8822CU_USB")
         build = read_text(BUILD)
         self._assert_overlay_pipeline(build)
         subprocess.run(["git", "diff", "--quiet", BASE_COMMIT, "--", BASELINE_WPA], cwd=ROOT,

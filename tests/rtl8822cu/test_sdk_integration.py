@@ -11,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[2]
 WIFI_MAKEFILE = ROOT / "sysdrv/drv_ko/wifi/Makefile"
 WIFI_LOADER = ROOT / "sysdrv/drv_ko/wifi/insmod_wifi.sh"
 KO_LOADER = ROOT / "sysdrv/drv_ko/insmod_ko.sh"
+BOARD_CONFIG = (
+    ROOT
+    / "project/cfg/BoardConfig_IPC/BoardConfig-SPI_NAND-NONE-RV1106_AICPM-V1.mk"
+)
 LEGACY_MARKER = "#AIC8800D40\n"
 LEGACY_SHA256 = "c418aa082556fac8f1c2a50bb3248063bf8a29af1148803ff8d29da7ab449013"
 
@@ -21,6 +25,7 @@ class SdkIntegration(unittest.TestCase):
         cls.makefile = WIFI_MAKEFILE.read_text(encoding="utf-8")
         cls.wifi_loader = WIFI_LOADER.read_text(encoding="utf-8")
         cls.ko_loader = KO_LOADER.read_text(encoding="utf-8")
+        cls.board_config = BOARD_CONFIG.read_text(encoding="utf-8")
 
     def test_01_exact_build_selector_writes_readonly_marker(self):
         branch = re.search(
@@ -147,6 +152,20 @@ class SdkIntegration(unittest.TestCase):
             ") &"
         )
         self.assertIn(expected, self.ko_loader)
+
+    def test_09_formal_board_selects_only_rtl8822cu_wifi(self):
+        expected = (
+            "export RK_ENABLE_WIFI_APP=n",
+            "export RK_ENABLE_WIFI=y",
+            "export RK_ENABLE_WIFI_CHIP=RTL8822CU_USB",
+        )
+        for line in expected:
+            with self.subTest(line=line):
+                self.assertEqual(1, len(re.findall(rf"(?m)^{re.escape(line)}$", self.board_config)))
+        self.assertNotRegex(self.board_config, r"(?m)^export RK_ENABLE_BT=y$")
+        self.assertNotRegex(
+            self.board_config, r"(?m)^export RK_ENABLE_WIFI_CHIP=.*AIC.*$"
+        )
 
 
 if __name__ == "__main__":
