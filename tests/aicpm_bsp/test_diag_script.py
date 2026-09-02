@@ -492,6 +492,41 @@ class DiagnosticScriptContract(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     self._safety_gate(f"#!/bin/sh\n{mutant}\n")
 
+    def test_safety_gate_rejects_embedded_absolute_paths_and_context_replacement(self):
+        source = read_text(SCRIPT)
+        collector = "\tcollect_file read_proc_cmdline /proc/cmdline || return 1"
+        self.assertIn(collector, source)
+        date_line = "\tcollect_command date date -Iseconds || return 1"
+        self.assertIn(date_line, source)
+        report_line = "REPORT=/run/aicpm-firstboard-report.txt"
+        self.assertIn(report_line, source)
+        mutants = (
+            source.replace(
+                collector,
+                "\tsafe-fake --path=/proc/cmdline || return 1",
+                1,
+            ),
+            source.replace(
+                date_line,
+                date_line + "\n\tawk -f/opt/vendor/payload.awk \"$TMP\"",
+                1,
+            ),
+            source.replace(
+                date_line,
+                date_line + "\n\tEMPTY=; PATH=$EMPTY/opt/vendor/bin:$PATH; helper",
+                1,
+            ),
+            source.replace(
+                report_line,
+                "safe-fake --report=REPORT=/run/aicpm-firstboard-report.txt",
+                1,
+            ),
+        )
+        for mutant in mutants:
+            with self.subTest(mutant=mutant):
+                with self.assertRaises(AssertionError):
+                    self._safety_gate(mutant)
+
     def test_ubifs_release_sink_mutation_is_rejected(self):
         board = read_text(BOARD)
         self.assertEqual(
