@@ -50,7 +50,7 @@ class DiagnosticScriptContract(unittest.TestCase):
         )
         lexer = shlex.shlex(script, posix=True, punctuation_chars="();<>|&")
         lexer.whitespace_split = True
-        lexer.commenters = "#"
+        lexer.commenters = ""
         try:
             tokens = list(lexer)
         except ValueError as error:
@@ -65,13 +65,30 @@ class DiagnosticScriptContract(unittest.TestCase):
             "/sys/class/net",
             "/sys/class/pwm",
         }
-        allowed_absolute_assignments = {
-            "REPORT=/run/aicpm-firstboard-report.txt",
-            "USB_ROOT=/sys/bus/usb/devices",
+        reviewed_absolute_contexts = {
+            "/proc/cmdline": "\tcollect_file read_proc_cmdline /proc/cmdline || return 1",
+            "/proc/mtd": "\tcollect_file read_proc_mtd /proc/mtd || return 1",
+            "/proc/partitions": "\tcollect_file read_proc_partitions /proc/partitions || return 1",
+            "/proc/meminfo": "\tcollect_file read_proc_meminfo /proc/meminfo || return 1",
+            "/sys/class/mtd": "\tcollect_directory scan_sys_class_mtd /sys/class/mtd || return 1",
+            "/sys/class/mmc_host": "\tcollect_directory scan_sys_class_mmc_host /sys/class/mmc_host || return 1",
+            "/sys/class/net": "\tcollect_directory scan_sys_class_net /sys/class/net || return 1",
+            "/sys/class/pwm": "\tcollect_directory scan_sys_class_pwm /sys/class/pwm || return 1",
         }
+        allowed_absolute_assignments = {
+            "REPORT=/run/aicpm-firstboard-report.txt": "REPORT=/run/aicpm-firstboard-report.txt",
+            "USB_ROOT=/sys/bus/usb/devices": "USB_ROOT=/sys/bus/usb/devices",
+        }
+        lines = set(script.splitlines())
         for token in tokens:
-            if token in allowed_absolute_tokens or token in allowed_absolute_assignments:
-                continue
+            if token in allowed_absolute_tokens:
+                if script.count(token) == 1 and reviewed_absolute_contexts[token] in lines:
+                    continue
+                raise AssertionError("absolute data path used outside reviewed collector")
+            if token in allowed_absolute_assignments:
+                if script.count(token) == 1 and allowed_absolute_assignments[token] in lines:
+                    continue
+                raise AssertionError("absolute assignment used outside reviewed declaration")
             if token.startswith("/") or token.startswith("`/") or re.match(
                 r"^[A-Za-z_][A-Za-z0-9_]*=/", token
             ):
