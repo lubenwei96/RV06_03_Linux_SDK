@@ -466,6 +466,10 @@ class DiagnosticScriptContract(unittest.TestCase):
             "if collect_command injected /opt/vendor/bin/helper; then :; fi",
             "true || collect_command injected /opt/vendor/bin/helper",
             "`/opt/vendor/bin/helper`",
+            "v=x; : ${v#x}; /opt/vendor/bin/modprobe rtl8822cu",
+            "chmod 0777 /sys/class/pwm",
+            "rm -f /proc/cmdline",
+            ". /proc/cmdline",
         ):
             with self.subTest(mutant=mutant):
                 with self.assertRaises(AssertionError):
