@@ -1,0 +1,289 @@
+#!/bin/sh
+
+umask 077
+
+MANAGER=${AICPM_WIFI_MANAGER:-/usr/sbin/aicpm-wifi-manager}
+MANAGER_PID_FILE=${AICPM_MANAGER_PID_FILE:-/run/aicpm-wifi-manager.pid}
+MANAGER_IDENTITY_FILE=${AICPM_MANAGER_IDENTITY_FILE:-/run/aicpm-wifi-manager.identity}
+MANAGER_LOCK_DIR=${AICPM_MANAGER_LOCK_DIR:-/run/aicpm-wifi-manager.lock}
+WPA_PID_FILE=${AICPM_WPA_PID_FILE:-/run/aicpm-wpa-supplicant.pid}
+WPA_IDENTITY_FILE=${AICPM_WPA_IDENTITY_FILE:-/run/aicpm-wpa-supplicant.identity}
+WPA_PENDING_FILE=${AICPM_WPA_PENDING_FILE:-/run/aicpm-wpa-supplicant.pending}
+WPA_PROCESS_TOKEN=${AICPM_WPA_PROCESS_TOKEN:-wpa_supplicant}
+INTERFACE=${AICPM_WIFI_INTERFACE:-wlan0}
+WPA_CONFIG=${AICPM_WPA_CONFIG:-/userdata/aicpm/wpa_supplicant.conf}
+ASSOC_STATE_FILE=${AICPM_ASSOC_STATE_FILE:-/run/aicpm-wifi-association.state}
+PROC_ROOT=${AICPM_PROC_ROOT:-/proc}
+PENDING_WAIT_ATTEMPTS=${AICPM_WPA_PENDING_WAIT_ATTEMPTS:-20}
+PENDING_WAIT_INTERVAL=${AICPM_WPA_PENDING_WAIT_INTERVAL:-0.1}
+
+read_pid()
+{
+	pid_file=$1
+	[ -r "$pid_file" ] || return 1
+	IFS= read -r pid <"$pid_file" || return 1
+	case "$pid" in
+		''|*[!0-9]*) return 1 ;;
+	esac
+	printf '%s\n' "$pid"
+}
+
+process_start_time()
+{
+	pid=$1
+	[ -r "$PROC_ROOT/$pid/stat" ] || return 1
+	awk '{print $22}' "$PROC_ROOT/$pid/stat" 2>/dev/null
+}
+
+identity_matches()
+{
+	pid_file=$1
+	identity_file=$2
+	pid=$(read_pid "$pid_file") || return 1
+	kill -0 "$pid" 2>/dev/null || return 1
+	[ -r "$identity_file" ] || return 1
+	set -- $(cat "$identity_file" 2>/dev/null) || return 1
+	[ "$#" -eq 2 ] || return 1
+	[ "$1" = "$pid" ] || return 1
+	current_start=$(process_start_time "$pid") || return 1
+	[ "$2" = "$current_start" ]
+}
+
+cmdline_contains_exact()
+{
+	pid=$1
+	token=$2
+	[ -r "$PROC_ROOT/$pid/cmdline" ] || return 1
+	tr '\000' '\n' <"$PROC_ROOT/$pid/cmdline" 2>/dev/null |
+		grep -F -x "$token" >/dev/null 2>&1
+}
+
+cmdline_matches_wpa()
+{
+	pid=$1
+	[ -r "$PROC_ROOT/$pid/cmdline" ] || return 1
+	tr '\000' '\n' <"$PROC_ROOT/$pid/cmdline" 2>/dev/null |
+		awk -v token="$WPA_PROCESS_TOKEN" -v interface="$INTERFACE" \
+			-v config="$WPA_CONFIG" '
+{
+ base = $0
+ sub(/^.*\//, "", base)
+ if (base == token) token_ok = 1
+ if (want_interface && $0 == interface) interface_ok = 1
+ if (want_config && $0 == config) config_ok = 1
+ want_interface = ($0 == "-i")
+ want_config = ($0 == "-c")
+ if ($0 == "-i" interface) interface_ok = 1
+ if ($0 == "-c" config) config_ok = 1
+}
+END { exit !(token_ok && interface_ok && config_ok) }'
+}
+
+manager_is_managed()
+{
+	identity_matches "$MANAGER_PID_FILE" "$MANAGER_IDENTITY_FILE" || return 1
+	pid=$(read_pid "$MANAGER_PID_FILE") || return 1
+	cmdline_contains_exact "$pid" "$MANAGER"
+}
+
+wpa_is_managed()
+{
+	identity_matches "$WPA_PID_FILE" "$WPA_IDENTITY_FILE" || return 1
+	pid=$(read_pid "$WPA_PID_FILE") || return 1
+	cmdline_matches_wpa "$pid"
+}
+
+stop_managed_process()
+{
+	pid_file=$1
+	identity_file=$2
+	kind=$3
+	pid=$(read_pid "$pid_file") || {
+		rm -f "$pid_file" "$identity_file"
+		return 0
+	}
+	if ! kill -0 "$pid" 2>/dev/null; then
+		rm -f "$pid_file" "$identity_file"
+		return 0
+	fi
+	managed=1
+	case "$kind" in
+		manager) manager_is_managed || managed=0 ;;
+		wpa) wpa_is_managed || managed=0 ;;
+		*) managed=0 ;;
+	esac
+	if [ "${managed:-1}" -ne 1 ]; then
+		logger -t aicpm-wifi "refusing to stop unverified $kind pid=$pid" 2>/dev/null || true
+		return 1
+	fi
+	kill "$pid" 2>/dev/null || true
+	count=0
+	while kill -0 "$pid" 2>/dev/null && [ "$count" -lt 5 ]; do
+		sleep 1
+		count=$((count + 1))
+	done
+	case "$kind" in
+		manager) manager_is_managed && kill -9 "$pid" 2>/dev/null || true ;;
+		wpa) wpa_is_managed && kill -9 "$pid" 2>/dev/null || true ;;
+	esac
+	if kill -0 "$pid" 2>/dev/null; then
+		return 1
+	fi
+	rm -f "$pid_file" "$identity_file"
+}
+
+lock_owner_is_live()
+{
+	owner_file="$MANAGER_LOCK_DIR/owner"
+	[ -r "$owner_file" ] || return 1
+	set -- $(cat "$owner_file" 2>/dev/null) || return 1
+	[ "$#" -eq 2 ] || return 1
+	case "$1" in ''|*[!0-9]*) return 1 ;; esac
+	kill -0 "$1" 2>/dev/null || return 1
+	current_start=$(process_start_time "$1") || return 1
+	[ "$2" = "$current_start" ]
+}
+
+release_start_lock()
+{
+	rm -f "$MANAGER_LOCK_DIR/owner"
+	rmdir "$MANAGER_LOCK_DIR" 2>/dev/null || true
+}
+
+cleanup_started_manager()
+{
+	started_pid=$1
+	started_at=$2
+	kill -0 "$started_pid" 2>/dev/null || return 0
+	current_start=$(process_start_time "$started_pid") || return 1
+	[ "$current_start" = "$started_at" ] || return 1
+	cmdline_contains_exact "$started_pid" "$MANAGER" || return 1
+	kill "$started_pid" 2>/dev/null || true
+	count=0
+	while kill -0 "$started_pid" 2>/dev/null && [ "$count" -lt 5 ]; do
+		sleep 1
+		count=$((count + 1))
+	done
+	if kill -0 "$started_pid" 2>/dev/null; then
+		current_start=$(process_start_time "$started_pid") || return 1
+		[ "$current_start" = "$started_at" ] || return 1
+		cmdline_contains_exact "$started_pid" "$MANAGER" || return 1
+		kill -9 "$started_pid" 2>/dev/null || true
+	fi
+	return 0
+}
+
+claim_pending_wpa()
+{
+	[ -e "$WPA_PENDING_FILE" ] || return 0
+	count=0
+	while [ "$count" -lt "$PENDING_WAIT_ATTEMPTS" ]; do
+		wpa_is_managed && return 0
+		pid=$(read_pid "$WPA_PID_FILE") || pid=
+		if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && cmdline_matches_wpa "$pid"; then
+			start_time=$(process_start_time "$pid") || start_time=
+			if [ -n "$start_time" ]; then
+				tmp_identity="${WPA_IDENTITY_FILE}.$$"
+				if printf '%s %s\n' "$pid" "$start_time" >"$tmp_identity" &&
+					mv "$tmp_identity" "$WPA_IDENTITY_FILE" && wpa_is_managed; then
+					return 0
+				fi
+				rm -f "$tmp_identity"
+			fi
+		fi
+		count=$((count + 1))
+		[ "$count" -lt "$PENDING_WAIT_ATTEMPTS" ] && sleep "$PENDING_WAIT_INTERVAL"
+	done
+	logger -t aicpm-wifi 'pending supplicant could not be safely claimed' 2>/dev/null || true
+	return 1
+}
+
+start()
+{
+	if manager_is_managed; then
+		return 0
+	fi
+	if ! mkdir "$MANAGER_LOCK_DIR" 2>/dev/null; then
+		count=0
+		while [ "$count" -lt 20 ]; do
+			manager_is_managed && return 0
+			[ -d "$MANAGER_LOCK_DIR" ] || break
+			sleep 0.1
+			count=$((count + 1))
+		done
+		lock_owner_is_live && return 1
+		release_start_lock
+		mkdir "$MANAGER_LOCK_DIR" 2>/dev/null || return 1
+	fi
+	owner_start=$(process_start_time "$$") || {
+		release_start_lock
+		return 1
+	}
+	printf '%s %s\n' "$$" "$owner_start" >"$MANAGER_LOCK_DIR/owner" || {
+		release_start_lock
+		return 1
+	}
+	trap 'release_start_lock' 0 1 2 15
+	if manager_is_managed; then
+		return 0
+	fi
+	rm -f "$MANAGER_PID_FILE" "$MANAGER_IDENTITY_FILE"
+	[ -x "$MANAGER" ] || {
+		logger -t aicpm-wifi 'manager executable unavailable' 2>/dev/null || true
+		return 1
+	}
+	"$MANAGER" run >/dev/null 2>&1 &
+	pid=$!
+	start_time=$(process_start_time "$pid") || {
+		kill "$pid" 2>/dev/null || true
+		return 1
+	}
+	printf '%s\n' "$pid" >"$MANAGER_PID_FILE" || {
+		cleanup_started_manager "$pid" "$start_time"
+		return 1
+	}
+	printf '%s %s\n' "$pid" "$start_time" >"$MANAGER_IDENTITY_FILE" || {
+		cleanup_started_manager "$pid" "$start_time"
+		return 1
+	}
+	manager_is_managed || {
+		cleanup_started_manager "$pid" "$start_time"
+		return 1
+	}
+	return 0
+}
+
+stop()
+{
+	stop_rc=0
+	stop_managed_process "$MANAGER_PID_FILE" "$MANAGER_IDENTITY_FILE" manager || stop_rc=1
+	pending_claimed=1
+	if [ -e "$WPA_PENDING_FILE" ]; then
+		claim_pending_wpa || pending_claimed=0
+	fi
+	if [ "$pending_claimed" -eq 1 ]; then
+		stop_managed_process "$WPA_PID_FILE" "$WPA_IDENTITY_FILE" wpa || stop_rc=1
+	else
+		stop_rc=1
+	fi
+	[ "$stop_rc" -eq 0 ] && rm -f "$ASSOC_STATE_FILE" "$WPA_PENDING_FILE"
+	return "$stop_rc"
+}
+
+status()
+{
+	manager_is_managed
+}
+
+case "${1:-}" in
+	start) start ;;
+	stop) stop ;;
+	restart)
+		stop && start
+		;;
+	status) status ;;
+	*)
+		printf 'Usage: %s {start|stop|restart|status}\n' "$0" >&2
+		exit 2
+		;;
+esac
