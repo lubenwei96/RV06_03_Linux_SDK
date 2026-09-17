@@ -277,7 +277,7 @@ def assert_schema_contract(binding):
             raise AssertionError(f"schema contract mismatch: {pattern}")
 
 
-def assert_disabled_dts_contract(dts):
+def assert_enabled_dts_contract(dts):
     node = dts_node(dts, "l9110s0")
     if len(re.findall(r'compatible\s*=\s*"aicpm,l9110s"\s*;', dts)) != 1:
         raise AssertionError("exactly one L9110S instance is allowed")
@@ -285,14 +285,14 @@ def assert_disabled_dts_contract(dts):
         'compatible = "aicpm,l9110s";',
         'pwm-names = "in-a", "in-b";',
         "aicpm,dead-time-us = <2000>;",
-        "aicpm,max-run-time-ms = <3000>;",
-        'status = "disabled";',
+        "aicpm,max-run-time-ms = <10000>;",
+        'status = "okay";',
     ):
         if value not in node:
             raise AssertionError(f"motor node mismatch: {value}")
     for pwm in ("pwm5", "pwm6"):
-        if not re.search(rf"&{pwm}\s*\{{\s*status\s*=\s*\"disabled\";\s*\}};", dts):
-            raise AssertionError(f"{pwm} must remain disabled")
+        if not re.search(rf"&{pwm}\s*\{{\s*status\s*=\s*\"okay\";\s*\}};", dts):
+            raise AssertionError(f"{pwm} must be enabled")
 
 
 def assert_kthread_failure_cleanup(test_source):
@@ -525,11 +525,11 @@ int main(void)
         for token in ("cancel_count", "generation", "direction", "AICPM_L9110S_FORWARD"):
             self.assertIn(token, invalid)
 
-    def test_schema_and_dts_keep_motor_physically_gated(self):
+    def test_schema_and_dts_enable_bench_verified_motor(self):
         binding = read_text(BINDING)
         assert_schema_contract(binding)
         dts = read_text(DTS)
-        assert_disabled_dts_contract(dts)
+        assert_enabled_dts_contract(dts)
         for mutant in (
             binding.replace("maxItems: 2", "maxItems: 3", 1),
             binding.replace("maximum: 30000", "maximum: 60000", 1),
@@ -538,18 +538,26 @@ int main(void)
             with self.assertRaises(AssertionError):
                 assert_schema_contract(mutant)
         for mutant in (
-            dts.replace('status = "disabled";', 'status = "okay";', 1),
-            dts.replace('status = "disabled";', "", 1),
-            dts.replace("&pwm5 { status = \"disabled\"; };", "&pwm5 { status = \"okay\"; };", 1),
-            dts.replace("aicpm,max-run-time-ms = <3000>;", "aicpm,max-run-time-ms = <30000>;", 1),
+            dts.replace(
+                'aicpm,max-run-time-ms = <10000>;\n\t\tstatus = "okay";',
+                'aicpm,max-run-time-ms = <10000>;\n\t\tstatus = "disabled";',
+                1,
+            ),
+            dts.replace(
+                'aicpm,max-run-time-ms = <10000>;\n\t\tstatus = "okay";',
+                "aicpm,max-run-time-ms = <10000>;",
+                1,
+            ),
+            dts.replace("&pwm5 { status = \"okay\"; };", "&pwm5 { status = \"disabled\"; };", 1),
+            dts.replace("aicpm,max-run-time-ms = <10000>;", "aicpm,max-run-time-ms = <30000>;", 1),
             dts.replace(
                 "l9110s0: motor-controller {",
-                'duplicate-motor { compatible = "aicpm,l9110s"; status = "disabled"; };\n\tl9110s0: motor-controller {',
+                'duplicate-motor { compatible = "aicpm,l9110s"; status = "okay"; };\n\tl9110s0: motor-controller {',
                 1,
             ),
         ):
             with self.assertRaises(AssertionError):
-                assert_disabled_dts_contract(mutant)
+                assert_enabled_dts_contract(mutant)
 
 
 if __name__ == "__main__":

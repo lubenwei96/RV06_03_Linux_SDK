@@ -95,16 +95,15 @@ class DtsContract(unittest.TestCase):
         self.assertEqual(self.dts.count("linux,code ="), 2)
         self.assertNotIn('compatible = "adc-keys"', self.dts)
 
-    def test_usb_host_and_frozen_unsafe_resources(self):
+    def test_usb_host_and_bench_verified_motor_resources(self):
         self.assertIn('dr_mode = "host"', self.dts)
         pwm5 = self.node_body("&pwm5")
         pwm6 = self.node_body("&pwm6")
-        # Catches PWM5 being enabled while another disabled node masks it.
-        self.assertIn('status = "disabled"', pwm5)
-        # Catches PWM6 being enabled while another disabled node masks it.
-        self.assertIn('status = "disabled"', pwm6)
-        # Task 6 supersedes the earlier global L9110S ban with one inert,
-        # reviewable instance.  The exact-list check catches aliases and a
+        # The exact per-node checks prevent another disabled PWM node from
+        # masking either bench-verified motor output.
+        self.assertIn('status = "okay"', pwm5)
+        self.assertIn('status = "okay"', pwm6)
+        # The exact-list check catches aliases and a
         # second instance rather than accepting any substring match.
         l9110s_compatibles = re.findall(
             r'(?is)\bcompatible\s*=\s*[^;]*"[^"]*l9110s[^"]*"[^;]*;',
@@ -112,12 +111,12 @@ class DtsContract(unittest.TestCase):
         )
         self.assertEqual(l9110s_compatibles, ['compatible = "aicpm,l9110s";'])
         motor = self.node_body("l9110s0: motor-controller")
-        self.assertIn('status = "disabled"', motor)
+        self.assertIn('status = "okay"', motor)
         self.assertEqual(
             re.findall(r"(?s)\bpwms\s*=\s*[^;]*;", motor),
             ["pwms = <&pwm5 0 1000000 0>, <&pwm6 0 1000000 0>;"],
         )
-        # The frozen motor is the sole reviewed PWM5/PWM6 consumer.
+        # The motor controller is the sole reviewed PWM5/PWM6 consumer.
         dts_without_motor = self.dts.replace(motor, "", 1)
         self.assertNotRegex(
             dts_without_motor, r"(?s)\bpwms\s*=\s*[^;]*&pwm[56]\b[^;]*;"
