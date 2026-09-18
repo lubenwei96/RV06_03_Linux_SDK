@@ -1,0 +1,30 @@
+File: ov5647_HBV-RPI-AUTO-IRCUT-3.6-S1.0_3.6mm.json
+Purpose: Engineering-only ISP32 bootstrap profile for AICPM RV1106G V1.0.
+Final file SHA-256: 3095663640111f3bfd3d39d5531f6ca232b2339335ec12f1029e6584cb7cce33
+
+ISP32 algorithm and tuning base:
+  Repository: https://github.com/LuckfoxTECH/luckfox-pico
+  Commit: 824b817f889c2cbff1d48fcdb18ab494a68f69d1
+  Path: media/isp/release_camera_engine_rkaiq_rv1106_arm-rockchip830-linux-uclibcgnueabihf/isp_iqfiles/sc500ai_CMK-OT1607-FV1_40IRC-F16.json
+  Source SHA-256: 4650ff55b34115261c5984b69e46c1c9864620e3d86e8c21ba4035b215fd4320
+  License: no license notice was found at the repository root or next to this IQ file.
+
+OV5647 sensor_calib and module_calib source:
+  Repository: https://github.com/radxa-pkg/rockchip-iqfiles
+  Commit: 07f081bd031a5730d42cddc96741bb198f71c3b2
+  Path: rockchip-iqfiles-rk3588/ov5647_rpi-camera-v1p3_default.json
+  Source SHA-256: e2a6b1c154592e53bfe128530dce9ca759e5145657a94a793da64c10021f0da2
+  License: GNU GPL version 3; see COPYING in this directory.
+
+Engineering changes:
+  - Retained the RV1106-compatible scene_isp32 structure from the SC500AI base.
+  - Replaced sensor_calib and module_calib with the OV5647 values.
+  - Disabled cac_v11 and removed its PSF map path because the SC500AI map is not
+    valid for this OV5647 module/lens combination.
+
+This file is not a calibrated OV5647 production profile. It is intended only to
+bring up the ISP32 pipeline and evaluate exposure, Bayer order, white balance,
+color correction, noise reduction, and focus. Obtain a module-specific IQ from
+the supplier or perform laboratory calibration before image-quality acceptance,
+distribution, or production. Resolve the Luckfox IQ licensing status before any
+external distribution.

@@ -1,0 +1,194 @@
+#!/bin/sh
+
+set -u
+
+AICPM_WIFI_SOAK_SAMPLES=1440
+AICPM_WIFI_SOAK_INTERVAL=60
+
+usage()
+{
+	printf 'Usage: aicpm-wifi-soak INTERFACE GATEWAY OUTPUT_DIR\n' >&2
+}
+
+if [ "$#" -ne 3 ]; then
+	usage
+	exit 2
+fi
+
+interface=$1
+gateway=$2
+output_dir=$3
+
+case "$interface" in
+''|-*|*[!A-Za-z0-9_.-]*)
+	printf 'invalid interface\n' >&2
+	exit 2
+	;;
+esac
+case "$gateway" in
+''|-*|*[!A-Fa-f0-9:._-]*)
+	printf 'invalid gateway\n' >&2
+	exit 2
+	;;
+esac
+
+if [ -e "$output_dir" ] || [ -L "$output_dir" ]; then
+	printf 'output directory already exists\n' >&2
+	exit 2
+fi
+
+umask 077
+if ! mkdir -m 0700 -- "$output_dir"; then
+	exit 2
+fi
+
+samples=$output_dir/samples.tsv
+summary=$output_dir/summary.txt
+exit_code_file=$output_dir/exit-code
+: > "$samples" || exit 2
+: > "$summary" || exit 2
+: > "$exit_code_file" || exit 2
+chmod 0600 "$samples" "$summary" "$exit_code_file" || exit 2
+
+printf 'utc\tround\tinterface_present\twpa_state\tfreq\tsignal_dbm\tping_ok\tmemavailable_kib\tkernel_error_count\tload_failed\tsample_status\n' > "$samples"
+
+kernel_errors()
+{
+	kernel_log=$(dmesg 2>/dev/null) || return 1
+	error_total=$(printf '%s\n' "$kernel_log" | grep -Eic 'oops|firmware crash|usb disconnect')
+	grep_rc=$?
+	if [ "$grep_rc" -eq 0 ] || [ "$grep_rc" -eq 1 ]; then
+		printf '%s\n' "$error_total"
+		return 0
+	fi
+	return 1
+}
+
+baseline_errors=$(kernel_errors)
+case "$baseline_errors" in
+''|*[!0-9]*) baseline_errors=-1 ;;
+esac
+
+round=1
+completed=0
+connected=0
+freq_ok=0
+ping_ok_count=0
+interface_ok=0
+load_failed_count=0
+kernel_growth=0
+memory_floor_ok=1
+first_sum=0
+first_count=0
+last_sum=0
+last_count=0
+
+while [ "$round" -le "$AICPM_WIFI_SOAK_SAMPLES" ]; do
+	utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ') || utc=INVALID
+	if [ -d "/sys/class/net/$interface" ]; then
+		present=1
+		interface_ok=$((interface_ok + 1))
+	else
+		present=0
+	fi
+
+	status=$(wpa_cli -i "$interface" status 2>/dev/null || true)
+	wpa_state=$(printf '%s\n' "$status" | sed -n 's/^wpa_state=//p' | head -n 1)
+	freq=$(printf '%s\n' "$status" | sed -n 's/^freq=//p' | head -n 1)
+	[ -n "$wpa_state" ] || wpa_state=UNKNOWN
+	case "$freq" in ''|*[!0-9]*) freq=0 ;; esac
+	if [ "$wpa_state" = COMPLETED ]; then
+		connected=$((connected + 1))
+	fi
+	if [ "$freq" -ge 2400 ] && [ "$freq" -le 2499 ]; then
+		freq_ok=$((freq_ok + 1))
+	fi
+
+	signal=$(iw dev "$interface" link 2>/dev/null | awk '$1 == "signal:" {print $2; exit}')
+	case "$signal" in ''|*[!0-9-]*) signal=0 ;; esac
+
+	if ping -c 1 -W 2 "$gateway" >/dev/null 2>&1; then
+		ping_ok=1
+		ping_ok_count=$((ping_ok_count + 1))
+	else
+		ping_ok=0
+	fi
+
+	mem_kib=$(awk '$1 == "MemAvailable:" {print $2; exit}' /proc/meminfo 2>/dev/null)
+	case "$mem_kib" in ''|*[!0-9]*) mem_kib=0 ;; esac
+	if [ "$mem_kib" -lt 24576 ]; then
+		memory_floor_ok=0
+	fi
+	if [ "$round" -le 60 ]; then
+		first_sum=$((first_sum + mem_kib))
+		first_count=$((first_count + 1))
+	fi
+	if [ "$round" -gt $((AICPM_WIFI_SOAK_SAMPLES - 60)) ]; then
+		last_sum=$((last_sum + mem_kib))
+		last_count=$((last_count + 1))
+	fi
+
+	error_count=$(kernel_errors)
+	case "$error_count" in ''|*[!0-9]*) error_count=-1 ;; esac
+	if [ "$baseline_errors" -lt 0 ] || [ "$error_count" -lt 0 ] || [ "$error_count" -gt "$baseline_errors" ]; then
+		kernel_growth=1
+	fi
+	if [ -e /run/wifi-load.failed ] || [ -L /run/wifi-load.failed ]; then
+		load_failed=1
+		load_failed_count=$((load_failed_count + 1))
+	else
+		load_failed=0
+	fi
+
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\tCOMPLETED\n' \
+		"$utc" "$round" "$present" "$wpa_state" "$freq" "$signal" \
+		"$ping_ok" "$mem_kib" "$error_count" "$load_failed" >> "$samples"
+	completed=$((completed + 1))
+
+	if [ "$round" -lt "$AICPM_WIFI_SOAK_SAMPLES" ]; then
+		sleep "$AICPM_WIFI_SOAK_INTERVAL"
+	fi
+	round=$((round + 1))
+done
+
+first_avg=0
+last_avg=0
+if [ "$first_count" -eq 60 ]; then
+	first_avg=$((first_sum / first_count))
+fi
+if [ "$last_count" -eq 60 ]; then
+	last_avg=$((last_sum / last_count))
+fi
+
+result=PASS
+if [ "$completed" -ne "$AICPM_WIFI_SOAK_SAMPLES" ] || \
+   [ "$interface_ok" -ne "$AICPM_WIFI_SOAK_SAMPLES" ] || \
+   [ "$connected" -ne "$AICPM_WIFI_SOAK_SAMPLES" ] || \
+   [ "$freq_ok" -ne "$AICPM_WIFI_SOAK_SAMPLES" ] || \
+   [ "$ping_ok_count" -ne "$AICPM_WIFI_SOAK_SAMPLES" ] || \
+   [ "$load_failed_count" -ne 0 ] || [ "$kernel_growth" -ne 0 ] || \
+   [ "$memory_floor_ok" -ne 1 ] || [ "$first_count" -ne 60 ] || \
+   [ "$last_count" -ne 60 ] || [ "$last_avg" -lt $((first_avg - 16384)) ]; then
+	result=FAIL
+fi
+
+{
+	printf 'result=%s\n' "$result"
+	printf 'samples_completed=%s/%s\n' "$completed" "$AICPM_WIFI_SOAK_SAMPLES"
+	printf 'interface_present=%s/%s\n' "$interface_ok" "$AICPM_WIFI_SOAK_SAMPLES"
+	printf 'wpa_completed=%s/%s\n' "$connected" "$AICPM_WIFI_SOAK_SAMPLES"
+	printf 'frequency_2g=%s/%s\n' "$freq_ok" "$AICPM_WIFI_SOAK_SAMPLES"
+	printf 'ping_success=%s/%s\n' "$ping_ok_count" "$AICPM_WIFI_SOAK_SAMPLES"
+	printf 'load_failed_samples=%s\n' "$load_failed_count"
+	printf 'kernel_error_growth=%s\n' "$kernel_growth"
+	printf 'memory_floor_pass=%s\n' "$memory_floor_ok"
+	printf 'first_60_memavailable_avg_kib=%s\n' "$first_avg"
+	printf 'last_60_memavailable_avg_kib=%s\n' "$last_avg"
+} > "$summary"
+
+if [ "$result" = PASS ]; then
+	printf '0\n' > "$exit_code_file"
+	exit 0
+fi
+printf '1\n' > "$exit_code_file"
+exit 1

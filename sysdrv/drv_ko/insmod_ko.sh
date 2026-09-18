@@ -84,4 +84,13 @@ __insmod goodix.ko
 udevadm control --start-exec-queue
 
 # insmod wifi driver background
-$(pwd)/insmod_wifi.sh &
+rm -f /run/wifi-load.failed
+(
+	"$(pwd)/insmod_wifi.sh"
+	wifi_rc=$?
+	if [ "$wifi_rc" -ne 0 ]; then
+		printf 'exit_code=%s\n' "$wifi_rc" > /run/wifi-load.failed
+		printf 'aicpm: Wi-Fi module load failed: exit_code=%s\n' "$wifi_rc" > /dev/kmsg
+	fi
+	exit "$wifi_rc"
+) &

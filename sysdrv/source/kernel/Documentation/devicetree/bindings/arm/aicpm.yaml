@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/arm/aicpm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: AICPM platforms device tree bindings
+
+maintainers:
+  - AICPM BSP Team
+
+properties:
+  $nodename:
+    const: '/'
+  compatible:
+    items:
+      - const: aicpm,rv1106g-v1
+      - const: rockchip,rv1106
+
+required:
+  - compatible
+
+additionalProperties: true
+
+...

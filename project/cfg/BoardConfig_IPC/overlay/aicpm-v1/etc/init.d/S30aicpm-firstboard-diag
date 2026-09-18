@@ -1,0 +1,192 @@
+#!/bin/sh
+
+umask 077
+REPORT=/run/aicpm-firstboard-report.txt
+USB_ROOT=/sys/bus/usb/devices
+TMP=
+SCRATCH=
+FATAL=0
+
+fatal()
+{
+	FATAL=1
+	logger -t aicpm-firstboard-diag 'report collection internal failure' >&2 || true
+	printf '%s\n' 'aicpm-firstboard-diag: report collection internal failure' >&2
+}
+
+append_line()
+{
+	[ "$FATAL" -eq 0 ] || return 1
+	printf '%s\n' "$1" >>"$TMP" || { fatal; return 1; }
+}
+
+cleanup()
+{
+	if [ -n "$TMP" ]; then
+		rm -f "$TMP"
+	fi
+	if [ -n "$SCRATCH" ]; then
+		rm -f "${SCRATCH}.collect" "${SCRATCH}.dmesg"
+	fi
+}
+
+record_failure()
+{
+	append_line "AICPM_DIAG_ERROR $1 rc=$2" || return 1
+	logger -t aicpm-firstboard-diag "collection failure: $1 rc=$2" >&2 || true
+	return 0
+}
+
+redact_append()
+{
+	awk 'BEGIN { private_key = 0 }
+{
+ lower = tolower($0)
+ if (lower ~ /presharedkey/ || lower ~ /(^|[^a-z0-9])[a-z][a-z0-9_]*(token|secret|password|passwd|passphrase|credential|psk)([^a-z0-9]|$)/) {
+  print "AICPM_DIAG_REDACTED_LINE"
+  next
+ }
+ if (private_key || $0 ~ /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/ || lower ~ /(^|[^a-z0-9])(psk|password|passwd|passphrase|pwd|ssid|bssid|token|secret|credential|authorization|bearer)([^a-z0-9]|$)/ || lower ~ /(api|access|mqtt|cloud|device|wifi|client|private)[^a-z0-9]*(key|token|secret|password|passwd|pass|psk|passphrase|credential|pwd)/) {
+  print "AICPM_DIAG_REDACTED_LINE"
+  if ($0 ~ /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/) private_key = 1
+  if ($0 ~ /-----END [A-Z0-9 ]*PRIVATE KEY-----/) private_key = 0
+  next
+ }
+ print
+}' "$1" >>"$TMP" || { fatal; return 1; }
+}
+
+collect_command()
+{
+	name=$1
+	shift
+	"$@" >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || return 1
+	if [ "$rc" -ne 0 ]; then
+		record_failure "$name" "$rc" || return 1
+	fi
+	return 0
+}
+
+collect_file()
+{
+	name=$1
+	path=$2
+	append_line "== $path ==" || return 1
+	collect_command "$name" cat "$path"
+}
+
+collect_directory()
+{
+	name=$1
+	path=$2
+	append_line "== $path ==" || return 1
+	collect_command "$name" find "$path" -maxdepth 2 \( -type l -o -type f \)
+}
+
+collect_dmesg()
+{
+	append_line '== dmesg tail ==' || return 1
+	dmesg >"${SCRATCH}.dmesg" 2>&1
+	rc=$?
+	if [ "$rc" -ne 0 ]; then
+		redact_append "${SCRATCH}.dmesg" || return 1
+		record_failure dmesg "$rc"
+		return $?
+	fi
+	tail -n 400 "${SCRATCH}.dmesg" >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || return 1
+	if [ "$rc" -ne 0 ]; then
+		record_failure dmesg_tail "$rc" || return 1
+	fi
+	return 0
+}
+
+collect_network()
+{
+	append_line '== network ==' || return 1
+	ip -br link >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || return 1
+	if [ "$rc" -eq 0 ]; then
+		return 0
+	fi
+	record_failure ip_br_link "$rc" || return 1
+	ip link >"${SCRATCH}.collect" 2>&1
+	rc=$?
+	redact_append "${SCRATCH}.collect" || return 1
+	if [ "$rc" -ne 0 ]; then
+		record_failure ip_link "$rc" || return 1
+	fi
+	return 0
+}
+
+collect_usb()
+{
+	append_line '== USB ==' || return 1
+	if [ ! -r "$USB_ROOT" ] || [ ! -x "$USB_ROOT" ]; then
+		record_failure scan_usb 1
+		return $?
+	fi
+	found=0
+	for device in "$USB_ROOT"/*; do
+		[ -f "$device/idVendor" ] || continue
+		found=1
+		collect_command usb_name basename "$device" || return 1
+		collect_command usb_vendor cat "$device/idVendor" || return 1
+		collect_command usb_product_id cat "$device/idProduct" || return 1
+		collect_command usb_product cat "$device/product" || return 1
+	done
+	[ "$found" -ne 0 ] || append_line 'AICPM_DIAG_USB_EMPTY'
+}
+
+collect_report()
+{
+	TMP=$(mktemp "${REPORT}.tmp.XXXXXX") || return 1
+	SCRATCH=$TMP
+	chmod 0600 "$TMP" || { fatal; return 1; }
+	append_line 'AICPM_FIRSTBOARD_REPORT_V1' || return 1
+	collect_command date date -Iseconds || return 1
+	collect_command uname uname -a || return 1
+	collect_file read_proc_cmdline /proc/cmdline || return 1
+	collect_file read_proc_mtd /proc/mtd || return 1
+	collect_file read_proc_partitions /proc/partitions || return 1
+	collect_file read_proc_meminfo /proc/meminfo || return 1
+	collect_directory scan_sys_class_mtd /sys/class/mtd || return 1
+	collect_directory scan_sys_class_mmc_host /sys/class/mmc_host || return 1
+	collect_directory scan_sys_class_net /sys/class/net || return 1
+	collect_directory scan_sys_class_pwm /sys/class/pwm || return 1
+	collect_usb || return 1
+	collect_network || return 1
+	collect_dmesg || return 1
+	chmod 0600 "$TMP" || { fatal; return 1; }
+	[ "$FATAL" -eq 0 ] || return 1
+	mv "$TMP" "$REPORT" || { fatal; return 1; }
+	TMP=
+	return 0
+}
+
+start()
+{
+	if ! collect_report; then
+		logger -t aicpm-firstboard-diag 'report collection setup failed' >&2
+		printf '%s\n' 'aicpm-firstboard-diag: report collection setup failed' >&2
+	fi
+	return 0
+}
+
+case "${1:-}" in
+	start)
+		trap cleanup 0 1 2 15
+		start
+		;;
+	stop)
+		exit 0
+		;;
+	*)
+		printf 'Usage: %s {start|stop}\n' "$0" >&2
+		exit 2
+		;;
+esac

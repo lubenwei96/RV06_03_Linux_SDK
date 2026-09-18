@@ -26,6 +26,21 @@ properties:
     description: Reference to the xclk clock.
     maxItems: 1
 
+  vdd-supply:
+    description: 3.3 V supply for the complete camera module.
+
+  rockchip,camera-module-index:
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  rockchip,camera-module-facing:
+    $ref: /schemas/types.yaml#/definitions/string
+
+  rockchip,camera-module-name:
+    $ref: /schemas/types.yaml#/definitions/string
+
+  rockchip,camera-module-lens-name:
+    $ref: /schemas/types.yaml#/definitions/string
+
   pwdn-gpios:
     description: Reference to the GPIO connected to the pwdn pin. Active high.
     maxItems: 1
@@ -42,6 +57,11 @@ properties:
         type: object
 
         properties:
+          data-lanes:
+            items:
+              - const: 1
+              - const: 2
+
           remote-endpoint:
             description: |-
               phandle to the video receiver input port.

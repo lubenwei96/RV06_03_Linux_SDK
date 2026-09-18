@@ -1,0 +1,298 @@
+#!/bin/sh
+
+umask 077
+
+INTERFACE=${AICPM_WIFI_INTERFACE:-wlan0}
+USB_ROOT=${AICPM_USB_ROOT:-/sys/bus/usb/devices}
+NET_ROOT=${AICPM_NET_ROOT:-/sys/class/net}
+MODULE_PATH=${AICPM_MODULE_PATH:-/sys/module/88x2cu}
+PROC_ROOT=${AICPM_PROC_ROOT:-/proc}
+WPA_CONFIG=${AICPM_WPA_CONFIG:-/userdata/aicpm/wpa_supplicant.conf}
+WPA_OWNER_UID=${AICPM_WPA_OWNER_UID:-0}
+WIFI_LOADER=${AICPM_WIFI_LOADER:-/oem/usr/ko/insmod_wifi.sh}
+WPA_PID_FILE=${AICPM_WPA_PID_FILE:-/run/aicpm-wpa-supplicant.pid}
+WPA_IDENTITY_FILE=${AICPM_WPA_IDENTITY_FILE:-/run/aicpm-wpa-supplicant.identity}
+WPA_PENDING_FILE=${AICPM_WPA_PENDING_FILE:-/run/aicpm-wpa-supplicant.pending}
+WPA_PROCESS_TOKEN=${AICPM_WPA_PROCESS_TOKEN:-wpa_supplicant}
+IDENTITY_CAPTURE_ATTEMPTS=${AICPM_WPA_IDENTITY_ATTEMPTS:-20}
+IDENTITY_CAPTURE_INTERVAL=${AICPM_WPA_IDENTITY_INTERVAL:-0.1}
+PENDING_MAX_ATTEMPTS=${AICPM_WPA_PENDING_ATTEMPTS:-3}
+ASSOC_STATE_FILE=${AICPM_ASSOC_STATE_FILE:-/run/aicpm-wifi-association.state}
+BASE_INTERVAL=${AICPM_WIFI_INTERVAL:-5}
+MAX_BACKOFF=${AICPM_WIFI_MAX_BACKOFF:-60}
+LAST_LOG_STATE=
+
+log_state()
+{
+	state=$1
+	[ "$state" = "$LAST_LOG_STATE" ] && return 0
+	LAST_LOG_STATE=$state
+	logger -t aicpm-wifi-manager "state=$state" 2>/dev/null || true
+}
+
+read_pid()
+{
+	pid_file=$1
+	[ -r "$pid_file" ] || return 1
+	IFS= read -r pid <"$pid_file" || return 1
+	case "$pid" in
+		''|*[!0-9]*) return 1 ;;
+	esac
+	printf '%s\n' "$pid"
+}
+
+process_start_time()
+{
+	pid=$1
+	[ -r "$PROC_ROOT/$pid/stat" ] || return 1
+	awk '{print $22}' "$PROC_ROOT/$pid/stat" 2>/dev/null
+}
+
+identity_matches()
+{
+	pid_file=$1
+	identity_file=$2
+	pid=$(read_pid "$pid_file") || return 1
+	kill -0 "$pid" 2>/dev/null || return 1
+	[ -r "$identity_file" ] || return 1
+	set -- $(cat "$identity_file" 2>/dev/null) || return 1
+	[ "$#" -eq 2 ] || return 1
+	[ "$1" = "$pid" ] || return 1
+	current_start=$(process_start_time "$pid") || return 1
+	[ "$2" = "$current_start" ]
+}
+
+cmdline_matches_wpa()
+{
+	pid=$1
+	[ -r "$PROC_ROOT/$pid/cmdline" ] || return 1
+	tr '\000' '\n' <"$PROC_ROOT/$pid/cmdline" 2>/dev/null |
+		awk -v token="$WPA_PROCESS_TOKEN" -v interface="$INTERFACE" \
+			-v config="$WPA_CONFIG" '
+{
+ base = $0
+ sub(/^.*\//, "", base)
+ if (base == token) token_ok = 1
+ if (want_interface && $0 == interface) interface_ok = 1
+ if (want_config && $0 == config) config_ok = 1
+ want_interface = ($0 == "-i")
+ want_config = ($0 == "-c")
+ if ($0 == "-i" interface) interface_ok = 1
+ if ($0 == "-c" config) config_ok = 1
+}
+END { exit !(token_ok && interface_ok && config_ok) }'
+}
+
+wpa_pid_is_managed()
+{
+	identity_matches "$WPA_PID_FILE" "$WPA_IDENTITY_FILE" || return 1
+	pid=$(read_pid "$WPA_PID_FILE") || return 1
+	cmdline_matches_wpa "$pid"
+}
+
+capture_wpa_identity()
+{
+	attempt=0
+	while [ "$attempt" -lt "$IDENTITY_CAPTURE_ATTEMPTS" ]; do
+		pid=$(read_pid "$WPA_PID_FILE") || pid=
+		if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && cmdline_matches_wpa "$pid"; then
+			start_time=$(process_start_time "$pid") || start_time=
+			if [ -n "$start_time" ]; then
+				tmp_identity="${WPA_IDENTITY_FILE}.$$"
+				printf '%s %s\n' "$pid" "$start_time" >"$tmp_identity" || return 1
+				mv "$tmp_identity" "$WPA_IDENTITY_FILE"
+				return $?
+			fi
+		fi
+		attempt=$((attempt + 1))
+		[ "$attempt" -lt "$IDENTITY_CAPTURE_ATTEMPTS" ] && sleep "$IDENTITY_CAPTURE_INTERVAL"
+	done
+	return 1
+}
+
+pending_process_is_live()
+{
+	pid=$(read_pid "$WPA_PID_FILE") || return 1
+	kill -0 "$pid" 2>/dev/null || return 1
+	cmdline_matches_wpa "$pid"
+}
+
+record_pending_failure()
+{
+	pending_process_is_live && return 0
+	pending_count=0
+	if [ -r "$WPA_PENDING_FILE" ]; then
+		IFS= read -r pending_count <"$WPA_PENDING_FILE" || pending_count=0
+	fi
+	case "$pending_count" in ''|*[!0-9]*) pending_count=0 ;; esac
+	pending_count=$((pending_count + 1))
+	if [ "$pending_count" -ge "$PENDING_MAX_ATTEMPTS" ]; then
+		rm -f "$WPA_PENDING_FILE" "$WPA_PID_FILE" "$WPA_IDENTITY_FILE"
+		log_state supplicant-pending-expired
+		return 0
+	fi
+	printf '%s\n' "$pending_count" >"$WPA_PENDING_FILE"
+}
+
+target_usb_present()
+{
+	[ -d "$USB_ROOT" ] || return 1
+	for device in "$USB_ROOT"/*; do
+		[ -f "$device/idVendor" ] || continue
+		[ -f "$device/idProduct" ] || continue
+		vendor=$(tr -d '\r\n' <"$device/idVendor" 2>/dev/null) || continue
+		product=$(tr -d '\r\n' <"$device/idProduct" 2>/dev/null) || continue
+		[ "$vendor" = 0bda ] && [ "$product" = c82c ] && return 0
+	done
+	return 1
+}
+
+config_is_safe()
+{
+	[ -f "$WPA_CONFIG" ] || return 1
+	[ ! -L "$WPA_CONFIG" ] || return 1
+	metadata=$(ls -ldn "$WPA_CONFIG" 2>/dev/null) || return 1
+	set -- $metadata
+	permissions=$1
+	owner_uid=$3
+	[ "$owner_uid" = "$WPA_OWNER_UID" ] || return 1
+	case "$permissions" in
+		-r--------|-rw-------) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
+ensure_interface()
+{
+	[ -d "$NET_ROOT/$INTERFACE" ] && return 0
+	target_usb_present || {
+		log_state waiting-for-usb
+		return 1
+	}
+
+	if [ ! -d "$MODULE_PATH" ]; then
+		[ -x "$WIFI_LOADER" ] || {
+			log_state loader-unavailable
+			return 1
+		}
+		if ! "$WIFI_LOADER" >/dev/null 2>&1; then
+			log_state driver-load-failed
+			return 1
+		fi
+	fi
+
+	waited=0
+	while [ "$waited" -lt 10 ]; do
+		[ -d "$NET_ROOT/$INTERFACE" ] && return 0
+		sleep 1
+		waited=$((waited + 1))
+	done
+	log_state interface-unavailable
+	return 1
+}
+
+ensure_wpa()
+{
+	config_is_safe || {
+		log_state configuration-unavailable
+		return 1
+	}
+
+	if wpa_pid_is_managed; then
+		rm -f "$WPA_PENDING_FILE"
+		return 0
+	fi
+	if [ -e "$WPA_PENDING_FILE" ]; then
+		if capture_wpa_identity; then
+			rm -f "$WPA_PENDING_FILE"
+			return 0
+		fi
+		record_pending_failure
+		log_state supplicant-start-pending
+		return 1
+	fi
+	rm -f "$WPA_PID_FILE" "$WPA_IDENTITY_FILE"
+	printf '%s\n' STARTING >"$ASSOC_STATE_FILE" 2>/dev/null || true
+	: >"$WPA_PENDING_FILE" || {
+		log_state supplicant-state-unavailable
+		return 1
+	}
+	if ! wpa_supplicant -B -P "$WPA_PID_FILE" -i "$INTERFACE" -c "$WPA_CONFIG" \
+		>/dev/null 2>&1; then
+		rm -f "$WPA_PENDING_FILE"
+		log_state supplicant-start-failed
+		return 1
+	fi
+	capture_wpa_identity || {
+		record_pending_failure
+		log_state supplicant-not-running
+		return 1
+	}
+	rm -f "$WPA_PENDING_FILE"
+	return 0
+}
+
+refresh_association()
+{
+	association=$(wpa_cli -i "$INTERFACE" status 2>/dev/null |
+		sed -n 's/^wpa_state=//p' | sed -n '1p')
+	[ -n "$association" ] || association=UNKNOWN
+	previous=
+	[ -r "$ASSOC_STATE_FILE" ] && IFS= read -r previous <"$ASSOC_STATE_FILE"
+	printf '%s\n' "$association" >"$ASSOC_STATE_FILE" 2>/dev/null || true
+
+	if [ "$association" = COMPLETED ]; then
+		log_state connected
+		if [ "$previous" != COMPLETED ]; then
+			dhcpcd -n "$INTERFACE" >/dev/null 2>&1 || true
+		fi
+	else
+		log_state associating
+	fi
+}
+
+reconcile()
+{
+	ensure_interface || return 1
+	ip link set "$INTERFACE" up >/dev/null 2>&1 || {
+		log_state interface-up-failed
+		return 1
+	}
+	ensure_wpa || return 1
+	refresh_association
+	return 0
+}
+
+run_daemon()
+{
+	failures=0
+	while :; do
+		if reconcile; then
+			failures=0
+			delay=$BASE_INTERVAL
+		else
+			[ "$failures" -lt 6 ] && failures=$((failures + 1))
+			delay=$BASE_INTERVAL
+			count=$failures
+			while [ "$count" -gt 1 ]; do
+				delay=$((delay * 2))
+				count=$((count - 1))
+			done
+			[ "$delay" -gt "$MAX_BACKOFF" ] && delay=$MAX_BACKOFF
+		fi
+		sleep "$delay"
+	done
+}
+
+case "${1:-run}" in
+	run)
+		run_daemon
+		;;
+	--once)
+		reconcile
+		;;
+	*)
+		printf 'Usage: %s {run|--once}\n' "$0" >&2
+		exit 2
+		;;
+esac

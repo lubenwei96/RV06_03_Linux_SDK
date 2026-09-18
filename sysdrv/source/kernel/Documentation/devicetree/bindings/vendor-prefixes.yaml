@@ -47,6 +47,8 @@ patternProperties:
     description: Adaptrum, Inc.
   "^adh,.*":
     description: AD Holdings Plc.
+  "^aicpm,.*":
+    description: AICPM Intelligent Pet Care Management products
   "^adi,.*":
     description: Analog Devices, Inc.
   "^advantech,.*":

@@ -1,0 +1,109 @@
+#!/bin/sh
+
+SAMPLE=${AICPM_SAMPLE:-/oem/usr/bin/simple_vi_bind_venc_rtsp}
+IQ_DIR=${AICPM_IQ_DIR:-/etc/iqfiles}
+IQ_NAME=ov5647_HBV-RPI-AUTO-IRCUT-3.6-S1.0_3.6mm.json
+RUN_DIR=${AICPM_RUN_DIR:-/run}
+PID_FILE=$RUN_DIR/aicpm-camera-preview.pid
+LOG_FILE=$RUN_DIR/aicpm-camera-preview.log
+LD_LIBRARY_PATH=${AICPM_LD_LIBRARY_PATH:-/oem/usr/lib:/usr/lib}
+START_WAIT=${AICPM_START_WAIT:-1}
+STOP_WAIT=${AICPM_STOP_WAIT:-10}
+PROC_ROOT=${AICPM_PROC_ROOT:-/proc}
+
+read_pid() {
+	[ -r "$PID_FILE" ] || return 1
+	pid=$(sed -n '1p' "$PID_FILE" 2>/dev/null)
+	case "$pid" in
+		''|*[!0-9]*) return 1 ;;
+	esac
+}
+
+process_alive() {
+	check_pid=$1
+	kill -0 "$check_pid" 2>/dev/null || return 1
+	if [ -r "$PROC_ROOT/$check_pid/stat" ] && grep -q ') Z ' "$PROC_ROOT/$check_pid/stat" 2>/dev/null; then
+		return 1
+	fi
+	return 0
+}
+
+is_running() {
+	read_pid || return 1
+	process_alive "$pid"
+}
+
+start_preview() {
+	if is_running; then
+		echo "aicpm camera preview already running (pid $pid)"
+		return 0
+	fi
+	rm -f "$PID_FILE"
+
+	if [ ! -x "$SAMPLE" ]; then
+		echo "camera sample is missing or not executable: $SAMPLE" >&2
+		return 1
+	fi
+	if [ ! -r "$IQ_DIR/$IQ_NAME" ]; then
+		echo "camera IQ is missing: $IQ_DIR/$IQ_NAME" >&2
+		return 1
+	fi
+	mkdir -p "$RUN_DIR" || return 1
+
+	(
+		trap '' PIPE
+		trap - INT
+		export LD_LIBRARY_PATH
+		exec "$SAMPLE" -I 0 -w 1920 -h 1080 "-a$IQ_DIR" -e h264 -b 4096
+	) >>"$LOG_FILE" 2>&1 &
+	pid=$!
+	printf '%s\n' "$pid" >"$PID_FILE"
+	sleep "$START_WAIT"
+	if ! process_alive "$pid"; then
+		rm -f "$PID_FILE"
+		echo "camera preview failed to start; see $LOG_FILE" >&2
+		return 1
+	fi
+	echo "aicpm camera preview started (pid $pid, rtsp://DEVICE_IP/live/0)"
+}
+
+stop_preview() {
+	if ! is_running; then
+		rm -f "$PID_FILE"
+		echo "aicpm camera preview is not running"
+		return 0
+	fi
+
+	kill -INT "$pid" 2>/dev/null || return 1
+	waited=0
+	while process_alive "$pid"; do
+		if [ "$waited" -ge "$STOP_WAIT" ]; then
+			echo "camera preview did not stop cleanly; refusing SIGKILL" >&2
+			return 1
+		fi
+		sleep 1
+		waited=$((waited + 1))
+	done
+	rm -f "$PID_FILE"
+	echo "aicpm camera preview stopped"
+}
+
+status_preview() {
+	if is_running; then
+		echo "aicpm camera preview running (pid $pid)"
+		return 0
+	fi
+	echo "aicpm camera preview stopped"
+	return 1
+}
+
+case "${1:-}" in
+	start) start_preview ;;
+	stop) stop_preview ;;
+	restart) stop_preview && start_preview ;;
+	status) status_preview ;;
+	*)
+		echo "Usage: $0 {start|stop|restart|status}" >&2
+		exit 2
+		;;
+esac

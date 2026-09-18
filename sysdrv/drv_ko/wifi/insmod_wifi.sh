@@ -5,6 +5,23 @@ cd $_DIR
 
 export PATH=$PATH:/oem/usr/ko/
 
+chip_marker=/oem/usr/ko/wifi_chip_type
+if [ -e "$chip_marker" ] || [ -L "$chip_marker" ]; then
+	[ ! -L "$chip_marker" ] || exit 1
+	[ -f "$chip_marker" ] && [ -r "$chip_marker" ] || exit 1
+	chip_type=$(tr -d '\000\r\n ' < "$chip_marker") || exit 1
+	case "$chip_type" in
+	RTL8822CU_USB)
+		test -s /oem/usr/ko/88x2cu.ko || exit 1
+		insmod /oem/usr/ko/88x2cu.ko
+		exit $?
+		;;
+	*)
+		exit 1
+		;;
+	esac
+fi
+
 #for fastboot
 #insmod_wifi.ko ${RK_ENABLE_WIFI_CHIP} ${RK_ENABLE_FASTBOOT}
 # if [ "${1}"x = "y"x ];then
