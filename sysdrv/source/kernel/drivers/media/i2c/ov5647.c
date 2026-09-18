@@ -291,7 +291,7 @@ static const struct regval_list ov5647_1080p30_10bpp[] = {
 	{0x3808, 0x07},
 	{0x3809, 0x80},
 	{0x380a, 0x04},
-	{0x380b, 0x38},
+	{0x380b, 0x40},
 	{0x3800, 0x01},
 	{0x3801, 0x5c},
 	{0x3802, 0x01},
@@ -551,19 +551,23 @@ static const struct ov5647_mode ov5647_modes[] = {
 		.reg_list	= ov5647_2592x1944_10bpp,
 		.num_regs	= ARRAY_SIZE(ov5647_2592x1944_10bpp)
 	},
-	/* 1080p30 10-bit mode. Full resolution centre-cropped down to 1080p. */
+	/*
+	 * 1080p30 10-bit mode. RV1106 requires the ISP input height to be
+	 * aligned to 8 lines, so transmit 1088 lines and crop four lines from
+	 * the top and bottom in the ISP.
+	 */
 	{
 		.format = {
 			.code		= MEDIA_BUS_FMT_SBGGR10_1X10,
 			.colorspace	= V4L2_COLORSPACE_SRGB,
 			.field		= V4L2_FIELD_NONE,
 			.width		= 1920,
-			.height		= 1080
+			.height		= 1088
 		},
 		.crop = {
-			.left		= 348 + OV5647_PIXEL_ARRAY_LEFT,
-			.top		= 434 + OV5647_PIXEL_ARRAY_TOP,
-			.width		= 1928,
+			.left		= 0,
+			.top		= 4,
+			.width		= 1920,
 			.height		= 1080,
 		},
 		.pixel_rate	= 81666700,
@@ -631,9 +635,9 @@ static const struct ov5647_mode ov5647_modes[] = {
 	},
 };
 
-/* Default sensor mode is 2x2 binned 640x480 SBGGR10_1X10. */
-#define OV5647_DEFAULT_MODE	(&ov5647_modes[3])
-#define OV5647_DEFAULT_FORMAT	(ov5647_modes[3].format)
+/* Default to the RV1106-aligned 1080p transport. */
+#define OV5647_DEFAULT_MODE	(&ov5647_modes[1])
+#define OV5647_DEFAULT_FORMAT	(ov5647_modes[1].format)
 
 static int ov5647_write16(struct v4l2_subdev *sd, u16 reg, u16 val)
 {
@@ -1100,8 +1104,25 @@ error_unlock:
 	return ret;
 }
 
+static int ov5647_g_frame_interval(struct v4l2_subdev *sd,
+				 struct v4l2_subdev_frame_interval *fi)
+{
+	struct ov5647 *sensor = to_sensor(sd);
+
+	if (fi->pad != 0)
+		return -EINVAL;
+
+	/* CIF queries the selected mode before starting the sensor stream. */
+	mutex_lock(&sensor->lock);
+	fi->interval = sensor->mode->frame_interval;
+	mutex_unlock(&sensor->lock);
+
+	return 0;
+}
+
 static const struct v4l2_subdev_video_ops ov5647_subdev_video_ops = {
 	.s_stream =		ov5647_s_stream,
+	.g_frame_interval =	ov5647_g_frame_interval,
 };
 
 static int ov5647_enum_mbus_code(struct v4l2_subdev *sd,
@@ -1254,10 +1275,30 @@ static int ov5647_set_pad_fmt(struct v4l2_subdev *sd,
 }
 
 static int ov5647_get_selection(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
-				struct v4l2_subdev_selection *sel)
+			       struct v4l2_subdev_pad_config *cfg,
+			       struct v4l2_subdev_selection *sel)
 {
+	if (sel->pad != 0)
+		return -EINVAL;
+
 	switch (sel->target) {
+	case V4L2_SEL_TGT_CROP_BOUNDS: {
+		struct v4l2_subdev_format fmt = {
+			.which = sel->which,
+			.pad = sel->pad,
+		};
+		int ret;
+
+		/* Rockchip CIF applies these bounds to the transmitted image. */
+		ret = ov5647_get_pad_fmt(sd, cfg, &fmt);
+		if (ret)
+			return ret;
+		sel->r.left = 0;
+		sel->r.top = 0;
+		sel->r.width = fmt.format.width;
+		sel->r.height = fmt.format.height;
+		return 0;
+	}
 	case V4L2_SEL_TGT_CROP: {
 		struct ov5647 *sensor = to_sensor(sd);
 
@@ -1278,7 +1319,6 @@ static int ov5647_get_selection(struct v4l2_subdev *sd,
 		return 0;
 
 	case V4L2_SEL_TGT_CROP_DEFAULT:
-	case V4L2_SEL_TGT_CROP_BOUNDS:
 		sel->r.top = OV5647_PIXEL_ARRAY_TOP;
 		sel->r.left = OV5647_PIXEL_ARRAY_LEFT;
 		sel->r.width = OV5647_PIXEL_ARRAY_WIDTH;
@@ -1358,10 +1398,7 @@ static int ov5647_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 				v4l2_subdev_get_try_format(sd, fh->pad, 0);
 	struct v4l2_rect *crop = v4l2_subdev_get_try_crop(sd, fh->pad, 0);
 
-	crop->left = OV5647_PIXEL_ARRAY_LEFT;
-	crop->top = OV5647_PIXEL_ARRAY_TOP;
-	crop->width = OV5647_PIXEL_ARRAY_WIDTH;
-	crop->height = OV5647_PIXEL_ARRAY_HEIGHT;
+	*crop = OV5647_DEFAULT_MODE->crop;
 
 	*format = OV5647_DEFAULT_FORMAT;
 

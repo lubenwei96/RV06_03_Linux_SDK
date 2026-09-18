@@ -654,7 +654,7 @@ class CameraContract(unittest.TestCase):
         modes = (
             ("ov5647_2592x1944_10bpp", 2592, 1944, 87500000, 2844,
              "0x7b0", 218750000, 1, 15),
-            ("ov5647_1080p30_10bpp", 1920, 1080, 81666700, 2416,
+            ("ov5647_1080p30_10bpp", 1920, 1088, 81666700, 2416,
              "0x450", 204166750, 1, 30),
             ("ov5647_2x2binned_10bpp", 1296, 972, 81666700, 1896,
              "0x59b", 204166750, 1, 30),
@@ -968,13 +968,55 @@ class CameraContract(unittest.TestCase):
             r"fie->(?:code|width|height)\s*=(?!=)",
         )
 
-    def test_ov5647_register_tables_match_ordered_upstream_fingerprints(self):
+    def test_ov5647_rv1106_1080_transport_is_aligned_and_cropped(self):
+        driver = strip_c_comments(read_text(DRIVER))
+        self.assertIn(
+            "#define OV5647_DEFAULT_MODE\t(&ov5647_modes[1])",
+            driver,
+        )
+        table = re.search(
+            r"ov5647_1080p30_10bpp\s*\[\s*\]\s*=\s*\{(?P<body>.*?)\n\};",
+            driver,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(table)
+        self.assertRegex(
+            table.group("body"),
+            re.compile(
+                r"\{\s*0x380a\s*,\s*0x04\s*\}\s*,\s*"
+                r"\{\s*0x380b\s*,\s*0x40\s*\}",
+                re.DOTALL,
+            ),
+        )
+        self.assertRegex(
+            driver,
+            re.compile(
+                r"\.format\s*=\s*\{(?:(?!\.reg_list).)*?"
+                r"\.width\s*=\s*1920(?:(?!\.reg_list).)*?"
+                r"\.height\s*=\s*1088(?:(?!\.reg_list).)*?"
+                r"\.crop\s*=\s*\{(?:(?!\.reg_list).)*?"
+                r"\.left\s*=\s*0(?:(?!\.reg_list).)*?"
+                r"\.top\s*=\s*4(?:(?!\.reg_list).)*?"
+                r"\.width\s*=\s*1920(?:(?!\.reg_list).)*?"
+                r"\.height\s*=\s*1080(?:(?!\.reg_list).)*?"
+                r"\.reg_list\s*=\s*ov5647_1080p30_10bpp",
+                re.DOTALL,
+            ),
+        )
+
+        selection = c_function_body(driver, "ov5647_get_selection")
+        bounds = selection.find("case V4L2_SEL_TGT_CROP_BOUNDS:")
+        current_crop = selection.find("__ov5647_get_pad_crop", bounds)
+        self.assertGreaterEqual(bounds, 0)
+        self.assertGreater(current_crop, bounds)
+
+    def test_ov5647_register_tables_match_ordered_fingerprints(self):
         driver = strip_c_comments(read_text(DRIVER))
         expected_fingerprints = {
             "ov5647_2592x1944_10bpp":
                 (86, "f19251e277fc1f3c8bf312c502c2f2420ca823007cfcf5151ee13043c9a6533e"),
             "ov5647_1080p30_10bpp":
-                (86, "ae5dd78b7e71c7beaf0b38e5f9ce202d5ea3b73b800db991cd11d2f3ff7fae5c"),
+                (86, "d4ca2505bcb426cd63db2440ce5c12844a75928cc6017f100609af0d3b932155"),
             "ov5647_2x2binned_10bpp":
                 (90, "963300a50cb3b67a42623f222ef4cd64aa607f4740002918d2251ffbe2f42507"),
             "ov5647_640x480_10bpp":
